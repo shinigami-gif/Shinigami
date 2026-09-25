@@ -12,7 +12,20 @@
           "package_name": "ani.shinigami.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "64572945971-u07rbuv9kf9f45ei2ilq5aguodid78mb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ani.shinigami.app",
+            "certificate_hash": "95f074c664394acff22edc03bb5cccd25f627ddb"
+          }
+        },
+        {
+          "client_id": "64572945971-l1f46k56cfbf7srb4g42dsgqo712t2uc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDUPKIrDvKZuMa4BdKH9QkCxoMiDdG3xqA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "64572945971-l1f46k56cfbf7srb4g42dsgqo712t2uc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
