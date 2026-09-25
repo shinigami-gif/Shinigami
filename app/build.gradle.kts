@@ -199,6 +199,7 @@ dependencies {
     implementation(libs.bundles.misc)
     implementation(libs.metro.runtime)
     implementation(libs.bundles.sqldelight)
+    implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.profileInstaller)
 
     // Shizuku
