@@ -8,8 +8,8 @@ fun AnimeStateRecord.applyTo(media: Media): Media {
     media.userProgress = progress
     media.userScore = score?.toInt() ?: 0
     media.userRepeat = repeat
-    media.userStartedAt = epochDayToFuzzyDate(startedAt)
-    media.userCompletedAt = epochDayToFuzzyDate(completedAt)
+    if (startedAt != null) media.userStartedAt = epochDayToFuzzyDate(startedAt)
+    if (completedAt != null) media.userCompletedAt = epochDayToFuzzyDate(completedAt)
     media.userUpdatedAt = updatedAt
     return media
 }
