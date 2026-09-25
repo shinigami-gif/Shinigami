@@ -41,7 +41,7 @@ class AnilistMetadata internal constructor(
         queries.getGenresAndTags()
 
     suspend fun getBannerImages(): ArrayList<String> =
-        queries.getBannerImages().mapNotNull { it }.toCollection(ArrayList())
+        queries.getBannerImages()
 
     suspend fun getGenres(
         genres: ArrayList<String>,
@@ -50,11 +50,11 @@ class AnilistMetadata internal constructor(
 
     suspend fun searchAnime(
         page: Int = 1,
-        perPage: Int = AnilistQueries.ITEMS_PER_PAGE,
+        perPage: Int? = AnilistQueries.ITEMS_PER_PAGE,
         search: String? = null,
         sort: String? = null,
-        genres: ArrayList<String>? = null,
-        tags: ArrayList<String>? = null,
+        genres: MutableList<String>? = null,
+        tags: MutableList<String>? = null,
         status: String? = null,
         source: String? = null,
         format: String? = null,
