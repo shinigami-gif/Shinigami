@@ -11,6 +11,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
+import ani.dantotsu.MainActivity
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.Refresh
 import ani.dantotsu.databinding.ActivityCalendarBinding
@@ -49,13 +50,13 @@ class CalendarActivity : AppCompatActivity() {
         binding = ActivityCalendarBinding.inflate(layoutInflater)
 
         val surface = getThemeColor(com.google.android.material.R.attr.colorSurface)
-        val primary = getThemeColor(com.google.android.material.R.attr.colorPrimary)
+        val primary = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
         val outline = getThemeColor(com.google.android.material.R.attr.colorOutline)
 
         window.statusBarColor = surface
         window.navigationBarColor = surface
         binding.calendarAppBar.setBackgroundColor(surface)
-        binding.calendarTitle.setTextColor(getThemeColor(androidx.appcompat.R.attr.colorOnBackground))
+        binding.calendarTitle.setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnBackground))
         binding.calendarDays.setTabTextColors(outline, getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
 
         if (!(PrefManager.getVal(PrefName.ImmersiveMode) as Boolean)) {
@@ -184,7 +185,7 @@ class CalendarActivity : AppCompatActivity() {
 
     private fun centerSelectedDay(position: Int) {
         binding.calendarDays.post {
-            val strip = binding.calendarDays.getChildAt(0) ?: return@post
+            val strip = binding.calendarDays.getChildAt(0) as? ViewGroup ?: return@post
             val tab = strip.getChildAt(position) ?: return@post
             val target = tab.left - ((binding.calendarDays.width - tab.width) / 2)
             binding.calendarDays.scrollTo(target.coerceAtLeast(0), 0)
