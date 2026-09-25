@@ -47,28 +47,35 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="170dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp">
 
-            <ImageView
-                android:id="@+id/bannerPreview"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:background="?attr/colorPrimaryContainer"
-                android:scaleType="centerCrop"
-                android:src="@drawable/bg_account_banner"
-                android:contentDescription="Banner preview" />
+                android:layout_height="140dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/changeBannerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:text="Change Banner"
-                app:cornerRadius="14dp" />
+                <ImageView
+                    android:id="@+id/bannerPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:background="?attr/colorPrimaryContainer"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/bg_account_banner"
+                    android:contentDescription="Banner preview" />
+            </com.google.android.material.card.MaterialCardView>
 
-            <ImageView
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="138dp"
+                android:background="?attr/colorPrimary" />
+
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/avatarPreview"
                 android:layout_width="82dp"
                 android:layout_height="82dp"
@@ -76,23 +83,52 @@
                 android:layout_marginStart="16dp"
                 android:background="?attr/colorSurfaceVariant"
                 android:scaleType="centerCrop"
-                android:contentDescription="Profile picture preview" />
+                android:contentDescription="Profile picture preview"
+                app:shapeAppearanceOverlay="@style/roundedImageView"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="2dp" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageButton
                 android:id="@+id/changeAvatarButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|start"
-                android:layout_marginStart="108dp"
-                android:text="Change Photo"
-                app:cornerRadius="14dp" />
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="start|bottom"
+                android:layout_marginStart="70dp"
+                android:layout_marginBottom="-4dp"
+                android:background="?attr/colorSurface"
+                android:contentDescription="Change photo"
+                android:src="@drawable/ic_round_camera_alt_24"
+                app:tint="?attr/colorOnSurface" />
+
+            <ImageButton
+                android:id="@+id/changeBannerButton"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="92dp"
+                android:layout_marginEnd="10dp"
+                android:background="?attr/colorSurface"
+                android:contentDescription="Change banner"
+                android:src="@drawable/ic_round_image_24"
+                app:tint="?attr/colorOnSurface" />
         </FrameLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:text="Profile Information"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="17sp"
+            android:textStyle="bold"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="16dp"
             android:hint="Username">
 
@@ -107,7 +143,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="16dp"
             android:hint="Bio">
 
@@ -116,9 +152,189 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
-                android:minLines="4"
-                android:maxLines="6" />
+                android:minLines="3"
+                android:maxLines="5" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="18dp"
+            android:text="Avatar"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="17sp"
+            android:textStyle="bold"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="92dp"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/bg_account_banner"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/roundedImageView"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="2dp"/>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/bg_account_banner"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/roundedImageView"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                    app:cardCornerRadius="35dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="+&#10;Add"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="11sp"/>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:text="Banner"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="17sp"
+            android:textStyle="bold"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="82dp"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="130dp"
+                    android:layout_height="72dp"
+                    android:layout_marginEnd="10dp"
+                    app:cardCornerRadius="10dp"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="2dp">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/bg_account_banner"
+                        android:scaleType="centerCrop"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="130dp"
+                    android:layout_height="72dp"
+                    android:layout_marginEnd="10dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="110dp"
+                    android:layout_height="72dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="More&#10;Backgrounds"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textSize="10sp"/>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="14dp"
+            android:text="Accent Color"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="17sp"
+            android:textStyle="bold"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_red"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_pink"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_purple"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_blue"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_cyan"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_green"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_accent_yellow"/>
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_accent_orange"/>
+            </LinearLayout>
+        </HorizontalScrollView>
     </LinearLayout>
 </ScrollView>
