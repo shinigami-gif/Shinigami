@@ -18,12 +18,12 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="190dp">
+                android:layout_height="230dp">
 
                 <ImageView
                     android:id="@+id/accountBanner"
                     android:layout_width="match_parent"
-                    android:layout_height="190dp"
+                    android:layout_height="230dp"
                     android:background="?attr/colorPrimaryContainer"
                     android:scaleType="centerCrop"
                     android:src="@drawable/bg_account_banner"
