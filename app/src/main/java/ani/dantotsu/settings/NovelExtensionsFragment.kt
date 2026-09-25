@@ -30,11 +30,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class NovelExtensionsFragment : Fragment(),
-    SearchQueryHandler, OnNovelInstallClickListener {
+    SearchQueryHandler, OnNovelInstallClickListener  
     private var _binding: FragmentNovelExtensionsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: NovelExtensionsViewModel by viewModels {
+    private val viewModel: NovelExtensionsViewModel by viewModels  
         NovelExtensionsViewModelFactory(novelExtensionManager)
     }
 
