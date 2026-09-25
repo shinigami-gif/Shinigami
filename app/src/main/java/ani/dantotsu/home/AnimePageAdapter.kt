@@ -67,7 +67,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding = LayoutTrendingBinding.bind(binding.root)
         trendingViewPager = trendingBinding.trendingViewPager
 
-        profileHeaderBinding.profileHeaderRoot.updatePadding(top = statusBarHeight + 4f.px)
+        profileHeaderBinding.profileHeaderRoot.updatePadding(top = statusBarHeight + 10f.px)
         val rescueModeForHeader = PrefManager.getVal<Boolean>(PrefName.RescueMode)
         val headerAvatarUrl = if (rescueModeForHeader) MAL.avatar else Anilist.avatar
         val headerUsername = if (rescueModeForHeader) MAL.username else Anilist.username
