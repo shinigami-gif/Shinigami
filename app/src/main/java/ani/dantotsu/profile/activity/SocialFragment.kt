@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_feed) {
+class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
     private var _binding: ActivitySocialBinding? = null
     private val binding get() = _binding!!
     private val handler = Handler(Looper.getMainLooper())
