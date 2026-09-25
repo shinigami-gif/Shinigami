@@ -1737,7 +1737,15 @@ Page(page:$page,perPage:50) {
             list.addAll(res?.airingSchedules?.mapNotNull { j ->
                 j.media?.let {
                     if (it.countryOfOrigin == "JP" && (if (!Anilist.adult) it.isAdult == false else true)) {
-                        Media(it).apply { relation = "${j.episode},${j.airingAt}" }
+                        val media = Media(it).apply { relation = "${j.episode},${j.airingAt}" }
+                        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
+                        val localState = localStateRepository.get(media.id)
+                        if (localState != null) {
+                            localState.applyTo(media)
+                        } else {
+                            localStateRepository.upsert(media.toAnimeStateRecord())
+                        }
+                        media
                     } else null
                 }
             } ?: listOf())
