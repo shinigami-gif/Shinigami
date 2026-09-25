@@ -5,7 +5,6 @@ import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.system.OsConstants
 import androidx.documentfile.provider.DocumentFile
-import me.zhanghai.android.libarchive.ArchiveException
 import java.io.Closeable
 import java.io.InputStream
 
@@ -30,7 +29,7 @@ class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
                     return archive
                 }
             }
-        } catch (e: ArchiveException) {
+        } catch (e: Exception) {
             archive.close()
             throw e
         }
