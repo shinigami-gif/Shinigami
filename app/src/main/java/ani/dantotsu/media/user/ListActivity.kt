@@ -72,6 +72,7 @@ class ListActivity : AppCompatActivity() {
         }
         setContentView(binding.root)
 
+        binding.includedNavbar.navbar.visibility = View.VISIBLE
         binding.includedNavbar.navbar.selectTabAt(3)
         binding.includedNavbar.navbar.setOnTabSelectListener(
             object : nl.joery.animatedbottombar.AnimatedBottomBar.OnTabSelectListener {
