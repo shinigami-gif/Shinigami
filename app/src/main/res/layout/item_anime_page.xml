@@ -11,56 +11,172 @@
 
     <include layout="@layout/layout_trending" />
 
-    <LinearLayout
+    <HorizontalScrollView
         android:id="@+id/animeSeasons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
+        android:scrollbarSize="0dp">
+
+        <LinearLayout
+            android:id="@+id/animeSeasonsCont"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        
+            <com.google.android.material.chip.Chip
+                android:id="@+id/animePreviousSeason"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/previous_season"
+                android:textAppearance="@style/Suffix"
+                app:chipStrokeColor="?attr/colorPrimaryContainer"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        
+            <com.google.android.material.chip.Chip
+                android:id="@+id/animeThisSeason"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/this_season"
+                android:textAppearance="@style/Suffix"
+                app:chipStrokeColor="?attr/colorPrimaryContainer"
+                app:layout_constraintBaseline_toBaselineOf="@+id/animeNextSeason"
+                app:layout_constraintEnd_toStartOf="@+id/animeNextSeason"
+                app:layout_constraintStart_toStartOf="parent" />
+        
+            <com.google.android.material.chip.Chip
+                android:id="@+id/animeNextSeason"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/next_season"
+                android:textAppearance="@style/Suffix"
+                app:chipStrokeColor="?attr/colorPrimaryContainer" />
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/animeListContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="10dp"
-        android:orientation="horizontal">
+        android:clipToPadding="false"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/animePreviousSeason"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_marginEnd="6dp"
-            android:layout_weight="1"
-            android:text="@string/previous_season"
-            android:textAllCaps="false"
-            android:textSize="13sp"
-            app:backgroundTint="@android:color/transparent"
-            app:cornerRadius="12dp"
-            app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="1dp" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/animeGenre"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="16dp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/animeCalendar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_max="256dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/animeThisSeason"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_marginEnd="6dp"
-            android:layout_weight="1"
-            android:text="@string/this_season"
-            android:textAllCaps="false"
-            android:textSize="13sp"
-            app:backgroundTint="@android:color/transparent"
-            app:cornerRadius="12dp"
-            app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="1dp" />
+            <ImageView
+                android:id="@+id/animeGenreImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:ignore="ContentDescription"
+                tools:src="@tools:sample/backgrounds/scenic" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/animeNextSeason"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:text="@string/next_season"
-            android:textAllCaps="false"
-            android:textSize="13sp"
-            app:backgroundTint="@android:color/transparent"
-            app:cornerRadius="12dp"
-            app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="1dp" />
-    </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.75"
+                android:background="@color/bg_black" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="@string/genres"
+                    android:textAllCaps="true"
+                    android:textColor="@color/bg_white"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="64dp"
+                    android:layout_height="2dp"
+                    android:layout_gravity="center"
+                    android:background="?attr/colorPrimary" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/animeCalendar"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_margin="8dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/animeGenre"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_max="256dp">
+
+            <ImageView
+                android:id="@+id/animeCalendarImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:ignore="ContentDescription"
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.75"
+                android:background="@color/bg_black" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="@string/release_calendar"
+                    android:textAllCaps="true"
+                    android:textColor="@color/bg_white"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="64dp"
+                    android:layout_height="2dp"
+                    android:layout_gravity="center"
+                    android:background="?attr/colorPrimary" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/animeRecentlyContainer"
