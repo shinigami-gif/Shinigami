@@ -83,6 +83,15 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
         ))
         binding.socialFeaturePager.offscreenPageLimit = 3
         binding.socialLeaderboardPager.offscreenPageLimit = 1
+        val leaderboardTitles = listOf("Community Leaderboard", "Anime Fans", "Watch Together", "Social")
+        binding.socialLeaderboardPager.registerOnPageChangeCallback(
+            object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    binding.socialLeaderboardTitle.text =
+                        leaderboardTitles.getOrNull(position) ?: "Community Leaderboard"
+                }
+            }
+        )
 
         viewLifecycleOwner.lifecycleScope.launch {
             val activities = withContext(Dispatchers.IO) {
