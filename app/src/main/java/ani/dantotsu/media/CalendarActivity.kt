@@ -12,7 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
 import ani.dantotsu.Refresh
-import ani.dantotsu.databinding.ActivityListBinding
+import ani.dantotsu.databinding.ActivityCalendarBinding
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.hideSystemBarsExtendView
 import ani.dantotsu.media.user.ListViewPagerAdapter
@@ -25,114 +25,155 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.DateFormat
+import java.util.Date
+import java.util.Locale
 
 class CalendarActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityListBinding
+    private lateinit var binding: ActivityCalendarBinding
     private val scope = lifecycleScope
-    private var selectedTabIdx = 1
+    private var selectedTabIdx = 0
     private var showOnlyLibrary = false
     private var showOnlyDubbed = false
+    private var currentCalendar: Map<String, MutableList<Media>> = emptyMap()
     private val model: OtherDetailsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         ThemeManager(this).applyTheme()
-        binding = ActivityListBinding.inflate(layoutInflater)
+        binding = ActivityCalendarBinding.inflate(layoutInflater)
 
-        val primaryColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
-        val primaryTextColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
-        val secondaryTextColor = getThemeColor(com.google.android.material.R.attr.colorOutline)
+        val surface = getThemeColor(com.google.android.material.R.attr.colorSurface)
+        val primary = getThemeColor(com.google.android.material.R.attr.colorPrimary)
+        val outline = getThemeColor(com.google.android.material.R.attr.colorOutline)
 
-        window.statusBarColor = primaryColor
-        window.navigationBarColor = primaryColor
-        binding.listTabLayout.setBackgroundColor(primaryColor)
-        binding.listAppBar.setBackgroundColor(primaryColor)
-        binding.listTitle.setTextColor(primaryTextColor)
-        binding.listTabLayout.setTabTextColors(secondaryTextColor, primaryTextColor)
-        binding.listTabLayout.setSelectedTabIndicatorColor(primaryTextColor)
+        window.statusBarColor = surface
+        window.navigationBarColor = surface
+        binding.calendarAppBar.setBackgroundColor(surface)
+        binding.calendarTitle.setTextColor(getThemeColor(androidx.appcompat.R.attr.colorOnBackground))
+        binding.calendarDays.setTabTextColors(outline, primary)
+
         if (!(PrefManager.getVal(PrefName.ImmersiveMode) as Boolean)) {
-            this.window.statusBarColor =
-                ContextCompat.getColor(this, R.color.nav_bg_inv)
+            window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg_inv)
             binding.root.fitsSystemWindows = true
-
+            binding.calendarHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = statusBarHeight
+            }
         } else {
             binding.root.fitsSystemWindows = false
             requestWindowFeature(Window.FEATURE_NO_TITLE)
             hideSystemBarsExtendView()
-            binding.settingsContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.calendarHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = statusBarHeight
             }
         }
+
         setContentView(binding.root)
 
-        binding.listTitle.setText(R.string.release_calendar)
-        binding.listSort.visibility = View.GONE
-        binding.random.visibility = View.GONE
-        binding.search.visibility = View.GONE
-        binding.filter.visibility = View.GONE
-        binding.listDubbed.visibility = View.VISIBLE
-        binding.listDubbed.alpha = 0.6f
-        binding.listTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                this@CalendarActivity.selectedTabIdx = tab?.position ?: 1
-            }
+        binding.calendarSearch.setOnClickListener {
+            startActivity(
+                android.content.Intent(this, SearchActivity::class.java)
+                    .putExtra("type", "ANIME")
+            )
+        }
 
+        binding.calendarMore.setOnClickListener {
+            showOnlyLibrary = !showOnlyLibrary
+            scope.launch { model.loadCalendar(showOnlyLibrary, showOnlyDubbed) }
+        }
+
+        binding.calendarDays.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                selectedTabIdx = tab?.position ?: 0
+                updateSummary()
+            }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
 
-        binding.listed.setOnClickListener {
-            showOnlyLibrary = !showOnlyLibrary
-            binding.listed.setImageResource(
-                if (showOnlyLibrary) R.drawable.ic_round_collections_bookmark_24
-                else R.drawable.ic_round_library_books_24
-            )
-            scope.launch {
-                model.loadCalendar(showOnlyLibrary, showOnlyDubbed)
-            }
-        }
+        model.getCalendar().observe(this) { data ->
+            currentCalendar = data ?: emptyMap()
+            binding.calendarProgressBar.visibility =
+                if (currentCalendar.isEmpty()) View.VISIBLE else View.GONE
 
-        binding.listDubbed.setOnClickListener {
-            showOnlyDubbed = !showOnlyDubbed
-            binding.listDubbed.alpha = if (showOnlyDubbed) 1f else 0.6f
-            scope.launch {
-                model.loadCalendar(showOnlyLibrary, showOnlyDubbed)
-            }
-        }
+            if (currentCalendar.isNotEmpty()) {
+                val keys = currentCalendar.keys.toList()
+                val savedTab = selectedTabIdx.coerceIn(0, keys.lastIndex)
+                binding.calendarViewPager.adapter =
+                    ListViewPagerAdapter(keys.size, true, this)
 
-        model.getCalendar().observe(this) {
-            if (it != null) {
-                binding.listProgressBar.visibility = View.GONE
-                binding.listViewPager.adapter = ListViewPagerAdapter(it.size, true, this)
-                val keys = it.keys.toList()
-                val values = it.values.toList()
-                val savedTab = if (it.isNotEmpty()) this.selectedTabIdx.coerceIn(0, it.size - 1) else 0
-                TabLayoutMediator(binding.listTabLayout, binding.listViewPager) { tab, position ->
-                    tab.text = "${keys[position]} (${values[position].size})"
+                TabLayoutMediator(binding.calendarDays, binding.calendarViewPager) { tab, position ->
+                    tab.text = formatDayTab(keys[position])
                 }.attach()
-                if (it.isNotEmpty()) {
-                    binding.listViewPager.setCurrentItem(savedTab, false)
+
+                binding.calendarViewPager.setCurrentItem(savedTab, false)
+                binding.calendarDays.getTabAt(savedTab)?.select()
+                updateSummary()
+            }
+        }
+
+        binding.calendarViewPager.registerOnPageChangeCallback(
+            object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    selectedTabIdx = position
+                    binding.calendarDays.getTabAt(position)?.select()
+                    updateSummary()
                 }
             }
-        }
+        )
 
         val live = Refresh.activity.getOrPut(this.hashCode()) { MutableLiveData(true) }
         live.observe(this) {
             if (it) {
                 scope.launch {
-                    withContext(Dispatchers.IO) { model.loadCalendar(showOnlyLibrary, showOnlyDubbed) }
+                    withContext(Dispatchers.IO) {
+                        model.loadCalendar(showOnlyLibrary, showOnlyDubbed)
+                    }
                     live.postValue(false)
                 }
             }
         }
     }
 
+    private fun formatDayTab(value: String): String {
+        return try {
+            val date = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).parse(value)
+                ?: return value
+            val day = java.text.SimpleDateFormat("EEE", Locale.getDefault()).format(date).uppercase()
+            val number = java.text.SimpleDateFormat("dd", Locale.getDefault()).format(date)
+            val month = java.text.SimpleDateFormat("MMM", Locale.getDefault()).format(date)
+            "$day\n$number\n$month"
+        } catch (_: Exception) {
+            value
+        }
+    }
+
+    private fun updateSummary() {
+        val key = currentCalendar.keys.toList().getOrNull(selectedTabIdx) ?: return
+        val date = try {
+            DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).parse(key)
+        } catch (_: Exception) {
+            null
+        }
+        if (date != null) {
+            val today = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(Date())
+            val dayLabel = if (key == today) "Today"
+            else java.text.SimpleDateFormat("EEE", Locale.getDefault()).format(date)
+            binding.calendarSummary.text =
+                "$dayLabel • " + java.text.SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(date)
+        } else {
+            binding.calendarSummary.text = key
+        }
+        binding.calendarCount.text =
+            "${currentCalendar[key]?.size ?: 0} episodes"
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         Refresh.activity.remove(this.hashCode())
         if (::binding.isInitialized) {
-            binding.listViewPager.adapter = null
+            binding.calendarViewPager.adapter = null
         }
     }
 }
