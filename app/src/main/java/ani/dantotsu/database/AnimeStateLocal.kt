@@ -20,5 +20,5 @@ fun Media.toAnimeStateRecord(now: Long = System.currentTimeMillis()): AnimeState
         score = if (userScore == 0) null else userScore.toDouble(),
         repeat = userRepeat,
         updatedAt = userUpdatedAt ?: now,
-        lastWatchedAt = now.takeIf { userProgress != null && userProgress!! > 0 },
+        lastWatchedAt = null,
     )
