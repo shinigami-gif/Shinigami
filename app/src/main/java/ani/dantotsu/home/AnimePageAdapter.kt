@@ -64,17 +64,21 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding = LayoutTrendingBinding.bind(binding.root)
         trendingViewPager = trendingBinding.trendingViewPager
 
-        binding.profileHeaderRoot.updatePadding(top = statusBarHeight + 8f.px)
-        binding.profileHeaderName.text = Anilist.username ?: getAppString(R.string.app_name)
+        val profileHeaderRoot = holder.itemView.findViewById<View>(R.id.profileHeaderRoot)
+        val profileHeaderAvatar = holder.itemView.findViewById<android.widget.ImageView>(R.id.profileHeaderAvatar)
+        val profileHeaderName = holder.itemView.findViewById<android.widget.TextView>(R.id.profileHeaderName)
+        val profileHeaderNotification = holder.itemView.findViewById<View>(R.id.profileHeaderNotification)
+        profileHeaderRoot.updatePadding(top = statusBarHeight + 8f.px)
+        profileHeaderName.text = Anilist.username ?: getAppString(R.string.app_name)
         val headerAvatarUrl = if (PrefManager.getVal<Boolean>(PrefName.RescueMode)) MAL.avatar else Anilist.avatar
         if (headerAvatarUrl != null) {
-            binding.profileHeaderAvatar.loadImage(headerAvatarUrl)
+            profileHeaderAvatar.loadImage(headerAvatarUrl)
         }
-        binding.profileHeaderNotification.setOnClickListener {
-            binding.userAvatar.performClick()
+        profileHeaderNotification.setOnClickListener {
+            trendingBinding.userAvatar.performClick()
         }
-        binding.profileHeaderRoot.setOnClickListener {
-            binding.userAvatar.performLongClick()
+        profileHeaderRoot.setOnClickListener {
+            trendingBinding.userAvatar.performLongClick()
         }
 
         val textInputLayout = holder.itemView.findViewById<TextInputLayout>(R.id.searchBar)
