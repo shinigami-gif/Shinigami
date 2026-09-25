@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.metro)
+    alias(libs.plugins.sqldelight)
 }
 
 if (gradle.startParameter.taskNames.any { it.contains("google", true) }) {
@@ -232,4 +233,12 @@ dependencies {
     // LeakCanary & Plumber (Active in Debug, Alpha, and Release builds for memory leak diagnosis)
     debugImplementation(libs.leakcanary.android)
     debugImplementation(libs.leakcanary.plumber)
+}
+    
+sqldelight {
+    databases {
+        create("ShinigamiDatabase") {
+            packageName.set("ani.dantotsu.database")
+        }
+    }
 }
