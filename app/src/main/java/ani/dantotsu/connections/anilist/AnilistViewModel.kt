@@ -66,22 +66,6 @@ class AnilistHomeViewModel : ViewModel() {
 
     fun getAnimePlanned(): LiveData<ArrayList<Media>> = animePlanned
 
-    private val mangaContinue: MutableLiveData<ArrayList<Media>> =
-        MutableLiveData<ArrayList<Media>>(null)
-
-    fun getMangaContinue(): LiveData<ArrayList<Media>> = mangaContinue
-
-    private val mangaFav: MutableLiveData<ArrayList<Media>> =
-        MutableLiveData<ArrayList<Media>>(null)
-
-    fun getMangaFav(): LiveData<ArrayList<Media>> = mangaFav
-
-    private val mangaPlanned: MutableLiveData<ArrayList<Media>> =
-        MutableLiveData<ArrayList<Media>>(null)
-
-    fun getMangaPlanned(): LiveData<ArrayList<Media>> = mangaPlanned
-
-    private val recommendation: MutableLiveData<ArrayList<Media>> =
         MutableLiveData<ArrayList<Media>>(null)
 
     fun getRecommendation(): LiveData<ArrayList<Media>> = recommendation
@@ -190,10 +174,6 @@ class AnilistHomeViewModel : ViewModel() {
         res["currentAnime"]?.let { animeContinue.postValue(it) }
         res["favoriteAnime"]?.let { animeFav.postValue(it) }
         res["currentAnimePlanned"]?.let { animePlanned.postValue(it) }
-        res["currentManga"]?.let { mangaContinue.postValue(it) }
-        res["favoriteManga"]?.let { mangaFav.postValue(it) }
-        res["currentMangaPlanned"]?.let { mangaPlanned.postValue(it) }
-        res["recommendations"]?.let { recommendation.postValue(it) }
         res["missingSequels"]?.let { missingSequels.postValue(it) }
         res["hidden"]?.let { hidden.postValue(it) }
     }
@@ -207,8 +187,6 @@ class AnilistHomeViewModel : ViewModel() {
                 recommendation.postValue(ArrayList(res?.data?.map { Media(it, true) } ?: emptyList()))
             }
             animeFav.postValue(arrayListOf())
-            mangaFav.postValue(arrayListOf())
-            missingSequels.postValue(arrayListOf())
             return
         }
 
