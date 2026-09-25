@@ -22,6 +22,9 @@ class AnilistMetadata internal constructor(
     suspend fun getAnime(id: Int, mal: Boolean = false): Media? =
         queries.getMedia(id, mal = mal, type = "ANIME")
 
+    suspend fun getAnimeBatch(ids: List<Int>): List<Media>? =
+        queries.getMediaList(ids)
+
     fun getAnimeDetails(media: Media): Media =
         queries.mediaDetails(media)
 
