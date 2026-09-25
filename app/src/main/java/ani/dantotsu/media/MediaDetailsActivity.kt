@@ -44,8 +44,6 @@ import ani.dantotsu.loadImage
 import ani.dantotsu.media.anime.AnimeWatchFragment
 import ani.dantotsu.media.comments.CommentsFragment
 import ani.dantotsu.notifications.comment.MediaNameFetch
-import ani.dantotsu.media.manga.MangaReadFragment
-import ani.dantotsu.media.novel.NovelReadFragment
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.openLinkInBrowser
 import ani.dantotsu.others.AndroidBug5497Workaround
@@ -313,39 +311,32 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         @SuppressLint("ResourceType")
         fun total() {
             val text = SpannableStringBuilder().apply {
-
                 val white =
                     this@MediaDetailsActivity.getThemeColor(com.google.android.material.R.attr.colorOnBackground)
                 if (media.userStatus != null) {
-                    append(if (media.anime != null) getString(R.string.watched_num) else getString(R.string.read_num))
+                    append(getString(R.string.watched_num))
                     val colorSecondary =
                         getThemeColor(com.google.android.material.R.attr.colorSecondary)
-                    bold { color(colorSecondary) { append("${media.userProgress}") } }
-                    append(
-                        if (media.anime != null) getString(R.string.episodes_out_of) else getString(
-                            R.string.chapters_out_of
-                        )
-                    )
+                    bold { color(colorSecondary) { append("\${media.userProgress}") } }
+                    append(getString(R.string.episodes_out_of))
                 } else {
-                    append(
-                        if (media.anime != null) getString(R.string.episodes_total_of) else getString(
-                            R.string.chapters_total_of
-                        )
-                    )
+                    append(getString(R.string.episodes_total_of))
                 }
-                if (media.anime != null) {
-                    if (media.anime!!.nextAiringEpisode != null) {
-                        bold { color(white) { append("${media.anime!!.nextAiringEpisode}") } }
-                        append(" / ")
-                    }
-                    bold { color(white) { append("${media.anime!!.totalEpisodes ?: "??"}") } }
-                } else
-                    bold { color(white) { append("${media.manga!!.totalChapters ?: "??"}") } }
+                if (media.anime?.nextAiringEpisode != null) {
+                    bold { color(white) { append("\${media.anime!!.nextAiringEpisode}") } }
+                    append(" / ")
+                }
+                bold { color(white) { append("\${media.anime?.totalEpisodes ?: "??"}") } }
             }
             binding.mediaTotal.text = text
         }
 
         fun progress() {
+            val statuses: Array<String> = resources.getStringArray(R.array.status)
+            val statusStrings = resources.getStringArray(R.array.status_anime)
+            val userStatus =
+                if (media.userStatus != null) statusStrings[statuses.indexOf(media.userStatus).coerceAtLeast(0)] else statusStrings[0]
+
             val statuses: Array<String> = resources.getStringArray(R.array.status)
             val statusStrings =
                 if (media.manga == null) resources.getStringArray(R.array.status_anime) else resources.getStringArray(
@@ -388,19 +379,12 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                 val oldId = media.id
                 media = it
 
-                // mapping button for LOCAL media
-                if (media.format?.startsWith("LOCAL") == true) {
+                // Mapping is supported only for local anime.
+                if (media.format?.startsWith("LOCAL") == true && media.anime != null) {
                     binding.mediaMapping?.visibility = View.VISIBLE
                     binding.mediaMapping?.setOnClickListener {
-                        val isAnime = media.anime != null
-                        val isNovel = media.format == "LOCAL_NOVEL"
                         val folderName = media.folderName ?: media.name ?: media.nameRomaji
-                        val dialog = LocalMappingSearchDialog.newInstance(
-                            folderName = folderName,
-                            isAnime = isAnime,
-                            isNovel = isNovel
-                        ) { _ ->
-                            // Re-trigger it
+                        val dialog = LocalMappingSearchDialog.newInstance(folderName) {
                             val updatedMedia = media.copy(id = 0)
                             model.loading = false
                             model.loadMedia(updatedMedia)
@@ -440,36 +424,18 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             }
         }
         adult = media.isAdult
-        if (media.anime != null) {
-            viewPager.adapter =
-                ViewPagerAdapter(
-                    supportFragmentManager,
-                    lifecycle,
-                    SupportedMedia.ANIME,
-                    media,
-                    intent.getIntExtra("commentId", -1)
-                )
-        } else if (media.manga != null) {
-            viewPager.adapter = ViewPagerAdapter(
-                supportFragmentManager,
-                lifecycle,
-                if (media.format == "NOVEL" || media.format == "LOCAL_NOVEL" || media.format == "LIGHT_NOVEL") SupportedMedia.NOVEL else SupportedMedia.MANGA,
-                media,
-                intent.getIntExtra("commentId", -1)
-            )
-            anime = false
-        }
+        viewPager.adapter = ViewPagerAdapter(
+            supportFragmentManager,
+            lifecycle,
+            SupportedMedia.ANIME,
+            media,
+            intent.getIntExtra("commentId", -1)
+        )
         selected = if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) != 1 && media.selected!!.window == 2 || rescueMode && media.selected!!.window == 2) 1 else media.selected!!.window
         binding.mediaTitle.translationX = -screenWidth
 
         val infoTab = navBar.createTab(R.drawable.ic_round_info_24, R.string.info, R.id.info)
-        val watchTab = if (anime) {
-            navBar.createTab(R.drawable.ic_round_movie_filter_24, R.string.watch, R.id.watch)
-        } else if (media.format == "NOVEL" || media.format == "LOCAL_NOVEL" || media.format == "LIGHT_NOVEL") {
-            navBar.createTab(R.drawable.ic_round_book_24, R.string.read, R.id.read)
-        } else {
-            navBar.createTab(R.drawable.ic_round_import_contacts_24, R.string.read, R.id.read)
-        }
+        val watchTab = navBar.createTab(R.drawable.ic_round_movie_filter_24, R.string.watch, R.id.watch)
         val commentTab =
             navBar.createTab(R.drawable.ic_round_comment_24, R.string.comments, R.id.comment)
         navBar.addTab(infoTab)
@@ -577,8 +543,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             0 -> MediaInfoFragment()
             1 -> when (mediaType) {
                 SupportedMedia.ANIME -> AnimeWatchFragment()
-                SupportedMedia.MANGA -> MangaReadFragment()
-                SupportedMedia.NOVEL -> NovelReadFragment()
             }
 
             2 -> { // Index 2
