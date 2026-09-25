@@ -868,7 +868,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        userResult.postValue(Anilist.query.searchUsers(r.page, r.search))
+        userResult.postValue(UserSearchResults(search = r.search, page = r.page, results = mutableListOf(), hasNextPage = false))
     }
 
     private suspend fun loadNextAniMangaPage(r: AniMangaSearchResults) {
@@ -945,7 +945,7 @@ class AnilistSearch : ViewModel() {
             return
         }
         aniMangaResult.postValue(
-            Anilist.query.searchAniManga(
+            Anilist.metadata.searchAnime(
                 r.page + 1,
                 r.perPage,
                 r.search,
@@ -1052,7 +1052,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        userResult.postValue(Anilist.query.searchUsers(r.page + 1, r.search))
+        userResult.postValue(UserSearchResults(search = r.search, page = r.page + 1, results = mutableListOf(), hasNextPage = false))
     }
 }
 
