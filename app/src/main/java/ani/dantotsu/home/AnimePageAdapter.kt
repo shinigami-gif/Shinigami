@@ -34,6 +34,7 @@ import ani.dantotsu.media.MediaListViewActivity
 import ani.dantotsu.media.SearchActivity
 import ani.dantotsu.openLinkInCustomTab
 import ani.dantotsu.profile.ProfileActivity
+import ani.dantotsu.profile.notification.NotificationActivity
 import ani.dantotsu.px
 import ani.dantotsu.setSafeOnClickListener
 import ani.dantotsu.setSlideIn
@@ -96,6 +97,38 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
 
         if (PrefManager.getVal(PrefName.SmallView)) trendingBinding.trendingContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = (-108f).px
+        }
+
+        val headerAvatar = binding.root.findViewById<android.widget.ImageView>(R.id.profileHeaderAvatar)
+        val headerName = binding.root.findViewById<android.widget.TextView>(R.id.profileHeaderName)
+        val headerNotification = binding.root.findViewById<View>(R.id.profileHeaderNotification)
+        val rescueModeForHeader = PrefManager.getVal<Boolean>(PrefName.RescueMode)
+        val headerAvatarUrl = if (rescueModeForHeader) MAL.avatar else Anilist.avatar
+        val headerUsername = if (rescueModeForHeader) MAL.username else Anilist.username
+
+        if (!headerUsername.isNullOrBlank()) {
+            headerName.text = headerUsername
+        }
+        if (!headerAvatarUrl.isNullOrBlank()) {
+            headerAvatar.loadImage(headerAvatarUrl)
+        }
+
+        headerNotification.setSafeOnClickListener {
+            if (!rescueModeForHeader && Anilist.token != null) {
+                ContextCompat.startActivity(
+                    it.context,
+                    Intent(it.context, NotificationActivity::class.java),
+                    null
+                )
+            } else {
+                val dialogFragment = SettingsDialogFragment.newInstance(
+                    SettingsDialogFragment.Companion.PageType.ANIME
+                )
+                dialogFragment.show(
+                    (it.context as AppCompatActivity).supportFragmentManager,
+                    "dialog"
+                )
+            }
         }
 
         updateAvatar()
