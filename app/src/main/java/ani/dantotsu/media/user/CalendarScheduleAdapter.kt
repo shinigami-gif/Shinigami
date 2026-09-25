@@ -2,8 +2,14 @@ package ani.dantotsu.media.user
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.getThemeColor
+import ani.dantotsu.MediaSingleton
+import ani.dantotsu.getBitmapFromImageView
+import ani.dantotsu.resizeBitmap
 import ani.dantotsu.databinding.ItemCalendarScheduleBinding
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.MediaDetailsActivity
@@ -60,11 +66,26 @@ class CalendarScheduleAdapter(
         )
 
         b.root.setSafeOnClickListener {
-            activity.startActivity(
-                android.content.Intent(activity, MediaDetailsActivity::class.java)
-                    .putExtra("media", item as java.io.Serializable)
-            )
+            openMedia(item, b.scheduleCover)
         }
+
+        b.scheduleCover.setSafeOnClickListener {
+            openMedia(item, b.scheduleCover)
+        }
+    }
+
+    private fun openMedia(item: Media, cover: android.widget.ImageView) {
+        MediaSingleton.bitmap = resizeBitmap(getBitmapFromImageView(cover), 100)
+        ContextCompat.startActivity(
+            activity,
+            android.content.Intent(activity, MediaDetailsActivity::class.java)
+                .putExtra("media", item as java.io.Serializable),
+            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity,
+                cover,
+                ViewCompat.getTransitionName(cover)!!
+            ).toBundle()
+        )
     }
 
     private fun parseAiringTime(time: String): Long? {
