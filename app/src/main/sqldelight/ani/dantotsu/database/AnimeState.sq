@@ -1,0 +1,51 @@
+CREATE TABLE AnimeState (
+    animeId INTEGER NOT NULL PRIMARY KEY,
+    isFavorite INTEGER AS Boolean NOT NULL DEFAULT 0,
+    listStatus TEXT,
+    progress INTEGER NOT NULL DEFAULT 0,
+    score REAL,
+    repeat INTEGER NOT NULL DEFAULT 0,
+    startedAt INTEGER,
+    completedAt INTEGER,
+    updatedAt INTEGER,
+    lastWatchedAt INTEGER
+);
+
+selectById:
+SELECT *
+FROM AnimeState
+WHERE animeId = ?;
+
+selectContinueWatching:
+SELECT *
+FROM AnimeState
+WHERE progress > 0
+  AND listStatus IN ('CURRENT', 'REPEATING')
+ORDER BY lastWatchedAt DESC;
+
+selectFavorites:
+SELECT *
+FROM AnimeState
+WHERE isFavorite = 1
+ORDER BY updatedAt DESC;
+
+upsert:
+INSERT OR REPLACE INTO AnimeState(
+    animeId,
+    isFavorite,
+    listStatus,
+    progress,
+    score,
+    repeat,
+    startedAt,
+    completedAt,
+    updatedAt,
+    lastWatchedAt
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM AnimeState
+WHERE animeId = ?;
+
+deleteAll:
+DELETE FROM AnimeState;
