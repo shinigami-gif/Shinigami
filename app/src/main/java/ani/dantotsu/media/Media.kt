@@ -806,6 +806,7 @@ fun Media?.deleteFromList(
                     val existing: List<ani.dantotsu.connections.PendingDeletion> =
                         PrefManager.getVal(PrefName.PendingDeletions, listOf())
                     val updated = existing.filterNot { it.mediaId == media.id } + pending
+                    AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).delete(media.id)
                     PrefManager.setVal(PrefName.PendingDeletions, updated)
                     val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
                     PrefManager.setCustomVal("removeList", removeList.minus(media.id.toString()))
