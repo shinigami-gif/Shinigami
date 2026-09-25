@@ -60,6 +60,11 @@
                     android:src="@drawable/bg_account_banner"
                     android:contentDescription="Profile banner" />
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="?attr/colorPrimary" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
