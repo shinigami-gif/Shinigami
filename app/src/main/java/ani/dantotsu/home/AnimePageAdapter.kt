@@ -332,7 +332,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
     }
 
     fun updateNotificationCount() {
-        if (this::binding.isInitialized) {
+        if (this::binding.isInitialized && this::trendingBinding.isInitialized) {
             val isRescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
             trendingBinding.notificationCount.isVisible = !isRescueMode && Anilist.unreadNotificationCount > 0
                     && PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
