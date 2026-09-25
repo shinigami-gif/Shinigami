@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingStart="16dp"
-    android:paddingTop="8dp"
+    android:paddingTop="4dp"
     android:paddingEnd="16dp">
 
     <com.google.android.material.card.MaterialCardView
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="?attr/colorSurface"
-        app:cardCornerRadius="22dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="8dp"
         app:strokeColor="?attr/colorOutline"
         app:strokeWidth="1dp">
@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,8 +33,8 @@
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/profileHeaderAvatar"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     app:srcCompat="@drawable/ic_round_person_24" />
@@ -42,7 +42,7 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
@@ -54,7 +54,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="Shin Tempest"
-                        android:textSize="18sp" />
+                        android:textSize="17sp" />
 
                     <TextView
                         android:id="@+id/profileHeaderSubtitle"
@@ -69,10 +69,10 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/profileHeaderNotification"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                    app:cardCornerRadius="22dp">
+                    app:cardCornerRadius="20dp">
 
                     <ImageView
                         android:layout_width="24dp"
@@ -87,13 +87,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="72dp"
-                    android:layout_height="64dp"
+                    android:layout_width="60dp"
+                    android:layout_height="56dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -114,11 +114,11 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/profileHeaderPremium"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="14dp"
                     app:strokeColor="?attr/colorPrimary"
                     app:strokeWidth="1dp">
 
@@ -127,11 +127,11 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="12dp">
+                        android:paddingHorizontal="9dp">
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
                             android:src="@drawable/ic_shinigami_crown"
                             app:tint="?attr/colorPrimary"
                             android:contentDescription="@null" />
@@ -148,13 +148,13 @@
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins_bold"
                                 android:text="Premium"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="1080p • Auto Skip • More"
-                                android:textSize="9sp" />
+                                android:textSize="7sp" />
                         </LinearLayout>
 
                         <ImageView
@@ -182,7 +182,7 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="10dp">
+                        android:paddingHorizontal="8dp">
 
                         <ImageView
                             android:layout_width="28dp"
@@ -194,7 +194,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="7dp"
+                            android:layout_marginStart="6dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
