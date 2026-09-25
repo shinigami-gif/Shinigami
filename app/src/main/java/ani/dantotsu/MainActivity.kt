@@ -42,6 +42,10 @@ import ani.dantotsu.home.AnimeFragment
 import ani.dantotsu.home.HomeFragment
 import ani.dantotsu.home.LoginFragment
 import ani.dantotsu.home.MangaFragment
+import ani.dantotsu.media.CalendarFragment
+import ani.dantotsu.profile.activity.SocialFragment
+import ani.dantotsu.media.user.LibraryFragment
+import ani.dantotsu.account.AccountFragment
 import ani.dantotsu.home.NoInternet
 import ani.dantotsu.media.MediaDetailsActivity
 import ani.dantotsu.notifications.TaskScheduler
@@ -316,36 +320,21 @@ class MainActivity : AppCompatActivity() {
                 ViewPagerAdapter(supportFragmentManager, lifecycle)
             mainViewPager.setPageTransformer(ZoomOutPageTransformer())
             navbar.selectTabAt(selectedOption)
-            navbar.setOnTabSelectListener(object :
-                AnimatedBottomBar.OnTabSelectListener {
-                override fun onTabSelected(
-                    lastIndex: Int,
-                    lastTab: AnimatedBottomBar.Tab?,
-                    newIndex: Int,
-                    newTab: AnimatedBottomBar.Tab
-                ) {
-                    navbar.animate().translationZ(12f).setDuration(200).start()
-                    when (newIndex) {
-                        0 -> {
-                            selectedOption = 0
-                            mainViewPager.setCurrentItem(0, false)
-                        }
-                        1 -> navigateWithSwipe(Intent(this@MainActivity, ani.dantotsu.media.CalendarActivity::class.java), true)
-                        2 -> if (!PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
-                            navigateWithSwipe(Intent(this@MainActivity, FeedActivity::class.java), true)
-                        } else {
-                            snackString(getString(R.string.rescue_mode_active))
-                            navbar.selectTabAt(0, false)
-                        }
-                        3 -> navigateWithSwipe(
-                            Intent(this@MainActivity, ani.dantotsu.media.user.ListActivity::class.java)
-                                .putExtra("anime", true)
-                                .putExtra("username", Anilist.username ?: "")
-                                .putExtra("userId", Anilist.userid ?: 0),
-                            true
-                        )
-                        4 -> navigateWithSwipe(Intent(this@MainActivity, AccountActivity::class.java), true)
+            navbar.setOnTabSelectListener(object : AnimatedBottomBar.OnTabSelectListener {
+                override fun onTabSelected(lastIndex: Int, lastTab: AnimatedBottomBar.Tab?, newIndex: Int, newTab: AnimatedBottomBar.Tab) {
+                    if (newIndex == 2 && PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
+                        snackString(getString(R.string.rescue_mode_active))
+                        navbar.selectTabAt(selectedOption, false)
+                        return
                     }
+                    selectedOption = newIndex
+                    mainViewPager.setCurrentItem(newIndex, false)
+                }
+            })
+            mainViewPager.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    if (position != selectedOption) selectedOption = position
+                    if (navbar.selectedTab?.id != navbar.tabs.getOrNull(position)?.id) navbar.selectTabAt(position, false)
                 }
             })
             if (mainViewPager.currentItem != selectedOption) {
@@ -625,21 +614,15 @@ class MainActivity : AppCompatActivity() {
     private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
         FragmentStateAdapter(fragmentManager, lifecycle) {
 
-        override fun getItemCount(): Int = 3
+        override fun getItemCount(): Int = 5
 
-        override fun createFragment(position: Int): Fragment {
-            val rescueMode = PrefManager.getVal<Boolean>(PrefName.RescueMode)
-            when (position) {
-                0 -> return AnimeFragment()
-                1 -> return if (rescueMode) {
-                    val hasMalLogin = PrefManager.getVal(PrefName.MALUserName, null as String?).let { !it.isNullOrBlank() }
-                    if (hasMalLogin) HomeFragment() else LoginFragment()
-                } else {
-                    if (Anilist.token != null) HomeFragment() else LoginFragment()
-                }
-                2 -> return MangaFragment()
-            }
-            return LoginFragment()
+        override fun createFragment(position: Int): Fragment = when (position) {
+            0 -> AnimeFragment()
+            1 -> CalendarFragment()
+            2 -> SocialFragment()
+            3 -> LibraryFragment()
+            4 -> AccountFragment()
+            else -> AnimeFragment()
         }
     }
 
