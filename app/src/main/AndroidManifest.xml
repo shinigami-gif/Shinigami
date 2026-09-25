@@ -129,9 +129,6 @@
 
         <activity android:name=".others.calc.CalcActivity"
             android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.TorrentSettingsActivity"
-            android:parentActivityName=".MainActivity" />
         <activity android:name=".settings.AnilistSettingsActivity"/>
         <activity android:name=".forum.ForumActivity" />
         <activity android:name=".forum.ThreadViewActivity" />
@@ -167,9 +164,6 @@
             android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".settings.SettingsAddonActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsMangaActivity"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".settings.SettingsNotificationActivity"
@@ -238,12 +232,6 @@
         <activity
             android:name=".profile.SingleStatActivity"
             android:parentActivityName=".profile.ProfileActivity" />
-        <activity
-            android:name=".media.manga.mangareader.MangaReaderActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:label="@string/manga"
-            android:launchMode="singleTask" />
         <activity android:name=".media.GenreActivity" />
         <activity
             android:name=".media.MediaListViewActivity"
@@ -354,12 +342,6 @@
                     android:scheme="dantotsu" />
                 <data
                     android:host="watch"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="manga"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="read"
                     android:scheme="dantotsu" />
                 <data
                     android:host="media"
@@ -493,14 +475,6 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
         <service
-            android:name=".download.manga.MangaDownloaderService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name=".download.novel.NovelDownloaderService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-        <service
             android:name=".download.anime.AnimeDownloaderService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
@@ -513,11 +487,6 @@
             android:name="androidx.media3.exoplayer.scheduler.PlatformScheduler$PlatformSchedulerService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".addons.torrent.TorrentServerService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"
-            android:stopWithTask="true" />
         <service
             android:name=".media.anime.AnimePlayerService"
             android:exported="true"
