@@ -9,7 +9,7 @@
 
     <nl.joery.animatedbottombar.AnimatedBottomBar
         android:id="@+id/navbar"
-        android:layout_width="240dp"
+        android:layout_width="310dp"
         android:layout_height="56dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
