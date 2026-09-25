@@ -1,4 +1,4 @@
-package ani.dantotsu.media.anime.player
+package anipdantotsupmedia.anime.player
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
