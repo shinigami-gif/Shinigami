@@ -159,7 +159,7 @@ class CalendarActivity : AppCompatActivity() {
                 val keys = currentCalendar.keys.toList()
                 val savedTab = selectedTabIdx.coerceIn(0, keys.lastIndex)
                 binding.calendarViewPager.adapter =
-                    ListViewPagerAdapter(keys.size, true, this)
+                    ListViewPagerAdapter(keys.size, true, supportFragmentManager, lifecycle)
 
                 TabLayoutMediator(binding.calendarDays, binding.calendarViewPager) { tab, position ->
                     tab.text = formatDayTab(keys[position])
