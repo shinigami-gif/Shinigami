@@ -3,25 +3,21 @@
     <item
         android:id="@+id/anime"
         android:icon="@drawable/ic_round_movie_filter_24"
-        android:title="Anime" />
-
+        android:title="@string/anime" />
     <item
         android:id="@+id/calendar"
-        android:icon="@drawable/ic_round_calendar_today_24"
-        android:title="Calendar" />
-
+        android:icon="@drawable/ic_shinigami_calendar"
+        android:title="@string/release_calendar" />
     <item
         android:id="@+id/social"
-        android:icon="@drawable/ic_round_person_24"
-        android:title="Social" />
-
+        android:icon="@drawable/ic_shinigami_social"
+        android:title="@string/activities" />
     <item
         android:id="@+id/library"
-        android:icon="@drawable/ic_round_library_books_24"
-        android:title="Library" />
-
+        android:icon="@drawable/ic_shinigami_library"
+        android:title="@string/library" />
     <item
         android:id="@+id/profile"
-        android:icon="@drawable/ic_round_person_24"
-        android:title="Profile" />
+        android:icon="@drawable/ic_shinigami_profile"
+        android:title="@string/profile" />
 </menu>
