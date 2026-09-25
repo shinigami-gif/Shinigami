@@ -172,7 +172,6 @@ Favorites"
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/profileOption"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:gravity="start|center_vertical"
@@ -182,7 +181,6 @@ Favorites"
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/appearanceOption"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:gravity="start|center_vertical"
@@ -192,7 +190,6 @@ Favorites"
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/notificationsOption"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:gravity="start|center_vertical"
@@ -202,7 +199,6 @@ Favorites"
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/settingsOption"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:gravity="start|center_vertical"
@@ -212,7 +208,6 @@ Favorites"
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/aboutOption"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:gravity="start|center_vertical"
