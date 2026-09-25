@@ -152,6 +152,8 @@
 
             </LinearLayout>
 
+        </LinearLayout>
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/listTabLayout"
             android:layout_width="match_parent"
