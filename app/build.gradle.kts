@@ -241,6 +241,6 @@ dependencies {
     implementation(libs.libtorrent4j.android.x86.x64)
 
     // LeakCanary & Plumber (Active in Debug, Alpha, and Release builds for memory leak diagnosis)
-    implementation(libs.leakcanary.android)
-    implementation(libs.leakcanary.plumber)
+    debugImplementation(libs.leakcanary.android)
+    debugImplementation(libs.leakcanary.plumber)
 }
