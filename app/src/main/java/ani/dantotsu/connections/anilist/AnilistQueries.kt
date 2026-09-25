@@ -2162,6 +2162,382 @@ Page(page:$page,perPage:50) {
         val res = executeQuery<UserBioResponse>(query, force = true)
         return res?.data?.user?.about
     }
+
+    suspend fun getCharacterDetails(character: Character): Character {
+        val query = """ {
+  Character(id: ${character.id}) {
+    ${characterInformation(true)}
+  }
+}""".prepare()
+        executeQuery<Query.Character>(query, force = true)?.data?.character?.let { i ->
+            return Character(
+                i.id,
+                i.name?.full,
+                i.image?.large ?: i.image?.medium,
+                null,
+                null.toString(),
+                i.isFavourite ?: false,
+                i.description,
+                i.age,
+                i.gender,
+                i.dateOfBirth,
+                i.media?.edges?.map {
+                    val m = Media(it)
+                    m.relation = it.characterRole.toString()
+                    m
+                }?.let { ArrayList(it) },
+                i.media?.edges?.flatMap { edge ->
+                    edge.voiceActors?.map { va ->
+                        Author(
+                            va.id,
+                            va.name?.userPreferred,
+                            va.image?.large ?: va.image?.medium,
+                            va.languageV2
+                        )
+                    } ?: emptyList()
+                }?.distinctBy { it.id }?.let { ArrayList(it) }
+            )
+        }
+        return character
+    }
+
+    suspend fun getStudioDetails(studio: Studio): Studio {
+        fun query(page: Int = 0) = """ {
+  Studio(id: ${studio.id}) {
+    ${studioInformation(page, ITEMS_PER_PAGE)}
+  }
+}""".prepare()
+
+        var hasNextPage = true
+        val yearMedia = mutableMapOf<String, ArrayList<Media>>()
+        var page = 0
+        val seenMediaIds = hashSetOf<Int>()
+        while (hasNextPage) {
+            page++
+            hasNextPage =
+                executeQuery<Query.Studio>(query(page), force = true)?.data?.studio?.media?.let {
+                    it.edges?.forEach { i ->
+                        i.node?.apply {
+                            if (id !in seenMediaIds) {
+                                seenMediaIds.add(id)
+                                val status = status.toString()
+                                val year = startDate?.year?.toString() ?: "TBA"
+                                val title = if (status != "CANCELLED") year else status
+                                if (!yearMedia.containsKey(title))
+                                    yearMedia[title] = arrayListOf()
+                                yearMedia[title]?.add(Media(this))
+                            }
+                        }
+                    }
+                    it.pageInfo?.hasNextPage == true
+                } ?: false
+        }
+        if (yearMedia.contains("CANCELLED")) {
+            val a = yearMedia["CANCELLED"]!!
+            yearMedia.remove("CANCELLED")
+            yearMedia["CANCELLED"] = a
+        }
+        studio.yearMedia = yearMedia
+        return studio
+    }
+
+
+    suspend fun getAuthorDetails(author: Author): Author {
+        fun query(page: Int = 0) = """ {
+  Staff(id: ${author.id}) {
+    ${staffInformation(page, ITEMS_PER_PAGE)}
+    characters(page: $page,sort:FAVOURITES_DESC) {
+      $standardPageInformation
+      nodes{
+        ${characterInformation(false)}
+      }
+    }
+  }
+}""".prepare()
+
+        var hasNextPage = true
+        val yearMedia = mutableMapOf<String, ArrayList<Media>>()
+        var page = 0
+        val characters = arrayListOf<Character>()
+        while (hasNextPage) {
+            page++
+            val query = executeQuery<Query.Author>(
+                query(page), force = true
+            )?.data?.author
+            author.age = query?.age
+            author.yearsActive =
+                if (query?.yearsActive?.isEmpty() == true) null else query?.yearsActive
+            author.homeTown = if (query?.homeTown?.isBlank() == true) null else query?.homeTown
+            author.dateOfDeath = if (query?.dateOfDeath?.toStringOrEmpty()
+                    ?.isBlank() == true
+            ) null else query?.dateOfDeath?.toStringOrEmpty()
+            author.dateOfBirth = if (query?.dateOfBirth?.toStringOrEmpty()
+                    ?.isBlank() == true
+            ) null else query?.dateOfBirth?.toStringOrEmpty()
+            hasNextPage = query?.staffMedia?.let {
+                it.edges?.forEach { i ->
+                    i.node?.apply {
+                        val status = status.toString()
+                        val year = startDate?.year?.toString() ?: "TBA"
+                        val title = if (status != "CANCELLED") year else status
+                        if (!yearMedia.containsKey(title))
+                            yearMedia[title] = arrayListOf()
+                        val media = Media(this)
+                        media.relation = i.staffRole
+                        yearMedia[title]?.add(media)
+                    }
+                }
+                it.pageInfo?.hasNextPage == true
+            } ?: false
+            query?.characters?.let {
+                it.nodes?.forEach { i ->
+                    characters.add(
+                        Character(
+                            i.id,
+                            i.name?.userPreferred,
+                            i.image?.large,
+                            i.image?.medium,
+                            "",
+                            false
+                        )
+                    )
+                }
+            }
+        }
+
+        if (yearMedia.contains("CANCELLED")) {
+            val a = yearMedia["CANCELLED"]!!
+            yearMedia.remove("CANCELLED")
+            yearMedia["CANCELLED"] = a
+        }
+        author.character = characters
+        author.yearMedia = yearMedia
+        return author
+    }
+
+    suspend fun getReviews(
+        mediaId: Int,
+        page: Int = 1,
+        sort: String = "SCORE_DESC"
+    ): Query.ReviewsResponse? {
+        return executeQuery<Query.ReviewsResponse>(
+            """{Page(page:$page,perPage:10){$standardPageInformation reviews(mediaId:$mediaId,sort:$sort){id,mediaId,mediaType,summary,body(asHtml:true)rating,ratingAmount,userRating,score,private,siteUrl,createdAt,updatedAt,user{id,name,bannerImage avatar{medium,large}}}}}""",
+            force = true
+        )
+    }
+
+    suspend fun getUserProfile(id: Int): Query.UserProfileResponse? {
+        return executeQuery<Query.UserProfileResponse>(
+            """{followerPage:Page{followers(userId:$id){id}$standardPageInformation}followingPage:Page{following(userId:$id){id}$standardPageInformation}user:User(id:$id){id name about(asHtml:true)avatar{medium large}bannerImage isFollowing isFollower isBlocked favourites{anime{nodes{id coverImage{extraLarge large medium color}}}manga{nodes{id coverImage{extraLarge large medium color}}}characters{nodes{id name{first middle last full native alternative userPreferred}image{large medium}isFavourite}}staff{nodes{id name{first middle last full native alternative userPreferred}image{large medium}isFavourite}}studios{nodes{id name isFavourite}}}statistics{anime{count meanScore standardDeviation minutesWatched episodesWatched chaptersRead volumesRead}manga{count meanScore standardDeviation minutesWatched episodesWatched chaptersRead volumesRead}}siteUrl}}""",
+            force = true
+        )
+    }
+
+    suspend fun getUserProfile(username: String): Query.UserProfileResponse? {
+        val id = getUserId(username) ?: return null
+        return getUserProfile(id)
+    }
+
+    private suspend fun getUserId(username: String): Int? {
+        return executeQuery<Query.User>(
+            """{User(name:"$username"){id}}""",
+            force = true
+        )?.data?.user?.id
+    }
+
+    suspend fun getUserStatistics(id: Int, sort: String = "ID"): Query.StatisticsResponse? {
+        return executeQuery<Query.StatisticsResponse>(
+            """{User(id:$id){id name mediaListOptions{scoreFormat}statistics{anime{...UserStatistics}manga{...UserStatistics}}}}fragment UserStatistics on UserStatistics{count meanScore standardDeviation minutesWatched episodesWatched chaptersRead volumesRead formats(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds format}statuses(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds status}scores(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds score}lengths(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds length}releaseYears(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds releaseYear}startYears(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds startYear}genres(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds genre}tags(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds tag{id name}}countries(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds country}voiceActors(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds voiceActor{id name{first middle last full native alternative userPreferred}}characterIds}staff(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds staff{id name{first middle last full native alternative userPreferred}}}studios(sort:$sort){count meanScore minutesWatched chaptersRead mediaIds studio{id name isAnimationStudio}}}""",
+            force = true,
+            show = true
+        )
+    }
+
+    private fun userFavMediaQuery(anime: Boolean, id: Int): String {
+        return """User(id:${id}){id favourites{${if (anime) "anime" else "manga"}(page:1){$standardPageInformation edges{favouriteOrder node{id idMal isAdult mediaListEntry{ progress private score(format:POINT_100) status } chapters isFavourite format episodes nextAiringEpisode{episode}meanScore isFavourite format startDate{year month day} title{english romaji userPreferred}type status(version:2)bannerImage coverImage{large}}}}}}"""
+    }
+
+    suspend fun userFollowing(id: Int): List<ani.dantotsu.connections.anilist.api.User> {
+        val result = mutableListOf<ani.dantotsu.connections.anilist.api.User>()
+        var page = 1
+        var hasNextPage = true
+        while (hasNextPage) {
+            val response = executeQuery<Query.Page>(
+                """{Page(page:$page,perPage:50) {$standardPageInformation following(userId:${id},sort:[USERNAME]){id name isFollowing isFollower avatar{large medium}bannerImage}}}""",
+                force = true
+            )
+            val pageData = response?.data?.page
+            pageData?.following?.let { result.addAll(it) }
+            hasNextPage = pageData?.pageInfo?.hasNextPage == true
+            page++
+        }
+        return result
+    }
+
+    suspend fun userFollowers(id: Int): List<ani.dantotsu.connections.anilist.api.User> {
+        val result = mutableListOf<ani.dantotsu.connections.anilist.api.User>()
+        var page = 1
+        var hasNextPage = true
+        while (hasNextPage) {
+            val response = executeQuery<Query.Page>(
+                """{Page(page:$page,perPage:50) {$standardPageInformation followers(userId:${id},sort:[USERNAME]){id name isFollowing isFollower avatar{large medium}bannerImage}}}""",
+                force = true
+            )
+            val pageData = response?.data?.page
+            pageData?.followers?.let { result.addAll(it) }
+            hasNextPage = pageData?.pageInfo?.hasNextPage == true
+            page++
+        }
+        return result
+    }
+
+    suspend fun initProfilePage(id: Int): Query.ProfilePageMedia? {
+        return executeQuery<Query.ProfilePageMedia>(
+            """{
+            favoriteAnime:${userFavMediaQuery(true, id)}
+            favoriteManga:${userFavMediaQuery(false, id)}
+            }""".prepare(), force = true
+        )
+    }
+
+
+    suspend fun getNotifications(
+        id: Int,
+        page: Int = 1,
+        resetNotification: Boolean = true,
+        type: Boolean? = null
+    ): NotificationResponse? {
+        val typeIn = "type_in:[AIRING,MEDIA_MERGE,MEDIA_DELETION,MEDIA_DATA_CHANGE,RELATED_MEDIA_ADDITION]"
+        val reset = if (resetNotification) "true" else "false"
+        val res = executeQuery<NotificationResponse>(
+            """{User(id:$id){unreadNotificationCount}Page(page:$page,perPage:$ITEMS_PER_PAGE){$standardPageInformation notifications(resetNotificationCount:$reset , ${if (type == true) typeIn else ""}){__typename...on AiringNotification{id,type,animeId,episode,contexts,createdAt,media{id,title{romaji,english,native,userPreferred}bannerImage,coverImage{medium,large}},}...on FollowingNotification{id,userId,type,context,createdAt,user{id,name,bannerImage,avatar{medium,large,}}}...on ActivityMessageNotification{id,userId,type,activityId,context,createdAt,message{id}user{id,name,bannerImage,avatar{medium,large,}}}...on ActivityMentionNotification{id,userId,type,activityId,context,createdAt,activity{__typename}user{id,name,bannerImage,avatar{medium,large,}}}...on ActivityReplyNotification{id,userId,type,activityId,context,createdAt,activity{__typename}user{id,name,bannerImage,avatar{medium,large,}}}...on ActivityReplySubscribedNotification{id,userId,type,activityId,context,createdAt,activity{__typename}user{id,name,bannerImage,avatar{medium,large,}}}...on ActivityLikeNotification{id,userId,type,activityId,context,createdAt,activity{__typename}user{id,name,bannerImage,avatar{medium,large,}}}...on ActivityReplyLikeNotification{id,userId,type,activityId,context,createdAt,activity{__typename}user{id,name,bannerImage,avatar{medium,large,}}}...on ThreadCommentMentionNotification{id,userId,type,commentId,context,createdAt,thread{id}comment{id}user{id,name,bannerImage,avatar{medium,large,}}}...on ThreadCommentReplyNotification{id,userId,type,commentId,context,createdAt,thread{id}comment{id}user{id,name,bannerImage,avatar{medium,large,}}}...on ThreadCommentSubscribedNotification{id,userId,type,commentId,context,createdAt,thread{id}comment{id}user{id,name,bannerImage,avatar{medium,large,}}}...on ThreadCommentLikeNotification{id,userId,type,commentId,context,createdAt,thread{id}comment{id}user{id,name,bannerImage,avatar{medium,large,}}}...on ThreadLikeNotification{id,userId,type,threadId,context,createdAt,thread{id}comment{id}user{id,name,bannerImage,avatar{medium,large,}}}...on RelatedMediaAdditionNotification{id,type,context,createdAt,media{id,title{romaji,english,native,userPreferred}bannerImage,coverImage{medium,large}}}...on MediaDataChangeNotification{id,type,mediaId,context,reason,createdAt,media{id,title{romaji,english,native,userPreferred}bannerImage,coverImage{medium,large}}}...on MediaMergeNotification{id,type,mediaId,deletedMediaTitles,context,reason,createdAt,media{id,title{romaji,english,native,userPreferred}bannerImage,coverImage{medium,large}}}...on MediaDeletionNotification{id,type,deletedMediaTitle,context,reason,createdAt,}}}}""",
+            force = true
+        )
+        if (res != null && resetNotification) {
+            val commentNotifications = PrefManager.getVal(PrefName.UnreadCommentNotifications, 0)
+            res.data.user.unreadNotificationCount += commentNotifications
+            PrefManager.setVal(PrefName.UnreadCommentNotifications, 0)
+            Anilist.unreadNotificationCount = 0
+        }
+        return res
+    }
+
+    suspend fun getFeed(
+        userId: Int?,
+        global: Boolean = false,
+        page: Int = 1,
+        activityId: Int? = null
+    ): FeedResponse? {
+        val filter = if (activityId != null) "id:$activityId,"
+        else if (userId != null) "userId:$userId,"
+        else if (global) "isFollowing:false,hasRepliesOrTypeText:true,"
+        else "isFollowing:true,"
+        val typeIn =
+            if (filter == "isFollowing:true,") "type_in:[TEXT,ANIME_LIST,MANGA_LIST,MEDIA_LIST]," else ""
+        return executeQuery<FeedResponse>(
+            """{Page(page:$page,perPage:$ITEMS_PER_PAGE){pageInfo{hasNextPage}activities(${filter}${typeIn}sort:ID_DESC){__typename ... on TextActivity{id userId type replyCount text(asHtml:true)siteUrl isLocked isSubscribed likeCount isLiked isPinned createdAt user{id name bannerImage avatar{medium large}}replies{id userId activityId text(asHtml:true)likeCount isLiked createdAt user{id name bannerImage avatar{medium large}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}... on ListActivity{id userId type replyCount status progress siteUrl isLocked isSubscribed likeCount isLiked isPinned createdAt user{id name bannerImage avatar{medium large}}media{id title{english romaji native userPreferred}bannerImage coverImage{medium large}isAdult}replies{id userId activityId text(asHtml:true)likeCount isLiked createdAt user{id name bannerImage avatar{medium large}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}... on MessageActivity{id recipientId messengerId type replyCount likeCount message(asHtml:true)isLocked isSubscribed isLiked isPrivate siteUrl createdAt recipient{id name bannerImage avatar{medium large}}messenger{id name bannerImage avatar{medium large}}replies{id userId activityId text(asHtml:true)likeCount isLiked createdAt user{id name bannerImage avatar{medium large}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}}}}""",
+            force = true
+        )
+    }
+
+    suspend fun getReplies(
+        activityId: Int,
+        page: Int = 1
+    ): ReplyResponse? {
+        val query =
+            """{Page(page:$page,perPage:50){activityReplies(activityId:$activityId){id userId activityId text(asHtml:true)likeCount isLiked createdAt user{id name bannerImage avatar{medium large}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}}}"""
+        return executeQuery(query, force = true)
+    }
+
+    private fun statusActivityFields(): String {
+        return """__typename ... on TextActivity{id userId type replyCount text(asHtml:true)siteUrl isLocked isSubscribed likeCount isLiked createdAt user{id name bannerImage avatar{medium large}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}... on ListActivity{id userId type replyCount status progress siteUrl isLocked isSubscribed likeCount isLiked isPinned createdAt user{id name bannerImage avatar{medium large}}media{id isAdult title{english romaji native userPreferred}bannerImage coverImage{large extraLarge}}likes{id name isFollowing isFollower bannerImage avatar{medium large}}}... on MessageActivity{id type createdAt likes{id name isFollowing isFollower bannerImage avatar{medium large}}}"""
+    }
+
+    private fun status(page: Int = 1): String {
+        return """Page(page:$page,perPage:25){activities(isFollowing: true,type_in:[TEXT,ANIME_LIST,MANGA_LIST,MEDIA_LIST],sort:ID_DESC){${statusActivityFields()}}}"""
+    }
+
+    private fun myStatus(): String {
+        val uid = Anilist.userid ?: return ""
+        return """MyActivities:Page(page:1,perPage:25){activities(userId:$uid,type_in:[TEXT,ANIME_LIST,MANGA_LIST,MEDIA_LIST],sort:ID_DESC){${statusActivityFields()}}}"""
+    }
+
+    suspend fun getUpcomingAnime(id: String): List<Media> {
+        val res = executeQuery<Query.MediaListCollection>(
+            """{MediaListCollection(userId:$id,type:ANIME){lists{name entries{media{id,type, isFavourite,title{userPreferred,romaji}coverImage{medium}nextAiringEpisode{episode,timeUntilAiring}}}}}}""",
+            force = true
+        )
+        val list = mutableListOf<Media>()
+        res?.data?.mediaListCollection?.lists?.forEach { listEntry ->
+            listEntry.entries?.forEach { entry ->
+                entry.media?.nextAiringEpisode?.timeUntilAiring?.let {
+                    list.add(Media(entry.media!!))
+                }
+            }
+        }
+        return list.sortedBy { it.timeUntilAiring }
+            .distinctBy { it.id }
+            .filter { it.timeUntilAiring != null }
+    }
+
+    suspend fun isUserFav(
+        favType: AnilistMutations.FavType,
+        id: Int
+    ): Boolean {   //anilist isFavourite is broken, so we need to check it manually
+        val res = getUserProfile(Anilist.userid ?: return false)
+        return when (favType) {
+            AnilistMutations.FavType.ANIME -> res?.data?.user?.favourites?.anime?.nodes?.any { it.id == id }
+                ?: false
+
+            AnilistMutations.FavType.MANGA -> res?.data?.user?.favourites?.manga?.nodes?.any { it.id == id }
+                ?: false
+
+            AnilistMutations.FavType.CHARACTER -> res?.data?.user?.favourites?.characters?.nodes?.any { it.id == id }
+                ?: false
+
+            AnilistMutations.FavType.STAFF -> res?.data?.user?.favourites?.staff?.nodes?.any { it.id == id }
+                ?: false
+
+            AnilistMutations.FavType.STUDIO -> res?.data?.user?.favourites?.studios?.nodes?.any { it.id == id }
+                ?: false
+        }
+    }
+
+    suspend fun getThreads(
+        categoryId: Int? = null,
+        mediaCategoryId: Int? = null,
+        search: String? = null,
+        sort: String = "ID_DESC",
+        page: Int = 1
+    ): ani.dantotsu.connections.anilist.api.ForumThreadsResponse? {
+        val categoryArg = if (categoryId != null) ", categoryId: $categoryId" else ""
+        val mediaCategoryArg = if (mediaCategoryId != null) ", mediaCategoryId: $mediaCategoryId" else ""
+        val searchArg = if (!search.isNullOrBlank()) ", search: \"$search\"" else ""
+        val query = """{Page(page:$page,perPage:25){pageInfo{hasNextPage currentPage}threads(sort:[$sort] $categoryArg $mediaCategoryArg $searchArg){id title body userId replyCount viewCount isLocked isSticky isSubscribed isLiked likeCount createdAt updatedAt siteUrl user{id name avatar{medium large}bannerImage}categories{id name}mediaCategories{id title{userPreferred}coverImage{medium}}}}}"""
+        return executeQuery(query, force = true)
+    }
+
+    suspend fun getThreadDetails(threadId: Int): ani.dantotsu.connections.anilist.api.ForumThreadsResponse? {
+        val query = """{Thread(id:$threadId){id title body userId replyCount viewCount isLocked isSticky isSubscribed isLiked likeCount createdAt updatedAt siteUrl user{id name avatar{medium large}bannerImage}categories{id name}mediaCategories{id title{userPreferred}coverImage{medium}}}}"""
+        return executeQuery(query, force = true)
+    }
+
+    suspend fun getThreadComments(threadId: Int, page: Int = 1): ani.dantotsu.connections.anilist.api.ThreadCommentsResponse? {
+        val query = """{Page(page:$page,perPage:25){pageInfo{hasNextPage currentPage}threadComments(threadId:$threadId){id userId threadId comment isLocked isLiked likeCount createdAt updatedAt siteUrl user{id name avatar{medium large}bannerImage}childComments}}}"""
+        return executeQuery(query, force = true)
+    }
+
+    suspend fun getMediaCharacters(mediaId: Int, page: Int = 1): Query.Media? {
+        val query = """{Media(id:$mediaId){characters(sort:[ROLE,FAVOURITES_DESC],page:$page,perPage:25){pageInfo{hasNextPage currentPage}edges{role voiceActors{id name{userPreferred}image{medium large}languageV2}node{id name{userPreferred}image{medium large}isFavourite}}}}}"""
+        return executeQuery(query, force = true)
+    }
+
+    suspend fun getMediaStaff(mediaId: Int, page: Int = 1): Query.Media? {
+        val query = """{Media(id:$mediaId){staff(sort:[RELEVANCE,ID],page:$page,perPage:25){pageInfo{hasNextPage currentPage}edges{role node{id name{userPreferred}image{medium large}}}}}}"""
+        return executeQuery(query, force = true)
+    }
+
+
 }
 
 @kotlinx.serialization.Serializable
