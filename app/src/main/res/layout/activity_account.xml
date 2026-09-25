@@ -54,7 +54,7 @@
                     android:layout_height="110dp"
                     android:background="?attr/colorPrimaryContainer"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/bg_gradient"
+                    android:src="@drawable/bg_account_banner"
                     android:contentDescription="Profile banner" />
 
                 <LinearLayout
