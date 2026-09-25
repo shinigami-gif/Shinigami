@@ -29,6 +29,7 @@ class AccountActivity : AppCompatActivity() {
         binding = ActivityAccountBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.includedNavbar.navbar.visibility = View.VISIBLE
         binding.includedNavbar.navbar.selectTabAt(4)
         binding.includedNavbar.navbar.setOnTabSelectListener(
             object : nl.joery.animatedbottombar.AnimatedBottomBar.OnTabSelectListener {
