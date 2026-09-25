@@ -5,12 +5,12 @@
     android:layout_height="wrap_content"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <TextView
         android:id="@+id/scheduleTime"
-        android:layout_width="70dp"
+        android:layout_width="54dp"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:fontFamily="@font/poppins_bold"
@@ -43,8 +43,8 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/scheduleCard"
         android:layout_width="0dp"
-        android:layout_height="118dp"
-        android:layout_marginStart="12dp"
+        android:layout_height="108dp"
+        android:layout_marginStart="8dp"
         app:cardBackgroundColor="?attr/colorSurface"
         app:cardCornerRadius="16dp"
         app:strokeColor="?attr/colorOutline"
@@ -57,20 +57,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:padding="7dp">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/scheduleCover"
                 android:transitionName="mediaCover"
-                android:layout_width="72dp"
-                android:layout_height="102dp"
+                android:layout_width="66dp"
+                android:layout_height="94dp"
                 android:scaleType="centerCrop"
                 app:shapeAppearanceOverlay="@style/roundedImageView" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
@@ -116,7 +116,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="88dp"
+                android:layout_width="72dp"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|end"
                 android:orientation="vertical">
@@ -126,9 +126,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/item_score"
-                    android:paddingStart="9dp"
+                    android:paddingStart="7dp"
                     android:paddingTop="5dp"
-                    android:paddingEnd="9dp"
+                    android:paddingEnd="7dp"
                     android:paddingBottom="5dp"
                     android:textColor="?attr/colorOnPrimary"
                     android:textSize="10sp" />
