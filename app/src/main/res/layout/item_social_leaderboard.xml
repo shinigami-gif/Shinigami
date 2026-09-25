@@ -20,10 +20,41 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
 
-            <TextView android:id="@+id/lbRank2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2" android:textSize="18sp"/>
-            <com.google.android.material.imageview.ShapeableImageView android:id="@+id/lbAvatar2" android:layout_width="58dp" android:layout_height="58dp" app:shapeAppearanceOverlay="@style/roundedImageView"/>
-            <TextView android:id="@+id/lbName2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:maxLines="1" android:textSize="10sp"/>
-            <TextView android:id="@+id/lbPoints2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="9sp"/>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/lbAvatar2"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:layout_marginBottom="2dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/roundedImageView"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp"/>
+
+            <TextView
+                android:id="@+id/lbName2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textSize="10sp"/>
+
+            <TextView
+                android:id="@+id/lbPoints2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="9sp"/>
+
+            <TextView
+                android:id="@+id/lbRank2"
+                android:layout_width="64dp"
+                android:layout_height="42dp"
+                android:layout_marginTop="3dp"
+                android:background="?attr/colorSurfaceVariant"
+                android:gravity="center"
+                android:text="2"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -33,10 +64,43 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
 
-            <TextView android:id="@+id/lbRank1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1" android:textSize="22sp"/>
-            <com.google.android.material.imageview.ShapeableImageView android:id="@+id/lbAvatar1" android:layout_width="68dp" android:layout_height="68dp" app:shapeAppearanceOverlay="@style/roundedImageView"/>
-            <TextView android:id="@+id/lbName1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:maxLines="1" android:textSize="10sp"/>
-            <TextView android:id="@+id/lbPoints1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="9sp"/>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/lbAvatar1"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:layout_marginBottom="2dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/roundedImageView"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="2dp"/>
+
+            <TextView
+                android:id="@+id/lbName1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/lbPoints1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="9sp"/>
+
+            <TextView
+                android:id="@+id/lbRank1"
+                android:layout_width="72dp"
+                android:layout_height="54dp"
+                android:layout_marginTop="3dp"
+                android:background="?attr/colorPrimaryContainer"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="?attr/colorOnPrimaryContainer"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -46,10 +110,41 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
 
-            <TextView android:id="@+id/lbRank3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3" android:textSize="18sp"/>
-            <com.google.android.material.imageview.ShapeableImageView android:id="@+id/lbAvatar3" android:layout_width="58dp" android:layout_height="58dp" app:shapeAppearanceOverlay="@style/roundedImageView"/>
-            <TextView android:id="@+id/lbName3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:maxLines="1" android:textSize="10sp"/>
-            <TextView android:id="@+id/lbPoints3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="9sp"/>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/lbAvatar3"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:layout_marginBottom="2dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/roundedImageView"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp"/>
+
+            <TextView
+                android:id="@+id/lbName3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textSize="10sp"/>
+
+            <TextView
+                android:id="@+id/lbPoints3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="9sp"/>
+
+            <TextView
+                android:id="@+id/lbRank3"
+                android:layout_width="64dp"
+                android:layout_height="38dp"
+                android:layout_marginTop="3dp"
+                android:background="?attr/colorSurfaceVariant"
+                android:gravity="center"
+                android:text="3"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
         </LinearLayout>
     </LinearLayout>
 
