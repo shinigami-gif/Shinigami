@@ -1,4 +1,5 @@
 name: Build APK and Notify Discord
+# Shinigami clean-build trigger
 
 on:
   push:
