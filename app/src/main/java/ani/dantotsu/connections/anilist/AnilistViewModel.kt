@@ -467,7 +467,7 @@ class AnilistAnimeViewModel : ViewModel() {
             loadAllFromMAL()
             return
         }
-        val list = Anilist.query.loadAnimeList(onList)
+        val list = Anilist.metadata.loadAnimeHomeLists()
         updated.postValue(list["recentUpdates"])
         popularMovies.postValue(list["trendingMovies"])
         topRatedAnime.postValue(list["topRated"])
