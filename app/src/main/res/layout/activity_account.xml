@@ -4,57 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="96dp">
-
-        <TextView
-            android:id="@+id/accountTitle"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingTop="16dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="4dp"
-            android:text="Account"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingBottom="112dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="16dp"
-            android:text="Manage your account and preferences"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="14sp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp">
-
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="190dp">
 
                 <ImageView
                     android:id="@+id/accountBanner"
                     android:layout_width="match_parent"
-                    android:layout_height="110dp"
+                    android:layout_height="190dp"
                     android:background="?attr/colorPrimaryContainer"
                     android:scaleType="centerCrop"
                     android:src="@drawable/bg_account_banner"
@@ -62,167 +31,330 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:background="?attr/colorPrimary" />
+                    android:layout_height="190dp"
+                    android:background="@drawable/bg_profile_header_gradient" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:layout_gravity="bottom"
+                    android:orientation="vertical"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="18dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/accountTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Account"
+                                android:textColor="@android:color/white"
+                                android:textSize="28sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Manage your account and preferences"
+                                android:textColor="#D9FFFFFF"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/accountSettingsButton"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="Settings"
+                            android:src="@drawable/ic_round_settings_24"
+                            app:tint="@android:color/white" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="-22dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/accountAvatar"
+                            android:layout_width="72dp"
+                            android:layout_height="72dp"
+                            android:background="?attr/colorSurfaceVariant"
+                            android:scaleType="centerCrop"
+                            android:contentDescription="Profile picture" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="14dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/accountUsername"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="19sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/accountBio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/editProfileIcon"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="Edit Profile"
+                            android:src="@drawable/ic_round_edit_24"
+                            app:tint="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/editProfileButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="10dp"
+                        android:text="Edit Profile"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
 
                     <ImageView
-                        android:id="@+id/accountAvatar"
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:scaleType="centerCrop"
-                        android:contentDescription="Profile picture" />
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_round_star_24"
+                        app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="14dp"
-                        android:orientation="vertical">
+                        android:layout_marginStart="10dp">
 
-                        <TextView
-                            android:id="@+id/accountUsername"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="?attr/colorOnSurface"
-                            android:textSize="19sp"
-                            android:textStyle="bold" />
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/accountBio"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:textSize="13sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Upgrade to Premium"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Unlock more features for a better anime experience"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:textSize="11sp" />
+                        </LinearLayout>
                     </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_round_chevron_right_24"
+                        app:tint="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="20dp"
+                android:text="Statistics"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="82dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:id="@+id/statAnime"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0&#10;Anime Watched"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="12sp"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="82dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:id="@+id/statEpisodes"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0&#10;Episodes"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="12sp"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="82dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:id="@+id/statFavorites"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0&#10;Favorites"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="12sp"/>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="20dp"
+                android:text="Preferences"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:orientation="vertical">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/editProfileButton"
+                    android:id="@+id/profileOption"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:text="Edit Profile"
-                    app:cornerRadius="14dp" />
+                    android:layout_height="52dp"
+                    android:gravity="start|center_vertical"
+                    android:text="Profile"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.Material3.Button.TextButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/appearanceOption"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:gravity="start|center_vertical"
+                    android:text="Appearance"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.Material3.Button.TextButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/notificationsOption"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:gravity="start|center_vertical"
+                    android:text="Notifications"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.Material3.Button.TextButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settingsOption"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:gravity="start|center_vertical"
+                    android:text="Settings"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.Material3.Button.TextButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/aboutOption"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:gravity="start|center_vertical"
+                    android:text="About Shinigami"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.Material3.Button.TextButton"/>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="22dp"
-            android:layout_marginEnd="20dp"
-            android:text="Statistics"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="17sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/statAnime"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="0
-Anime Watched"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/statEpisodes"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="0
-Episodes"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/statFavorites"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="0
-Favorites"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="13sp" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="8dp"
-            android:text="Preferences"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="17sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/profileOption"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:gravity="start|center_vertical"
-            android:paddingStart="20dp"
-            android:text="Profile"
-            android:textColor="?attr/colorOnSurface" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/appearanceOption"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:gravity="start|center_vertical"
-            android:paddingStart="20dp"
-            android:text="Appearance"
-            android:textColor="?attr/colorOnSurface" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/notificationsOption"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:gravity="start|center_vertical"
-            android:paddingStart="20dp"
-            android:text="Notifications"
-            android:textColor="?attr/colorOnSurface" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/settingsOption"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:gravity="start|center_vertical"
-            android:paddingStart="20dp"
-            android:text="Settings"
-            android:textColor="?attr/colorOnSurface" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/aboutOption"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:gravity="start|center_vertical"
-            android:paddingStart="20dp"
-            android:text="About Shinigami"
-            android:textColor="?attr/colorOnSurface" />
-
         </LinearLayout>
     </ScrollView>
 
