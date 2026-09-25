@@ -46,6 +46,12 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="6dp"
+                android:background="?attr/colorPrimary" />
+
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/socialFeaturePager"
                 android:layout_width="match_parent"
@@ -89,15 +95,15 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/socialAnimeChatCard"
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="58dp"
                     android:layout_margin="2dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="?attr/colorSurface"
                     app:cardCornerRadius="12dp"
                     app:strokeColor="?attr/colorOutline"
                     app:strokeWidth="1dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="3dp">
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_round_person_24" app:tint="?attr/colorPrimary"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="2dp">
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_round_person_24" app:tint="?attr/colorPrimary"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:fontFamily="@font/poppins_semi_bold" android:text="Anime Chat" android:textColor="?attr/colorOnSurface" android:textSize="10sp"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Discuss anime and episodes" android:textColor="?attr/colorOnSurface" android:alpha="0.65" android:textSize="7sp"/>
                     </LinearLayout>
@@ -114,7 +120,7 @@
                     app:strokeColor="?attr/colorPrimary"
                     app:strokeWidth="1dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="3dp">
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_round_star_24" app:tint="?attr/colorPrimary"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="18dp" android:src="@drawable/ic_round_star_24" app:tint="?attr/colorPrimary"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:fontFamily="@font/poppins_semi_bold" android:text="Leaderboard" android:textColor="?attr/colorOnSurface" android:textSize="10sp"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="See top fans and ranks" android:textColor="?attr/colorOnSurface" android:alpha="0.65" android:textSize="7sp"/>
                     </LinearLayout>
