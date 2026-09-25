@@ -49,16 +49,16 @@
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/socialFeaturePager"
                 android:layout_width="match_parent"
-                android:layout_height="188dp"
-                android:layout_marginTop="10dp"
+                android:layout_height="176dp"
+                android:layout_marginTop="8dp"
                 android:clipChildren="false"
                 android:clipToPadding="false" />
 
             <LinearLayout
                 android:id="@+id/socialFeatureDots"
                 android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:layout_marginTop="6dp"
+                android:layout_height="6dp"
+                android:layout_marginTop="4dp"
                 android:gravity="center"
                 android:orientation="horizontal" />
 
@@ -66,21 +66,21 @@
                 android:id="@+id/socialQuickActions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="6dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/socialGlobalChatCard"
                     android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:layout_margin="3dp"
+                    android:layout_height="72dp"
+                    android:layout_margin="2dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="?attr/colorSurface"
-                    app:cardCornerRadius="14dp"
+                    app:cardCornerRadius="12dp"
                     app:strokeColor="?attr/colorOutline"
                     app:strokeWidth="1dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="4dp">
-                        <ImageView android:layout_width="21dp" android:layout_height="21dp" android:src="@drawable/ic_round_comment_24" app:tint="?attr/colorPrimary"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="3dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_round_comment_24" app:tint="?attr/colorPrimary"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:fontFamily="@font/poppins_semi_bold" android:text="Global Chat" android:textColor="?attr/colorOnSurface" android:textSize="10sp"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Chat with anime fans" android:textColor="?attr/colorOnSurface" android:alpha="0.65" android:textSize="7sp"/>
                     </LinearLayout>
@@ -89,15 +89,15 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/socialAnimeChatCard"
                     android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:layout_margin="3dp"
+                    android:layout_height="72dp"
+                    android:layout_margin="2dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="?attr/colorSurface"
-                    app:cardCornerRadius="14dp"
+                    app:cardCornerRadius="12dp"
                     app:strokeColor="?attr/colorOutline"
                     app:strokeWidth="1dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="4dp">
-                        <ImageView android:layout_width="21dp" android:layout_height="21dp" android:src="@drawable/ic_round_person_24" app:tint="?attr/colorPrimary"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="3dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_round_person_24" app:tint="?attr/colorPrimary"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:fontFamily="@font/poppins_semi_bold" android:text="Anime Chat" android:textColor="?attr/colorOnSurface" android:textSize="10sp"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Discuss anime and episodes" android:textColor="?attr/colorOnSurface" android:alpha="0.65" android:textSize="7sp"/>
                     </LinearLayout>
@@ -106,15 +106,15 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/socialLeaderboardCard"
                     android:layout_width="0dp"
-                    android:layout_height="76dp"
-                    android:layout_margin="3dp"
+                    android:layout_height="72dp"
+                    android:layout_margin="2dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="?attr/colorSurface"
-                    app:cardCornerRadius="14dp"
+                    app:cardCornerRadius="12dp"
                     app:strokeColor="?attr/colorPrimary"
                     app:strokeWidth="1dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="4dp">
-                        <ImageView android:layout_width="21dp" android:layout_height="21dp" android:src="@drawable/ic_round_star_24" app:tint="?attr/colorPrimary"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="3dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_round_star_24" app:tint="?attr/colorPrimary"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:fontFamily="@font/poppins_semi_bold" android:text="Leaderboard" android:textColor="?attr/colorOnSurface" android:textSize="10sp"/>
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="See top fans and ranks" android:textColor="?attr/colorOnSurface" android:alpha="0.65" android:textSize="7sp"/>
                     </LinearLayout>
@@ -125,9 +125,16 @@
                 android:id="@+id/socialLeaderboardHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_round_star_24"
+                    app:tint="?attr/colorPrimary" />
 
                 <TextView
                     android:id="@+id/socialLeaderboardTitle"
@@ -151,18 +158,18 @@
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/socialLeaderboardPager"
                 android:layout_width="match_parent"
-                android:layout_height="292dp"
-                android:layout_marginTop="6dp" />
+                android:layout_height="244dp"
+                android:layout_marginTop="4dp" />
 
             <TextView
                 android:id="@+id/socialActivityTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:fontFamily="@font/poppins_bold"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/poppins_semi_bold"
                 android:text="Friend Activity                         See all  ›"
                 android:textColor="?attr/colorOnBackground"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/socialActivityList"
@@ -175,16 +182,16 @@
                 android:id="@+id/socialFriendsTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:fontFamily="@font/poppins_bold"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/poppins_semi_bold"
                 android:text="Active Friends"
                 android:textColor="?attr/colorOnBackground"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/socialFriendsList"
                 android:layout_width="match_parent"
-                android:layout_height="116dp"
+                android:layout_height="104dp"
                 android:nestedScrollingEnabled="false"
                 android:orientation="horizontal"
                 tools:listitem="@layout/item_social_friend" />
@@ -193,11 +200,11 @@
                 android:id="@+id/socialMessagesTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/poppins_bold"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/poppins_semi_bold"
                 android:text="Recent Messages                         See all  ›"
                 android:textColor="?attr/colorOnBackground"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/socialMessagesList"
