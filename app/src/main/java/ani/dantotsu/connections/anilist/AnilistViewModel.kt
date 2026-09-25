@@ -760,7 +760,7 @@ class AnilistSearch : ViewModel() {
             return
         }
         aniMangaResult.postValue(
-            Anilist.metadata.searchAnime(
+            Anilist.query.searchAniManga(
                 r.page,
                 r.perPage,
                 r.search,
@@ -967,7 +967,7 @@ class AnilistSearch : ViewModel() {
             return
         }
         aniMangaResult.postValue(
-            Anilist.metadata.searchAnime(
+            Anilist.query.searchAniManga(
                 r.page + 1,
                 r.perPage,
                 r.search,
