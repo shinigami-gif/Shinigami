@@ -89,19 +89,26 @@ class CalendarActivity : AppCompatActivity() {
                         0 -> {
                             startActivity(android.content.Intent(this@CalendarActivity, MainActivity::class.java)
                                 .putExtra("goToHome", true))
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                             finish()
                         }
                         1 -> Unit
                         2 -> startActivity(android.content.Intent(this@CalendarActivity, FeedActivity::class.java))
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                            finish()
                         3 -> startActivity(
                             android.content.Intent(this@CalendarActivity, ListActivity::class.java)
                                 .putExtra("anime", true)
                                 .putExtra("userId", Anilist.userid)
                         )
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        finish()
                         4 -> startActivity(
                             android.content.Intent(this@CalendarActivity, ProfileActivity::class.java)
                                 .putExtra("userId", Anilist.userid)
                         )
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        finish()
                     }
                     if (newIndex != 1) {
                         binding.calendarNavbar.navbar.selectTabAt(1, false)
