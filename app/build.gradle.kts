@@ -65,7 +65,7 @@ android {
         abi {
             isEnable = true
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            val fdroidAbi = providers.gradleProperty("fdroidAbi").orNull\n            if (fdroidAbi != null) {\n                include(fdroidAbi)\n            } else {\n                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")\n            }
             // F-Droid builds are consumed as per-ABI APKs; Google keeps the universal APK.\n            isUniversalApk = !providers.gradleProperty("fdroid").isPresent
         }
     }
