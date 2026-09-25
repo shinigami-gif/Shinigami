@@ -9,7 +9,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("shinigami.backend.ApplicationKt")
+    mainClass.set("shinigami.backend.MainKt")
 }
 
 dependencies {
