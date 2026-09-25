@@ -36,7 +36,7 @@ import java.util.Locale
 class CalendarActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCalendarBinding
     private val scope = lifecycleScope
-    private var selectedTabIdx = 0
+    private var selectedTabIdx = 1
     private var showOnlyLibrary = false
     private var showOnlyDubbed = false
     private var currentCalendar: Map<String, MutableList<Media>> = emptyMap()
@@ -124,6 +124,9 @@ class CalendarActivity : AppCompatActivity() {
         binding.calendarDays.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 selectedTabIdx = tab?.position ?: 0
+                binding.calendarDays.post {
+                    binding.calendarDays.setScrollPosition(selectedTabIdx, 0f, true)
+                }
                 updateSummary()
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
@@ -145,8 +148,11 @@ class CalendarActivity : AppCompatActivity() {
                     tab.text = formatDayTab(keys[position])
                 }.attach()
 
-                binding.calendarViewPager.setCurrentItem(savedTab, false)
-                binding.calendarDays.getTabAt(savedTab)?.select()
+                val initialTab = 1.coerceIn(0, keys.lastIndex)
+                selectedTabIdx = initialTab
+                binding.calendarViewPager.setCurrentItem(initialTab, false)
+                binding.calendarDays.getTabAt(initialTab)?.select()
+                binding.calendarDays.setScrollPosition(initialTab, 0f, true)
                 updateSummary()
             }
         }
