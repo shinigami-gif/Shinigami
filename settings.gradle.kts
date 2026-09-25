@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Dantotsu"
 include(":app")
+include(":backend")
