@@ -73,7 +73,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.joery.animatedbottombar.AnimatedBottomBar
-import tachiyomi.core.util.lang.launchIO
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.Serializable
@@ -509,11 +508,6 @@ class MainActivity : AppCompatActivity() {
             }
             val isRepoHost = uri.host == "add-repo" || uri.host == "extension-store"
             val schemeLower = uri.scheme?.lowercase() ?: ""
-            if (schemeLower == "magnet" || uri.toString().endsWith(".torrent", ignoreCase = true) || intent.type == "application/x-bittorrent") {
-                ani.dantotsu.torrent.DirectTorrentBottomSheet.newInstance(uri.toString())
-                    .show(supportFragmentManager, "DirectTorrentBottomSheet")
-                return
-            }
             if (isRepoHost && (schemeLower == "tachiyomi" || schemeLower == "aniyomi" || schemeLower == "novelyomi" || schemeLower == "mihon" || schemeLower == "dantotsu")) {
                 val url = uri.getQueryParameter("url") ?: throw Exception("No url for repo import")
                 val (prefName, name) = when (schemeLower) {
