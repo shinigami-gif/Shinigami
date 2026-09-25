@@ -106,9 +106,7 @@ class FeedActivity : AppCompatActivity() {
     private fun setupFeaturePager() {
         binding.socialFeaturePager.adapter = SocialFeatureAdapter(
             listOf(
-                SocialFeature("Watch Together", "Create a room, invite friends, and enjoy anime together."),
-                SocialFeature("Global Chat", "Talk with anime fans around the world."),
-                SocialFeature("Anime Chat", "Discuss episodes, characters, and seasonal shows.")
+                SocialFeature("Watch Together", "Create a room, invite friends, and enjoy anime together.")
             )
         )
         binding.socialFeaturePager.offscreenPageLimit = 3
@@ -154,9 +152,7 @@ class FeedActivity : AppCompatActivity() {
                         "Create a room, invite friends, and enjoy anime together.",
                         activities.firstOrNull()?.media?.bannerImage
                             ?: activities.firstOrNull()?.media?.coverImage?.large
-                    ),
-                    SocialFeature("Global Chat", "Chat with anime fans around the world."),
-                    SocialFeature("Anime Chat", "Discuss anime, episodes, and more.")
+                    )
                 )
             )
             binding.socialLeaderboardPager.adapter = SocialLeaderboardAdapter(leaderboardPages)
