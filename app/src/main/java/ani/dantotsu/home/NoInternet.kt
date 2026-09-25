@@ -20,10 +20,8 @@ import ani.dantotsu.R
 import ani.dantotsu.ZoomOutPageTransformer
 import ani.dantotsu.databinding.ActivityNoInternetBinding
 import ani.dantotsu.download.anime.OfflineAnimeFragment
-import ani.dantotsu.download.manga.OfflineMangaFragment
 import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
-import ani.dantotsu.offline.LocalFragment
 import ani.dantotsu.offline.OfflineFragment
 import ani.dantotsu.selectedOption
 import ani.dantotsu.settings.saving.PrefManager
@@ -109,13 +107,12 @@ class NoInternet : AppCompatActivity() {
     private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
         FragmentStateAdapter(fragmentManager, lifecycle) {
 
-        override fun getItemCount(): Int = 3
+        override fun getItemCount(): Int = 2
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> OfflineAnimeFragment()
-                1 -> LocalFragment()
-                2 -> OfflineMangaFragment()
+                1 -> OfflineFragment()
                 else -> OfflineFragment()
             }
         }
