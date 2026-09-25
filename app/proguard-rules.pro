@@ -170,6 +170,8 @@
 # ML Kit Text Recognition
 #############################################
 -keep class com.google.mlkit.vision.** { *; }
+# ML Kit component discovery uses internal common classes reflectively; keep the executor selector and related runtime types from R8.
+-keep class com.google.mlkit.common.sdkinternal.** { *; }
 -dontwarn com.google.mlkit.vision.**
 -keep class com.google.android.gms.internal.mlkit_vision_text** { *; }
 -dontwarn com.google.android.gms.internal.mlkit_vision_text**
