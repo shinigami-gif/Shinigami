@@ -40,6 +40,7 @@ class ForumActivity : AppCompatActivity() {
         binding = ActivityForumBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initActivity(this)
+        binding.forumTitle.text = intent.getStringExtra("forum_title") ?: getString(R.string.forum)
 
         binding.forumAppBar.updateLayoutParams<android.view.ViewGroup.MarginLayoutParams> {
             topMargin += statusBarHeight
