@@ -132,11 +132,10 @@ class ListActivity : AppCompatActivity() {
 
             val sortSubMenu = popup.menu.addSubMenu("Sort by")
             listOf(
-                "Recently Added" to "updatedAt",
-                "Last Updated" to "updatedAt",
-                "Title (A - Z)" to "title",
                 "Score" to "score",
-                "Release" to "release"
+                "Title" to "title",
+                "Release Date" to "release",
+                "Last Updated" to "updatedAt"
             ).forEachIndexed { index, (label, sort) ->
                 sortSubMenu.add(3, index + 20000, Menu.NONE, label).setOnMenuItemClickListener {
                     PrefManager.setVal(
