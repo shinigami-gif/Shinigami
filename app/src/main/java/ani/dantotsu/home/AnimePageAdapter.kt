@@ -63,58 +63,6 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding = LayoutTrendingBinding.bind(binding.root)
         trendingViewPager = trendingBinding.trendingViewPager
 
-        val profileHeaderRoot = holder.itemView.findViewById<View>(R.id.profileHeaderRoot)
-        profileHeaderRoot.updatePadding(top = statusBarHeight + 8f.px)
-
-        val textInputLayout = holder.itemView.findViewById<TextInputLayout>(R.id.searchBar)
-        val currentColor = textInputLayout.boxBackgroundColor
-        val semiTransparentColor = (currentColor and 0x00FFFFFF) or 0xA8000000.toInt()
-        textInputLayout.boxBackgroundColor = semiTransparentColor
-        val materialCardView =
-            holder.itemView.findViewById<MaterialCardView>(R.id.userAvatarContainer)
-        materialCardView.setCardBackgroundColor(semiTransparentColor)
-        val color = binding.root.context.getThemeColor(android.R.attr.windowBackground)
-        textInputLayout.boxBackgroundColor = (color and 0x00FFFFFF) or 0x28000000
-        materialCardView.setCardBackgroundColor((color and 0x00FFFFFF) or 0x28000000)
-
-        trendingBinding.titleContainer.updatePadding(top = statusBarHeight)
-
-        if (PrefManager.getVal(PrefName.SmallView)) trendingBinding.trendingContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = (-108f).px
-        }
-
-        val headerAvatar = binding.root.findViewById<android.widget.ImageView>(R.id.profileHeaderAvatar)
-        val headerName = binding.root.findViewById<android.widget.TextView>(R.id.profileHeaderName)
-        val headerNotification = binding.root.findViewById<View>(R.id.profileHeaderNotification)
-        val rescueModeForHeader = PrefManager.getVal<Boolean>(PrefName.RescueMode)
-        val headerAvatarUrl = if (rescueModeForHeader) MAL.avatar else Anilist.avatar
-        val headerUsername = if (rescueModeForHeader) MAL.username else Anilist.username
-
-        if (!headerUsername.isNullOrBlank()) {
-            headerName.text = headerUsername
-        }
-        if (!headerAvatarUrl.isNullOrBlank()) {
-            headerAvatar.loadImage(headerAvatarUrl)
-        }
-
-        headerNotification.setSafeOnClickListener {
-            if (!rescueModeForHeader && Anilist.token != null) {
-                ContextCompat.startActivity(
-                    it.context,
-                    Intent(it.context, NotificationActivity::class.java),
-                    null
-                )
-            } else {
-                val dialogFragment = SettingsDialogFragment.newInstance(
-                    SettingsDialogFragment.Companion.PageType.ANIME
-                )
-                dialogFragment.show(
-                    (it.context as AppCompatActivity).supportFragmentManager,
-                    "dialog"
-                )
-            }
-        }
-
         updateAvatar()
 
         trendingBinding.searchBar.hint = binding.root.context.getString(R.string.search)
