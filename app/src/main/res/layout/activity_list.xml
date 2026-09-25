@@ -170,6 +170,15 @@
         android:id="@+id/listViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="76dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <include
+        android:id="@+id/includedNavbar"
+        layout="@layout/item_navbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
