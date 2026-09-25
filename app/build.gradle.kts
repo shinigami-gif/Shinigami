@@ -217,18 +217,7 @@ dependencies {
     implementation(libs.kenburns)
     implementation(libs.subsampling)
     implementation(libs.gesture)
-    implementation(libs.webgpuviewer)
-    implementation(libs.image.decoder)
-    implementation(libs.mlkit.text.japanese)
-    implementation(libs.mlkit.text)
     implementation(libs.play.services.base)
-    // Readium Kotlin Toolkit
-    implementation(libs.readium.shared)
-    implementation(libs.readium.streamer)
-    implementation(libs.readium.navigator)
-    implementation(libs.readium.navigator.media.tts)
-    implementation(libs.readium.adapter.pdfium.document)
-    implementation(libs.readium.adapter.pdfium.navigator)
     implementation(libs.dialogs)
     implementation(libs.charts)
 
@@ -238,17 +227,7 @@ dependencies {
     implementation(libs.bundles.okhttp)
     implementation(libs.okio)
 
-    // Archive support (local source)
-    implementation(libs.libarchive)
-    implementation(libs.xmlutil.core)
-    implementation(libs.xmlutil.serialization)
 
-    // libtorrent
-    implementation(libs.libtorrent4j)
-    implementation(libs.libtorrent4j.android.arm)
-    implementation(libs.libtorrent4j.android.arm64)
-    implementation(libs.libtorrent4j.android.x86)
-    implementation(libs.libtorrent4j.android.x86.x64)
 
     // LeakCanary & Plumber (Active in Debug, Alpha, and Release builds for memory leak diagnosis)
     debugImplementation(libs.leakcanary.android)
