@@ -37,6 +37,9 @@ class AnilistMetadata internal constructor(
     suspend fun getGenresAndTags(): Boolean =
         queries.getGenresAndTags()
 
+    suspend fun getBannerImages(): ArrayList<String> =
+        queries.getBannerImages()
+
     suspend fun getGenres(
         genres: ArrayList<String>,
         listener: ((Pair<String, String>) -> Unit)
