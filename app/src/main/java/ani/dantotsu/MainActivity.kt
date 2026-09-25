@@ -32,8 +32,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import ani.dantotsu.torrent.TorrentServerManager
-import ani.dantotsu.addons.torrent.TorrentServerService
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.anilist.AnilistHomeViewModel
 import ani.dantotsu.account.AccountActivity
@@ -487,14 +485,6 @@ class MainActivity : AppCompatActivity() {
         if (PrefManager.getVal(PrefName.OC)) {
             AudioHelper.run(this, R.raw.audio)
             PrefManager.setVal(PrefName.OC, false)
-        }
-        val torrentManager = Injekt.get<TorrentServerManager>()
-        if (torrentManager.isAvailable() && PrefManager.getVal(PrefName.TorrentEnabled)) {
-            launchIO {
-                if (!TorrentServerService.isRunning()) {
-                    TorrentServerService.start()
-                }
-            }
         }
     }
 
