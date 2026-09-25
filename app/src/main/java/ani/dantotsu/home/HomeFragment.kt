@@ -240,7 +240,6 @@ class HomeFragment : Fragment() {
         model.getListImages().observe(viewLifecycleOwner) {
             if (it.isNotEmpty()) {
                 binding.homeAnimeListImage.loadImage(it[0] ?: "https://bit.ly/31bsIHq")
-                binding.homeMangaListImage.loadImage(it[1] ?: "https://bit.ly/2ZGfcuG")
             }
         }
 
