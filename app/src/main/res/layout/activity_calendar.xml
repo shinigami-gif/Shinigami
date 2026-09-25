@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground"
+    android:background="?android:attr/colorBackground"
     tools:context=".media.CalendarActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/calendarAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorBackground"
+        android:background="?android:attr/colorBackground"
         app:elevation="0dp">
 
         <LinearLayout
@@ -70,7 +70,7 @@
                     android:layout_height="44dp"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_round_more_vert_24"
+                    app:srcCompat="@drawable/ic_round_dots_vertical_24"
                     app:tint="?attr/colorOnBackground" />
             </LinearLayout>
 
