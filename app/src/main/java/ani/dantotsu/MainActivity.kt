@@ -36,6 +36,7 @@ import ani.dantotsu.torrent.TorrentServerManager
 import ani.dantotsu.addons.torrent.TorrentServerService
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.anilist.AnilistHomeViewModel
+import ani.dantotsu.account.AccountActivity
 import ani.dantotsu.databinding.ActivityMainBinding
 import ani.dantotsu.databinding.DialogUserAgentBinding
 import ani.dantotsu.databinding.SplashScreenBinding
@@ -345,15 +346,7 @@ class MainActivity : AppCompatActivity() {
                                 .putExtra("userId", Anilist.userid ?: 0)
                         )
                         4 -> {
-                            val userId = Anilist.userid
-                            if (userId != null) {
-                                startActivity(
-                                    Intent(this@MainActivity, ProfileActivity::class.java)
-                                        .putExtra("userId", userId)
-                                )
-                            } else {
-                                snackString(getString(R.string.rescue_mode_active))
-                            }
+                            startActivity(Intent(this@MainActivity, AccountActivity::class.java))
                         }
                     }
                     if (newIndex != 0) {
