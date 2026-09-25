@@ -18,7 +18,7 @@ import ani.dantotsu.initActivity
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.media.CalendarActivity
 import ani.dantotsu.media.user.ListActivity
-import ani.dantotsu.profile.ProfileActivity
+import ani.dantotsu.account.AccountActivity
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
 import kotlinx.coroutines.Dispatchers
@@ -199,29 +199,37 @@ class FeedActivity : AppCompatActivity() {
                     newTab: nl.joery.animatedbottombar.AnimatedBottomBar.Tab
                 ) {
                     when (newIndex) {
-                        0 -> startActivity(
-                            Intent(this@FeedActivity, MainActivity::class.java)
-                                .putExtra("goToHome", true)
-                        )
-                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                        finish()
-                        1 -> startActivity(Intent(this@FeedActivity, CalendarActivity::class.java))
+                        0 -> {
+                            startActivity(
+                                Intent(this@FeedActivity, MainActivity::class.java)
+                                    .putExtra("goToHome", true)
+                            )
                             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                             finish()
+                        }
+                        1 -> {
+                            startActivity(Intent(this@FeedActivity, CalendarActivity::class.java))
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                            finish()
+                        }
                         2 -> Unit
-                        3 -> startActivity(
-                            Intent(this@FeedActivity, ListActivity::class.java)
-                                .putExtra("anime", true)
-                                .putExtra("userId", Anilist.userid)
-                        )
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                        finish()
-                        4 -> startActivity(
-                            Intent(this@FeedActivity, ProfileActivity::class.java)
-                                .putExtra("userId", Anilist.userid)
-                        )
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                        finish()
+                        3 -> {
+                            startActivity(
+                                Intent(this@FeedActivity, ListActivity::class.java)
+                                    .putExtra("anime", true)
+                                    .putExtra("userId", Anilist.userid)
+                            )
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                            finish()
+                        }
+                        4 -> {
+                            startActivity(
+                                Intent(this@FeedActivity, AccountActivity::class.java)
+                                    .putExtra("userId", Anilist.userid)
+                            )
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                            finish()
+                        }
                     }
                     if (newIndex != 2) {
                         binding.socialNavbar.navbar.selectTabAt(2, false)
