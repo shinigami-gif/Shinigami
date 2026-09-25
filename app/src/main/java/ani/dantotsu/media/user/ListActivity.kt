@@ -5,12 +5,10 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
@@ -70,10 +68,7 @@ class ListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val anime = intent.getBooleanExtra("anime", true)
-        binding.listTitle.text = getString(
-            R.string.user_list, intent.getStringExtra("username"),
-            if (anime) getString(R.string.anime) else getString(R.string.manga)
-        )
+        binding.listTitle.text = getString(R.string.library)
         binding.listTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 this@ListActivity.selectedTabIdx = tab?.position ?: 0
@@ -205,27 +200,8 @@ class ListActivity : AppCompatActivity() {
             currentFragment?.randomOptionClick()
         }
 
-        binding.search.setOnClickListener {
-            toggleSearchView(binding.searchView.isVisible)
-            if (!binding.searchView.isVisible) {
-                model.unfilterLists()
-            }
-        }
-
         binding.searchViewText.addTextChangedListener {
             model.searchLists(binding.searchViewText.text.toString())
-        }
-    }
-
-    private fun toggleSearchView(isVisible: Boolean) {
-        if (isVisible) {
-            binding.searchView.visibility = View.GONE
-            binding.searchViewText.text.clear()
-        } else {
-            binding.searchView.visibility = View.VISIBLE
-            binding.searchViewText.requestFocus()
-            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(binding.searchViewText, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 
