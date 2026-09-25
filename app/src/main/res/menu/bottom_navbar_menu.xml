@@ -3,15 +3,25 @@
     <item
         android:id="@+id/anime"
         android:icon="@drawable/ic_round_movie_filter_24"
-        android:title="@string/anime" />
+        android:title="Anime" />
 
     <item
-        android:id="@+id/home"
-        android:icon="@drawable/ic_round_home_24"
-        android:title="@string/home" />
+        android:id="@+id/calendar"
+        android:icon="@drawable/ic_round_calendar_today_24"
+        android:title="Calendar" />
 
     <item
-        android:id="@+id/manga"
-        android:icon="@drawable/ic_round_import_contacts_24"
-        android:title="@string/manga" />
+        android:id="@+id/social"
+        android:icon="@drawable/ic_round_person_24"
+        android:title="Social" />
+
+    <item
+        android:id="@+id/library"
+        android:icon="@drawable/ic_round_library_books_24"
+        android:title="Library" />
+
+    <item
+        android:id="@+id/profile"
+        android:icon="@drawable/ic_round_person_24"
+        android:title="Profile" />
 </menu>
