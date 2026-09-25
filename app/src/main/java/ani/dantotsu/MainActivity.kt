@@ -357,7 +357,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = (navBarHeight - 6f.px).coerceAtLeast(0f.px)
+                bottomMargin = navBarHeight
             }
         }
 
