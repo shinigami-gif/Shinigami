@@ -38,14 +38,14 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
 
-class InstalledNovelExtensionsFragment : Fragment(), SearchQueryHandler {
+class InstalledNovelExtensionsFragment : Fragment(), SearchQueryHandler  
     private var _binding: FragmentNovelExtensionsBinding? = null
     private val binding get() = _binding!!
     private lateinit var extensionsRecyclerView: RecyclerView
     private val skipIcons: Boolean = PrefManager.getVal(PrefName.SkipExtensionIcons)
     private val novelExtensionManager: NovelExtensionManager = Injekt.get()
     private val extensionsAdapter = NovelExtensionsAdapter(
-        { _ ->
+          _ ->
             Toast.makeText(requireContext(), "Source is not configurable", Toast.LENGTH_SHORT)
                 .show()
         },
