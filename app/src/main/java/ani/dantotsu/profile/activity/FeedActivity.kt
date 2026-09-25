@@ -29,6 +29,7 @@ class FeedActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var featureIndex = 0
     private var leaderboardIndex = 0
+    private var quickActionIndex = 0
 
     private val featureRunnable = object : Runnable {
         override fun run() {
@@ -48,6 +49,25 @@ class FeedActivity : AppCompatActivity() {
                 leaderboardIndex = (leaderboardIndex + 1) % count
                 binding.socialLeaderboardPager.setCurrentItem(leaderboardIndex, true)
             }
+            handler.postDelayed(this, 4000)
+        }
+    }
+
+    private val quickActionRunnable = object : Runnable {
+        override fun run() {
+            val cards = listOf(
+                binding.socialGlobalChatCard,
+                binding.socialAnimeChatCard,
+                binding.socialLeaderboardCard
+            )
+            cards.forEachIndexed { index, card ->
+                card.strokeColor = if (index == quickActionIndex) {
+                    getThemeColor(com.google.android.material.R.attr.colorPrimary)
+                } else {
+                    getThemeColor(com.google.android.material.R.attr.colorOutline)
+                }
+            }
+            quickActionIndex = (quickActionIndex + 1) % cards.size
             handler.postDelayed(this, 4000)
         }
     }
@@ -160,8 +180,10 @@ class FeedActivity : AppCompatActivity() {
 
             handler.removeCallbacks(featureRunnable)
             handler.removeCallbacks(leaderboardRunnable)
+            handler.removeCallbacks(quickActionRunnable)
             handler.postDelayed(featureRunnable, 4000)
             handler.postDelayed(leaderboardRunnable, 4000)
+            handler.postDelayed(quickActionRunnable, 0)
         }
     }
 
@@ -203,6 +225,7 @@ class FeedActivity : AppCompatActivity() {
     override fun onDestroy() {
         handler.removeCallbacks(featureRunnable)
         handler.removeCallbacks(leaderboardRunnable)
+        handler.removeCallbacks(quickActionRunnable)
         super.onDestroy()
     }
 }
