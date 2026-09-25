@@ -1,7 +1,9 @@
 package ani.dantotsu.database
 
 import android.content.Context
-import app.cash.sqldelight.driver.androidx.AndroidSqliteDriver
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.eygraber.sqldelight.androidx.driver.AndroidxSqliteDatabaseType
+import com.eygraber.sqldelight.androidx.driver.AndroidxSqliteDriver
 
 object AnimeStateDatabase {
     @Volatile
@@ -10,10 +12,10 @@ object AnimeStateDatabase {
     fun get(context: Context): ShinigamiDatabase =
         database ?: synchronized(this) {
             database ?: ShinigamiDatabase(
-                AndroidSqliteDriver(
+                AndroidxSqliteDriver(
+                    driver = BundledSQLiteDriver(),
+                    databaseType = AndroidxSqliteDatabaseType.FileProvider(context, "shinigami.db"),
                     schema = ShinigamiDatabase.Schema,
-                    context = context.applicationContext,
-                    name = "shinigami.db",
                 ),
             ).also { database = it }
         }
