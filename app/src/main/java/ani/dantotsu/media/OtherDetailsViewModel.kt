@@ -345,7 +345,7 @@ class OtherDetailsViewModel : ViewModel() {
     private suspend fun loadCalendarFromAnilist(showOnlyLibrary: Boolean, showOnlyDubbed: Boolean) {
         if (cachedAllCalendarData == null || cachedLibraryCalendarData == null) {
             val curr = System.currentTimeMillis() / 1000
-            val res = Anilist.query.recentlyUpdated(curr - 86400, curr + (86400 * 6))
+            val res = Anilist.query.recentlyUpdated(curr - 86400, curr + (86400 * 14))
             val df = DateFormat.getDateInstance(DateFormat.FULL)
             val tf = DateFormat.getTimeInstance(DateFormat.SHORT)
             val allMap = mutableMapOf<String, MutableList<Media>>()
