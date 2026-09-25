@@ -22,6 +22,7 @@ import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.ItemAnimePageBinding
+import ani.dantotsu.databinding.LayoutProfileHeaderBinding
 import ani.dantotsu.databinding.LayoutTrendingBinding
 import ani.dantotsu.getAppString
 import ani.dantotsu.getThemeColor
@@ -49,6 +50,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
     val ready = MutableLiveData(false)
     lateinit var binding: ItemAnimePageBinding
     private lateinit var trendingBinding: LayoutTrendingBinding
+    private lateinit var profileHeaderBinding: LayoutProfileHeaderBinding
     private var trendHandler: Handler? = null
     private lateinit var trendRun: Runnable
     var trendingViewPager: ViewPager2? = null
@@ -61,8 +63,39 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
 
     override fun onBindViewHolder(holder: AnimePageViewHolder, position: Int) {
         binding = holder.binding
+        profileHeaderBinding = LayoutProfileHeaderBinding.bind(binding.root)
         trendingBinding = LayoutTrendingBinding.bind(binding.root)
         trendingViewPager = trendingBinding.trendingViewPager
+
+        profileHeaderBinding.profileHeaderRoot.updatePadding(top = statusBarHeight + 4f.px)
+        val rescueModeForHeader = PrefManager.getVal<Boolean>(PrefName.RescueMode)
+        val headerAvatarUrl = if (rescueModeForHeader) MAL.avatar else Anilist.avatar
+        val headerUsername = if (rescueModeForHeader) MAL.username else Anilist.username
+        profileHeaderBinding.profileHeaderName.text =
+            headerUsername?.takeIf { it.isNotBlank() } ?: getAppString(R.string.app_name)
+        if (!headerAvatarUrl.isNullOrBlank()) {
+            profileHeaderBinding.profileHeaderAvatar.loadImage(headerAvatarUrl)
+        }
+        profileHeaderBinding.profileHeaderNotification.setSafeOnClickListener {
+            if (!rescueModeForHeader && Anilist.token != null) {
+                ContextCompat.startActivity(
+                    it.context,
+                    Intent(it.context, ani.dantotsu.profile.notification.NotificationActivity::class.java),
+                    null
+                )
+            } else {
+                val dialog = SettingsDialogFragment.newInstance(
+                    SettingsDialogFragment.Companion.PageType.ANIME
+                )
+                dialog.show(
+                    (it.context as AppCompatActivity).supportFragmentManager,
+                    "dialog"
+                )
+            }
+        }
+        profileHeaderBinding.profileHeaderRoot.setSafeOnClickListener {
+            trendingBinding.userAvatar.performLongClick()
+        }
 
         val textInputLayout = holder.itemView.findViewById<TextInputLayout>(R.id.searchBar)
         val currentColor = textInputLayout.boxBackgroundColor
@@ -75,7 +108,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         textInputLayout.boxBackgroundColor = (color and 0x00FFFFFF) or 0x28000000
         materialCardView.setCardBackgroundColor((color and 0x00FFFFFF) or 0x28000000)
 
-        trendingBinding.titleContainer.updatePadding(top = statusBarHeight)
+        trendingBinding.titleContainer.updatePadding(top = 8f.px)
 
         if (PrefManager.getVal(PrefName.SmallView)) trendingBinding.trendingContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = (-108f).px
