@@ -2,9 +2,8 @@ package ani.dantotsu.media.user
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import ani.dantotsu.R
+import ani.dantotsu.getThemeColor
 import ani.dantotsu.databinding.ItemCalendarScheduleBinding
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.MediaDetailsActivity
@@ -56,9 +55,8 @@ class CalendarScheduleAdapter(
             b.scheduleRemaining.text = ""
         }
 
-        b.scheduleCard.strokeColor = ContextCompat.getColor(
-            b.root.context,
-            if (airingTime != null && airingTime > now) R.color.blue_500 else R.color.nav_bg_inv
+        b.scheduleCard.strokeColor = b.root.context.getThemeColor(
+            if (airingTime != null && airingTime > now) com.google.android.material.R.attr.colorPrimary else com.google.android.material.R.attr.colorOutline
         )
 
         b.root.setSafeOnClickListener {
