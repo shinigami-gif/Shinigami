@@ -19,6 +19,7 @@ import ani.dantotsu.getThemeColor
 import ani.dantotsu.hideSystemBarsExtendView
 import ani.dantotsu.media.user.ListViewPagerAdapter
 import ani.dantotsu.media.user.ListActivity
+import ani.dantotsu.px
 import ani.dantotsu.profile.ProfileActivity
 import ani.dantotsu.profile.activity.FeedActivity
 import ani.dantotsu.settings.saving.PrefManager
@@ -63,7 +64,7 @@ class CalendarActivity : AppCompatActivity() {
             window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg_inv)
             binding.root.fitsSystemWindows = true
             binding.calendarHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBarHeight
+                topMargin = (statusBarHeight - 8f.px).coerceAtLeast(0f.px)
             }
         } else {
             binding.root.fitsSystemWindows = false
