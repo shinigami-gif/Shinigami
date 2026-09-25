@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorBackground"
+    tools:context=".media.CalendarActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/calendarAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorBackground"
+        app:elevation="0dp">
+
+        <LinearLayout
+            android:id="@+id/calendarHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/calendarTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="Schedule"
+                        android:textColor="?attr/colorOnBackground"
+                        android:textSize="28sp" />
+
+                    <TextView
+                        android:id="@+id/calendarSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:alpha="0.65"
+                        android:text="Track upcoming anime episodes"
+                        android:textColor="?attr/colorOnBackground"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/calendarSearch"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/search"
+                    app:srcCompat="@drawable/ic_round_search_24"
+                    app:tint="?attr/colorOnBackground" />
+
+                <ImageButton
+                    android:id="@+id/calendarMore"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/more"
+                    app:srcCompat="@drawable/ic_round_more_vert_24"
+                    app:tint="?attr/colorOnBackground" />
+            </LinearLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/calendarDays"
+                android:layout_width="match_parent"
+                android:layout_height="78dp"
+                android:layout_marginTop="12dp"
+                android:clipToPadding="false"
+                app:tabBackground="@drawable/calendar_day_tab"
+                app:tabIndicator="@null"
+                app:tabMode="scrollable"
+                app:tabPaddingEnd="7dp"
+                app:tabPaddingStart="7dp"
+                app:tabRippleColor="@android:color/transparent"
+                app:tabTextAppearance="@style/NavBarText" />
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/calendarViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <ProgressBar
+        android:id="@+id/calendarProgressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
