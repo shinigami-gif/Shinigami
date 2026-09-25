@@ -370,17 +370,6 @@ class HomeFragment : Fragment() {
             bottomBarOrNull?.selectTabAt(0)
         }
 
-        initRecyclerView(
-            model.getMissingSequels(),
-            binding.homeMissingSequelsContainer,
-            binding.homeMissingSequelsRecyclerView,
-            binding.homeMissingSequelsProgressBar,
-            binding.homeMissingSequelsEmpty,
-            binding.homeMissingSequels,
-            binding.homeMissingSequelsMore,
-            getString(R.string.missing_sequels)
-        )
-
 
 
 
@@ -519,7 +508,6 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
             "AnimePlanned",
             "Recommendation",
             "UserStatus",
-            "MissingSequels",
         )
 
         val containers = arrayOf(
@@ -528,7 +516,6 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
             binding.homePlannedAnimeContainer,
             binding.homeRecommendedContainer,
             binding.homeUserStatusContainer,
-            binding.homeMissingSequelsContainer,
         )
 
         var running = false
@@ -540,7 +527,6 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
                 val alOnlySections = listOf(
                     binding.homeFavAnimeContainer,
                     binding.homeUserStatusContainer,
-                    binding.homeMissingSequelsContainer,
                 )
                 binding.homeRescueModeBanner.visibility =
                     if (inRescueMode) View.VISIBLE else View.GONE
