@@ -16,7 +16,7 @@ class AccountFragment : Fragment(ani.dantotsu.R.layout.activity_account) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = ActivityAccountBinding.bind(view)
-        ThemeManager(requireContext()).applyTheme()
+        ThemeManager(requireActivity()).applyTheme()
         binding.includedNavbar.navbarContainer.visibility = View.GONE
         loadProfile()
         binding.editProfileButton.setOnClickListener { startActivity(android.content.Intent(requireContext(), EditProfileActivity::class.java)) }
