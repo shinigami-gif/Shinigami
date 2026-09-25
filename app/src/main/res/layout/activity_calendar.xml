@@ -117,6 +117,8 @@
         android:id="@+id/calendarViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="76dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <include
