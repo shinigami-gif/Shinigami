@@ -57,7 +57,9 @@ fun updateProgress(media: Media, number: String) {
             val a = progressInt
             if (a > (media.userProgress ?: -1)) {
                 // Local AnimeState is the persistent source of playback progress.
-                AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).updateProgress(media.id, a)
+                CoroutineScope(Dispatchers.IO).launch {
+                    AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).updateProgress(media.id, a)
+                }
                 val status = if (media.userStatus == "REPEATING") media.userStatus!! else "CURRENT"
                 val pending = PendingProgressUpdate(
                     mediaId = media.id,
