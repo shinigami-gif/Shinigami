@@ -334,7 +334,7 @@ class MainActivity : AppCompatActivity() {
             mainViewPager.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     if (position != selectedOption) selectedOption = position
-                    if (navbar.selectedTab?.id != navbar.tabs.getOrNull(position)?.id) navbar.selectTabAt(position, false)
+                    navbar.selectTabAt(position, false)
                 }
             })
             if (mainViewPager.currentItem != selectedOption) {
