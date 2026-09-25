@@ -64,21 +64,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingViewPager = trendingBinding.trendingViewPager
 
         val profileHeaderRoot = holder.itemView.findViewById<View>(R.id.profileHeaderRoot)
-        val profileHeaderAvatar = holder.itemView.findViewById<android.widget.ImageView>(R.id.profileHeaderAvatar)
-        val profileHeaderName = holder.itemView.findViewById<android.widget.TextView>(R.id.profileHeaderName)
-        val profileHeaderNotification = holder.itemView.findViewById<View>(R.id.profileHeaderNotification)
         profileHeaderRoot.updatePadding(top = statusBarHeight + 8f.px)
-        profileHeaderName.text = Anilist.username ?: getAppString(R.string.app_name)
-        val headerAvatarUrl = if (PrefManager.getVal<Boolean>(PrefName.RescueMode)) MAL.avatar else Anilist.avatar
-        if (headerAvatarUrl != null) {
-            profileHeaderAvatar.loadImage(headerAvatarUrl)
-        }
-        profileHeaderNotification.setOnClickListener {
-            trendingBinding.userAvatar.performClick()
-        }
-        profileHeaderRoot.setOnClickListener {
-            trendingBinding.userAvatar.performLongClick()
-        }
 
         val textInputLayout = holder.itemView.findViewById<TextInputLayout>(R.id.searchBar)
         val currentColor = textInputLayout.boxBackgroundColor
