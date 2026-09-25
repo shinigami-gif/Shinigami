@@ -1551,9 +1551,19 @@ class AnilistQueries {
         return null
     }
 
-    private fun mediaList(media1: Page?): ArrayList<Media> {
+    private suspend fun mediaList(media1: Page?): ArrayList<Media> {
         val combinedList = arrayListOf<Media>()
-        media1?.media?.mapTo(combinedList) { Media(it) }
+        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
+        media1?.media?.forEach { item ->
+            val media = Media(item)
+            val localState = localStateRepository.get(media.id)
+            if (localState != null) {
+                localState.applyTo(media)
+            } else {
+                localStateRepository.upsert(media.toAnimeStateRecord())
+            }
+            combinedList.add(media)
+        }
         return combinedList
     }
 
