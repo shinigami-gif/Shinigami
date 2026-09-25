@@ -305,18 +305,9 @@ class MainActivity : AppCompatActivity() {
                     }
             }
             window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
-            selectedOption = if (intent.getBooleanExtra("goToHome", false)) {
-                1
-            } else if (fragment != null) {
-                when (fragment) {
-                    AnimeFragment::class.java.name -> 0
-                    HomeFragment::class.java.name -> 1
-                    MangaFragment::class.java.name -> 2
-                    else -> 1
-                }
-            } else {
-                PrefManager.getVal(PrefName.DefaultStartUpTab)
-            }
+            // Shinigami main navigation starts on Anime. Other bottom tabs open
+            // their existing feature screens as separate activities.
+            selectedOption = 0
             val navbar = binding.includedNavbar.navbar
             bottomBar = navbar
             navbar.visibility = View.VISIBLE
@@ -336,8 +327,39 @@ class MainActivity : AppCompatActivity() {
                     newTab: AnimatedBottomBar.Tab
                 ) {
                     navbar.animate().translationZ(12f).setDuration(200).start()
-                    selectedOption = newIndex
-                    mainViewPager.setCurrentItem(newIndex, false)
+                    when (newIndex) {
+                        0 -> {
+                            selectedOption = 0
+                            mainViewPager.setCurrentItem(0, false)
+                        }
+                        1 -> startActivity(Intent(this@MainActivity, ani.dantotsu.media.CalendarActivity::class.java))
+                        2 -> if (!PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
+                            startActivity(Intent(this@MainActivity, FeedActivity::class.java))
+                        } else {
+                            snackString(getString(R.string.rescue_mode_active))
+                        }
+                        3 -> startActivity(
+                            Intent(this@MainActivity, ani.dantotsu.media.user.ListActivity::class.java)
+                                .putExtra("anime", true)
+                                .putExtra("username", Anilist.username ?: "")
+                                .putExtra("userId", Anilist.userid ?: 0)
+                        )
+                        4 -> {
+                            val userId = Anilist.userid
+                            if (userId != null) {
+                                startActivity(
+                                    Intent(this@MainActivity, ProfileActivity::class.java)
+                                        .putExtra("userId", userId)
+                                )
+                            } else {
+                                snackString(getString(R.string.rescue_mode_active))
+                            }
+                        }
+                    }
+                    if (newIndex != 0) {
+                        navbar.selectTabAt(0, false)
+                        selectedOption = 0
+                    }
                 }
             })
             if (mainViewPager.currentItem != selectedOption) {
