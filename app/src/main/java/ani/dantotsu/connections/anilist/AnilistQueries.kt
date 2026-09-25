@@ -164,7 +164,7 @@ class AnilistQueries {
         }
     }
 
-    fun mediaDetails(media: Media): Media {
+    suspend fun mediaDetails(media: Media): Media {
         media.cameFromContinue = false
         runBlocking {
             val anilist = async {
