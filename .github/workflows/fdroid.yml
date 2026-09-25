@@ -37,17 +37,18 @@ jobs:
         run: yes | sdkmanager --licenses > /dev/null || true
 
       - name: Build Google Release APK
-        run: ./gradlew assembleGoogleRelease --no-daemon
+        run: ./gradlew assembleGoogleRelease -PsingleApk --no-daemon
 
-      - name: Verify universal APK
+      - name: Verify single APK
         run: |
           set -e
           ls -lah app/build/outputs/apk
-          find app/build/outputs/apk -type f -name '*universal*.apk' -print -quit | grep -q .
+          APK_COUNT=$(find app/build/outputs/apk -type f -name '*.apk' | wc -l)
+          test "$APK_COUNT" -eq 1
 
-      - name: Upload single universal APK
+      - name: Upload single APK
         uses: actions/upload-artifact@v7
         with:
-          name: shinigami-google-universal
-          path: app/build/outputs/apk/**/*universal*.apk
+          name: shinigami-google-release
+          path: app/build/outputs/apk/**/*.apk
           if-no-files-found: error
