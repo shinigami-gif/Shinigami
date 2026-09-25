@@ -57,7 +57,14 @@ class ListFragment : Fragment() {
             model.getCalendar().observe(viewLifecycleOwner) {
                 if (it != null) {
                     list = it.values.toList().getOrNull(pos!!)
-                    update()
+                    if (list != null) {
+                        binding.listRecyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
+                        binding.listRecyclerView.adapter = CalendarScheduleAdapter(
+                            list!!,
+                            it.keys.toList().getOrNull(pos!!) ?: "",
+                            requireActivity()
+                        )
+                    }
                 }
             }
             grid = true
