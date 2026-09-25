@@ -205,7 +205,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding.trendingProgressBar.visibility = View.GONE
         trendingBinding.trendingViewPager.adapter = adaptor
         trendingBinding.trendingViewPager.offscreenPageLimit = 3
-        trendingBinding.trendingViewPager.getChildAt(0).overScrollMode =
+        trendingBinding.trendingViewPager.getChildAt(0)?.overScrollMode =
             RecyclerView.OVER_SCROLL_NEVER
         trendingBinding.trendingViewPager.setPageTransformer(MediaPageTransformer())
         trendHandler = Handler(Looper.getMainLooper())
