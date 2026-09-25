@@ -41,6 +41,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:64572945971:android:6b78063a34707d71f49546",
+        "android_client_info": {
+          "package_name": "ani.shinigami.app.beta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "64572945971-l1f46k56cfbf7srb4g42dsgqo712t2uc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUPKIrDvKZuMa4BdKH9QkCxoMiDdG3xqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "64572945971-l1f46k56cfbf7srb4g42dsgqo712t2uc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
