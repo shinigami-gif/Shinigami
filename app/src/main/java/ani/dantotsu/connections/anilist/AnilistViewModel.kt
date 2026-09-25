@@ -66,6 +66,7 @@ class AnilistHomeViewModel : ViewModel() {
 
     fun getAnimePlanned(): LiveData<ArrayList<Media>> = animePlanned
 
+    private val recommendation: MutableLiveData<ArrayList<Media>> =
         MutableLiveData<ArrayList<Media>>(null)
 
     fun getRecommendation(): LiveData<ArrayList<Media>> = recommendation
@@ -215,7 +216,6 @@ class AnilistHomeViewModel : ViewModel() {
         if (!username.isNullOrBlank()) {
         } else {
             animeFav.postValue(arrayListOf())
-            mangaFav.postValue(arrayListOf())
         }
 
         tryWithSuspend {
