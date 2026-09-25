@@ -123,7 +123,4 @@ class AnilistMetadata internal constructor(
         mediaId: Int,
         page: Int = 1
     ): Query.Media? = queries.getMediaStaff(mediaId, page)
-
-    suspend fun searchUsers(page: Int, search: String?): UserSearchResults? =
-        queries.searchUsers(page, search)
 }
