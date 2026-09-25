@@ -23,7 +23,6 @@ import ani.dantotsu.snackString
 import ani.dantotsu.connections.syncPendingProgressUpdates
 import ani.dantotsu.connections.syncPendingDeletions
 import ani.dantotsu.media.anime.Anime
-import ani.dantotsu.media.manga.Manga
 import ani.dantotsu.tryWithSuspend
 import ani.dantotsu.util.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -233,54 +232,9 @@ class AnilistHomeViewModel : ViewModel() {
                 animePlanned.postValue(ArrayList(entries.map { Media(it, true) }))
             }
         }
-        tryWithSuspend {
-            MAL.query.getUserMangaList(status = "reading", limit = 20)?.data?.let { entries ->
-                mangaContinue.postValue(ArrayList(entries.map { Media(it, false) }))
-            }
-        }
-        tryWithSuspend {
-            MAL.query.getUserMangaList(status = "plan_to_read", limit = 20)?.data?.let { entries ->
-                mangaPlanned.postValue(ArrayList(entries.map { Media(it, false) }))
-            }
-        }
 
         val username = MAL.username
         if (!username.isNullOrBlank()) {
-            tryWithSuspend {
-                val favData = MAL.jikan.getUserFavorites(username)
-                if (favData != null) {
-                    val favAnime = favData.anime.map { fav ->
-                        Media(
-                            id = fav.malId,
-                            idMAL = fav.malId,
-                            name = fav.title,
-                            nameRomaji = fav.title ?: "",
-                            userPreferredName = fav.title ?: "",
-                            cover = fav.images?.jpg?.largeImageUrl ?: fav.images?.jpg?.imageUrl,
-                            isAdult = false,
-                            anime = Anime(null, null, null),
-                        )
-                    }
-                    animeFav.postValue(ArrayList(favAnime))
-
-                    val favManga = favData.manga.map { fav ->
-                        Media(
-                            id = fav.malId,
-                            idMAL = fav.malId,
-                            name = fav.title,
-                            nameRomaji = fav.title ?: "",
-                            userPreferredName = fav.title ?: "",
-                            cover = fav.images?.jpg?.largeImageUrl ?: fav.images?.jpg?.imageUrl,
-                            isAdult = false,
-                            manga = Manga(),
-                        )
-                    }
-                    mangaFav.postValue(ArrayList(favManga))
-                } else {
-                    animeFav.postValue(arrayListOf())
-                    mangaFav.postValue(arrayListOf())
-                }
-            }
         } else {
             animeFav.postValue(arrayListOf())
             mangaFav.postValue(arrayListOf())
