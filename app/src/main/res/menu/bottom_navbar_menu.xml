@@ -7,17 +7,17 @@
     <item
         android:id="@+id/calendar"
         android:icon="@drawable/ic_shinigami_calendar"
-        android:title=""Calendar"" />
+        android:title="Calendar" />
     <item
         android:id="@+id/social"
         android:icon="@drawable/ic_shinigami_social"
-        android:title=""Social"" />
+        android:title="Social" />
     <item
         android:id="@+id/library"
         android:icon="@drawable/ic_shinigami_library"
-        android:title=""Library"" />
+        android:title="Library" />
     <item
         android:id="@+id/profile"
         android:icon="@drawable/ic_shinigami_profile"
-        android:title=""Profile"" />
+        android:title="Profile" />
 </menu>
