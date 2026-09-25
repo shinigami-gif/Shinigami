@@ -44,7 +44,7 @@ fun computeGitCommitHash(): String {
 val gitCommitHash = computeGitCommitHash()
 
 android {
-    namespace = "ani.shinigami.app"
+    namespace = "ani.dantotsu"
     compileSdk = 37
 
     defaultConfig {
@@ -238,7 +238,7 @@ dependencies {
 sqldelight {
     databases {
         create("ShinigamiDatabase") {
-            packageName.set("ani.shinigami.app.database")
+            packageName.set("ani.dantotsu.database")
             generateAsync.set(true)
         }
     }
