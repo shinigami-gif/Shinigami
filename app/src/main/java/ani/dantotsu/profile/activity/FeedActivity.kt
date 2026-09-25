@@ -203,17 +203,25 @@ class FeedActivity : AppCompatActivity() {
                             Intent(this@FeedActivity, MainActivity::class.java)
                                 .putExtra("goToHome", true)
                         )
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                        finish()
                         1 -> startActivity(Intent(this@FeedActivity, CalendarActivity::class.java))
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                            finish()
                         2 -> Unit
                         3 -> startActivity(
                             Intent(this@FeedActivity, ListActivity::class.java)
                                 .putExtra("anime", true)
                                 .putExtra("userId", Anilist.userid)
                         )
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        finish()
                         4 -> startActivity(
                             Intent(this@FeedActivity, ProfileActivity::class.java)
                                 .putExtra("userId", Anilist.userid)
                         )
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        finish()
                     }
                     if (newIndex != 2) {
                         binding.socialNavbar.navbar.selectTabAt(2, false)
