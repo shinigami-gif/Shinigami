@@ -169,8 +169,8 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/profileHeaderWatchTogether"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="?attr/colorSecondaryContainer"
                     app:cardCornerRadius="16dp"
@@ -185,8 +185,8 @@
                         android:paddingHorizontal="8dp">
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
                             android:src="@drawable/ic_shinigami_groups"
                             app:tint="?attr/colorSecondary"
                             android:contentDescription="@null" />
@@ -203,13 +203,13 @@
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins_bold"
                                 android:text="Watch Together"
-                                android:textSize="13sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Nonton bareng teman"
-                                android:textSize="8sp" />
+                                android:textSize="7sp" />
                         </LinearLayout>
 
                         <ImageView
