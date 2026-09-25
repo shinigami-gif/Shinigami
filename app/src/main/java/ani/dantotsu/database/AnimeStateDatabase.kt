@@ -14,7 +14,7 @@ object AnimeStateDatabase {
             database ?: ShinigamiDatabase(
                 AndroidxSqliteDriver(
                     driver = BundledSQLiteDriver(),
-                    databaseType = AndroidxSqliteDatabaseType.FileProvider(context, "shinigami.db"),
+                    databaseType = AndroidxSqliteDatabaseType.FileProvider { context.getDatabasePath("shinigami.db").path },
                     schema = ShinigamiDatabase.Schema,
                 ),
             ).also { database = it }
