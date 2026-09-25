@@ -159,8 +159,16 @@ class AnilistQueries {
             force = true
         )
         val fetchedMediaList = response?.data?.page?.media ?: return null
+        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
         return fetchedMediaList.map {
-            Media(it)
+            val media = Media(it)
+            val localState = localStateRepository.get(media.id)
+            if (localState != null) {
+                localState.applyTo(media)
+            } else {
+                localStateRepository.upsert(media.toAnimeStateRecord())
+            }
+            media
         }
     }
 
