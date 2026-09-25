@@ -16,8 +16,6 @@ import ani.dantotsu.currContext
 import ani.dantotsu.media.anime.Episode
 import ani.dantotsu.media.anime.SelectorDialogFragment
 import ani.dantotsu.media.anime.getEpisode
-import ani.dantotsu.media.manga.MangaChapter
-import ani.dantotsu.media.mangaupdates.MangaAnimeUtil
 import ani.dantotsu.others.AniSkip
 import ani.dantotsu.others.Anify
 import ani.dantotsu.others.AniskipCsvFallback
@@ -26,16 +24,8 @@ import ani.dantotsu.others.IntroDbService
 import ani.dantotsu.others.Jikan
 import ani.dantotsu.others.Kitsu
 import ani.dantotsu.others.TmdbService
-import ani.dantotsu.media.novel.NovelStorage
 import ani.dantotsu.parsers.AnimeSources
-import ani.dantotsu.parsers.Book
-import ani.dantotsu.parsers.MangaImage
-import ani.dantotsu.parsers.MangaReadSources
-import ani.dantotsu.parsers.MangaSources
-import ani.dantotsu.parsers.NovelSources
 import ani.dantotsu.parsers.OfflineAnimeParser
-import ani.dantotsu.parsers.OfflineMangaParser
-import ani.dantotsu.parsers.OfflineNovelParser
 import ani.dantotsu.parsers.ShowResponse
 import ani.dantotsu.parsers.VideoExtractor
 import ani.dantotsu.parsers.WatchSources
@@ -44,9 +34,7 @@ import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.snackString
 import ani.dantotsu.tryWithSuspend
 import ani.dantotsu.util.Logger
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import eu.kanade.tachiyomi.animesource.model.SAnime
-import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
@@ -69,7 +57,7 @@ class MediaDetailsViewModel : ViewModel() {
 
 
     fun loadSelected(media: Media, isDownload: Boolean = false): Selected {
-        if ((media.format == "LOCAL" || media.format == "LOCAL_NOVEL") && media.selected != null) {
+        if (media.format == "LOCAL" && media.selected != null) {
             return media.selected!!
         }
         val data =
@@ -81,18 +69,8 @@ class MediaDetailsViewModel : ViewModel() {
                     it
                 }
         if (isDownload) {
-            data.sourceIndex = when {
-                media.anime != null -> {
-                    AnimeSources.list.size - 1
-                }
-
-                media.format == "MANGA" || media.format == "ONE_SHOT" -> {
-                    MangaSources.list.size - 1
-                }
-
-                else -> {
-                    NovelSources.list.size - 1
-                }
+            if (media.anime != null) {
+                data.sourceIndex = AnimeSources.list.size - 1
             }
         }
         return data
@@ -967,205 +945,6 @@ class MediaDetailsViewModel : ViewModel() {
         }
     }
 
-    //Manga
-    var mangaReadSources: MangaReadSources? = null
-
-    private val mangaChapters =
-        MutableLiveData<MutableMap<Int, MutableMap<String, MangaChapter>>>(null)
-    private val mangaLoaded = mutableMapOf<Int, MutableMap<String, MangaChapter>>()
-    fun getMangaChapters(): LiveData<MutableMap<Int, MutableMap<String, MangaChapter>>> =
-        mangaChapters
-
-    fun invalidateMangaSource(sourceIndex: Int) {
-        mangaLoaded.remove(sourceIndex)
-    }
-
-    suspend fun loadMangaChapters(media: Media, i: Int, invalidate: Boolean = false) {
-        Logger.log("Loading Manga Chapters : $mangaLoaded")
-        val isOffline = mangaReadSources?.get(i) is OfflineMangaParser
-        val current = mangaLoaded[i]
-        if (current.isNullOrEmpty() || invalidate || isOffline) tryWithSuspend {
-            val loaded = mangaReadSources?.loadChaptersFromMedia(
-                i = i,
-                media = media,
-                invalidate = invalidate,
-                onCachedLoaded = { cached ->
-                    mangaLoaded[i] = cached
-                    mangaChapters.postValue(mangaLoaded)
-                }
-            ) ?: mutableMapOf()
-            if (loaded.isNotEmpty() || invalidate) {
-                mangaLoaded[i] = loaded
-            }
-        }
-        mangaChapters.postValue(mangaLoaded)
-    }
-
-    suspend fun overrideMangaChapters(i: Int, source: ShowResponse, id: Int) {
-        if (source.sManga == null) {
-            source.sManga = SManga.create().apply {
-                url = source.link
-                title = source.name
-                thumbnail_url = source.coverUrl.url
-            }
-        }
-        mangaReadSources?.saveResponse(i, id, source)
-        tryWithSuspend {
-            mangaLoaded[i] = mangaReadSources?.loadChapters(i, source) ?: return@tryWithSuspend
-        }
-        mangaChapters.postValue(mangaLoaded)
-    }
-
-    private val mangaChapter = MutableLiveData<MangaChapter?>(null)
-    fun getMangaChapter(): LiveData<MangaChapter?> = mangaChapter
-    suspend fun loadMangaChapterImages(
-        chapter: MangaChapter,
-        selected: Selected,
-        post: Boolean = true
-    ): Boolean {
-
-        return tryWithSuspend(true) {
-            chapter.addImages(
-                mangaReadSources?.get(selected.sourceIndex)
-                    ?.loadImages(chapter.link, chapter.sChapter) ?: return@tryWithSuspend false
-            )
-            if (post) mangaChapter.postValue(chapter)
-            true
-        } ?: false
-    }
-
-    fun loadTransformation(mangaImage: MangaImage, source: Int): BitmapTransformation? {
-        return if (mangaImage.useTransformation) mangaReadSources?.get(source)
-            ?.getTransformation() else null
-    }
-
-    val novelSources = NovelSources
-    val novelResponses = MutableLiveData<List<ShowResponse>>(null)
-
-    private val novelChapters = MutableLiveData<MutableMap<Int, List<ShowResponse>>>(null)
-    private val novelLoaded = mutableMapOf<Int, List<ShowResponse>>()
-    fun getNovelChapters(): LiveData<MutableMap<Int, List<ShowResponse>>> = novelChapters
-
-    suspend fun searchNovels(query: String, i: Int) {
-        val position = if (i >= novelSources.list.size) 0 else i
-        val source = novelSources[position]
-        tryWithSuspend(post = true) {
-            if (source != null) {
-                novelResponses.postValue(source.search(query))
-            }
-        }
-    }
-
-    suspend fun autoSearchNovels(media: Media) {
-        val source = novelSources[media.selected?.sourceIndex ?: 0]
-        tryWithSuspend(post = true) {
-            if (source != null) {
-                novelResponses.postValue(source.sortedSearch(media))
-            }
-        }
-    }
-
-    suspend fun loadNovelChapters(media: Media, i: Int, invalidate: Boolean = false) {
-        val isOffline = novelSources[i] is OfflineNovelParser
-        val current = novelLoaded[i]
-        if (current.isNullOrEmpty() || invalidate || isOffline) {
-            tryWithSuspend {
-                val source = novelSources[i]
-                if (source == null) {
-                    novelLoaded[i] = emptyList()
-                    return@tryWithSuspend
-                }
-                val sourceKey = source.saveName.ifBlank { source.name }
-
-                var book: Book? = null
-                var novelCover = media.cover?.let { ani.dantotsu.FileUrl(it) } ?: ani.dantotsu.FileUrl("")
-
-                fun postBookChapters(targetBook: Book, cover: ani.dantotsu.FileUrl) {
-                    val chapterResponses = targetBook.links.mapIndexed { index, fileUrl ->
-                        val chapterName = fileUrl.headers?.get("X-Chapter-Name") ?: "Chapter ${index + 1}"
-                        val releaseTime = fileUrl.headers?.get("X-Release-Time")
-                        val chapterNumber = fileUrl.headers?.get("X-Chapter-Number")
-                        ShowResponse(
-                            name = chapterName,
-                            link = fileUrl.url,
-                            coverUrl = cover,
-                            extra = mutableMapOf<String, String>().apply {
-                                releaseTime?.let { put("releaseTime", it) }
-                                chapterNumber?.let { put("chapterNumber", it) }
-                                put("sourceName", source.name)
-                            }
-                        )
-                    }
-                    novelLoaded[i] = chapterResponses
-                    novelChapters.postValue(novelLoaded)
-                }
-
-                if (!invalidate && !isOffline) {
-                    val savedResponse = source.loadSavedShowResponse(media.id)
-                    if (savedResponse != null && savedResponse.link.isNotBlank()) {
-                        novelCover = savedResponse.coverUrl
-                        book = NovelStorage.loadBook(sourceKey, savedResponse.link)
-                        if (book != null && book.links.isNotEmpty()) {
-                            postBookChapters(book, novelCover)
-                        }
-                    }
-                }
-
-                val novelResponse = source.autoSearch(media)
-                if (novelResponse == null) {
-                    if (novelLoaded[i] == null) novelLoaded[i] = emptyList()
-                    return@tryWithSuspend
-                }
-                novelCover = novelResponse.coverUrl
-
-                if (book == null && !invalidate && !isOffline) {
-                    book = NovelStorage.loadBook(sourceKey, novelResponse.link)
-                    if (book != null && book.links.isNotEmpty()) {
-                        postBookChapters(book, novelCover)
-                    }
-                }
-
-                val fetchedBook = source.loadBook(novelResponse.link, novelResponse.extra)
-                if (fetchedBook != null && fetchedBook.links.isNotEmpty() && !isOffline) {
-                    NovelStorage.saveBook(sourceKey, novelResponse.link, fetchedBook)
-                    book = fetchedBook
-                }
-
-                if (book == null || book.links.isEmpty()) {
-                    if (novelLoaded[i] == null) novelLoaded[i] = emptyList()
-                    return@tryWithSuspend
-                }
-                postBookChapters(book, novelCover)
-            }
-        }
-        novelChapters.postValue(novelLoaded)
-    }
-
-    suspend fun overrideNovelChapters(i: Int, source: ShowResponse, mediaId: Int) {
-        novelSources.saveResponse(i, mediaId, source)
-        novelLoaded.remove(i)
-    }
-
-    val book: MutableLiveData<Book> = MutableLiveData(null)
-    suspend fun loadBook(novel: ShowResponse, i: Int) {
-        tryWithSuspend {
-            val source = novelSources[i] ?: return@tryWithSuspend
-            val sourceKey = source.saveName.ifBlank { source.name }
-            val isOffline = source is OfflineNovelParser
-            if (!isOffline) {
-                val cached = NovelStorage.loadBook(sourceKey, novel.link)
-                if (cached != null && cached.links.isNotEmpty()) {
-                    book.postValue(cached)
-                }
-            }
-            val loaded = source.loadBook(novel.link, novel.extra) ?: return@tryWithSuspend
-            if (loaded.links.isNotEmpty() && !isOffline) {
-                NovelStorage.saveBook(sourceKey, novel.link, loaded)
-            }
-            book.postValue(loaded)
-        }
-    }
-
     private val fetchedOnlineSubtitles = mutableMapOf<String, List<Any>>()
 
     fun saveFetchedSubtitles(id: String, subs: List<Any>) {
@@ -1212,35 +991,6 @@ class MediaDetailsViewModel : ViewModel() {
 
     fun clearLocalSubtitles(id: String) {
         localSubtitlesMap.remove(id)
-    }
-
-    val adaptation = MutableLiveData<MangaAnimeUtil.AnimeAdaptation?>()
-    val nextRelease = MutableLiveData<MangaAnimeUtil.NextRelease?>()
-    fun loadMangaExtras(media: Media) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val seriesDeferred = async {
-                    MangaAnimeUtil.getSeriesFromMedia(media)
-                }
-
-                val adaptationDeferred = async {
-                    MangaAnimeUtil.getAnimeAdaptation(seriesDeferred.await())
-                }
-
-                val nextReleaseDeferred = async {
-                    MangaAnimeUtil.getNextChapterPrediction(
-                        media,
-                        seriesDeferred.await()
-                    )
-                }
-
-                adaptation.postValue(adaptationDeferred.await())
-                nextRelease.postValue(nextReleaseDeferred.await())
-
-            } catch (e: Exception) {
-                Logger.log("MangaExtras error: $e")
-            }
-        }
     }
 
     // Watch Order and News integration
