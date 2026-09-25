@@ -98,6 +98,7 @@ fun updateProgress(media: Media, number: String) {
                         a, null,
                         if (media.userStatus == "REPEATING") media.userStatus!! else "CURRENT"
                     )
+                    AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).updateProgress(media.id, a)
                     toast(currContext()?.getString(R.string.setting_progress, a))
                     media.userProgress = a
                 }
