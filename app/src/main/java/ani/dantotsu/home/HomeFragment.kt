@@ -392,44 +392,8 @@ class HomeFragment : Fragment() {
             getString(R.string.missing_sequels)
         )
 
-        initRecyclerView(
-            model.getMangaContinue(),
-            binding.homeContinueReadingContainer,
-            binding.homeReadingRecyclerView,
-            binding.homeReadingProgressBar,
-            binding.homeReadingEmpty,
-            binding.homeContinueRead,
-            binding.homeContinueReadMore,
-            getString(R.string.continue_reading)
-        )
-        binding.homeReadingBrowseButton.setOnClickListener {
-            bottomBarOrNull?.selectTabAt(2)
-        }
 
-        initRecyclerView(
-            model.getMangaFav(),
-            binding.homeFavMangaContainer,
-            binding.homeFavMangaRecyclerView,
-            binding.homeFavMangaProgressBar,
-            binding.homeFavMangaEmpty,
-            binding.homeFavManga,
-            binding.homeFavMangaMore,
-            getString(R.string.fav_manga)
-        )
 
-        initRecyclerView(
-            model.getMangaPlanned(),
-            binding.homePlannedMangaContainer,
-            binding.homePlannedMangaRecyclerView,
-            binding.homePlannedMangaProgressBar,
-            binding.homePlannedMangaEmpty,
-            binding.homePlannedManga,
-            binding.homePlannedMangaMore,
-            getString(R.string.planned_manga)
-        )
-        binding.homePlannedMangaBrowseButton.setOnClickListener {
-            bottomBarOrNull?.selectTabAt(2)
-        }
 
         initRecyclerView(
             model.getRecommendation(),
