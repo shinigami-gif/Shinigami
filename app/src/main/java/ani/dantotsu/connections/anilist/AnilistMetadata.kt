@@ -25,7 +25,7 @@ class AnilistMetadata internal constructor(
     suspend fun getAnimeBatch(ids: List<Int>): List<Media>? =
         queries.getMediaList(ids)
 
-    fun getAnimeDetails(media: Media): Media =
+    suspend fun getAnimeDetails(media: Media): Media =
         queries.mediaDetails(media)
 
     suspend fun loadAnimeHomeLists(): Map<String, ArrayList<Media>> =
@@ -41,7 +41,7 @@ class AnilistMetadata internal constructor(
         queries.getGenresAndTags()
 
     suspend fun getBannerImages(): ArrayList<String> =
-        queries.getBannerImages()
+        queries.getBannerImages().mapNotNull { it }.toCollection(ArrayList())
 
     suspend fun getGenres(
         genres: ArrayList<String>,
