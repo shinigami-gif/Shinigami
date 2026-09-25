@@ -185,6 +185,7 @@ class FeedActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
+        binding.socialNavbar.navbar.visibility = View.VISIBLE
         binding.socialNavbar.navbar.selectTabAt(2)
         binding.socialNavbar.navbar.setOnTabSelectListener(
             object : nl.joery.animatedbottombar.AnimatedBottomBar.OnTabSelectListener {
