@@ -7,6 +7,11 @@ import ani.dantotsu.checkId
 import ani.dantotsu.connections.anilist.Anilist.authorRoles
 import ani.dantotsu.connections.anilist.Anilist.executeQuery
 import ani.dantotsu.connections.anilist.api.Activity
+import ani.dantotsu.App
+import ani.dantotsu.database.AnimeStateDatabase
+import ani.dantotsu.database.AnimeStateRepository
+import ani.dantotsu.database.applyTo
+import ani.dantotsu.database.toAnimeStateRecord
 import ani.dantotsu.connections.anilist.api.FeedResponse
 import ani.dantotsu.connections.anilist.api.FuzzyDate
 import ani.dantotsu.connections.anilist.api.MediaEdge
@@ -496,6 +501,22 @@ class AnilistQueries {
                 }
             }
             awaitAll(anilist, mal)
+
+            // Local AnimeState is the source for persistent user progress/state.
+            // Seed it once from the existing remote state so the migration is non-destructive.
+            val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
+            val localState = localStateRepository.get(media.id)
+            if (localState != null) {
+                localState.applyTo(media)
+            } else if (
+                media.isFav ||
+                media.userProgress != null ||
+                media.userStatus != null ||
+                media.userScore != 0 ||
+                media.userRepeat != 0
+            ) {
+                localStateRepository.upsert(media.toAnimeStateRecord())
+            }
         }
         return media
     }
