@@ -46,14 +46,14 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
 
-class InstalledMangaExtensionsFragment : Fragment(), SearchQueryHandler {
+class InstalledMangaExtensionsFragment : Fragment(), SearchQueryHandler  
     private var _binding: FragmentExtensionsBinding? = null
     private val binding get() = _binding!!
     private lateinit var extensionsRecyclerView: RecyclerView
     private val skipIcons: Boolean = PrefManager.getVal(PrefName.SkipExtensionIcons)
     private val mangaExtensionManager: MangaExtensionManager = Injekt.get()
     private val extensionsAdapter = MangaExtensionsAdapter(
-        { pkg ->
+          pkg ->
             val name = pkg.name
             val changeUIVisibility: (Boolean) -> Unit = { show ->
                 val activity = activity as? ExtensionsActivity
