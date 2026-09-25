@@ -1,0 +1,43 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-or-later
+SourceCode: https://github.com/shinigami-gif/Shinigami
+RepoType: git
+Repo: https://github.com/shinigami-gif/Shinigami.git
+IssueTracker: https://github.com/shinigami-gif/Shinigami/issues
+
+Builds:
+  - versionName: 3.2.2
+    versionCode: 3020201
+    commit: a0e00b4de5a219f7ab41465f9aaa087d011ff2cd
+    gradle: fdroid
+    gradleprops: fdroid,fdroidAbi=armeabi-v7a
+    forcevercode: true
+    output: app/build/outputs/apk/release/app-fdroid-armeabi-v7a-release.apk
+
+  - versionName: 3.2.2
+    versionCode: 3020202
+    commit: a0e00b4de5a219f7ab41465f9aaa087d011ff2cd
+    gradle: fdroid
+    gradleprops: fdroid,fdroidAbi=arm64-v8a
+    forcevercode: true
+    output: app/build/outputs/apk/release/app-fdroid-arm64-v8a-release.apk
+
+  - versionName: 3.2.2
+    versionCode: 3020203
+    commit: a0e00b4de5a219f7ab41465f9aaa087d011ff2cd
+    gradle: fdroid
+    gradleprops: fdroid,fdroidAbi=x86
+    forcevercode: true
+    output: app/build/outputs/apk/release/app-fdroid-x86-release.apk
+
+  - versionName: 3.2.2
+    versionCode: 3020204
+    commit: a0e00b4de5a219f7ab41465f9aaa087d011ff2cd
+    gradle: fdroid
+    gradleprops: fdroid,fdroidAbi=x86_64
+    forcevercode: true
+    output: app/build/outputs/apk/release/app-fdroid-x86_64-release.apk
+
+CurrentVersion: 3.2.2
+CurrentVersionCode: 3020204
