@@ -709,10 +709,15 @@ class AnilistQueries {
         }"""
         val response = executeQuery<Query.RecommendationsResponse>(query, show = true)
         val subMap = mutableMapOf<Int, Media>()
+        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
 
         response?.data?.recRating?.recommendations?.forEach {
             it.mediaRecommendation?.let { json ->
                 val media = Media(json)
+                val localState = localStateRepository.get(media.id)
+                if (localState != null) {
+                    localState.applyTo(media)
+                }
                 if (media.userStatus == null) {
                     media.relation = json.type?.toString()
                     subMap[media.id] = media
@@ -722,6 +727,10 @@ class AnilistQueries {
         response?.data?.recNew?.recommendations?.forEach {
             it.mediaRecommendation?.let { json ->
                 val media = Media(json)
+                val localState = localStateRepository.get(media.id)
+                if (localState != null) {
+                    localState.applyTo(media)
+                }
                 if (media.userStatus == null) {
                     media.relation = json.type?.toString()
                     subMap[media.id] = media
