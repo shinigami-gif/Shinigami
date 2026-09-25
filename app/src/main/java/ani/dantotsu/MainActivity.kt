@@ -333,25 +333,21 @@ class MainActivity : AppCompatActivity() {
                             selectedOption = 0
                             mainViewPager.setCurrentItem(0, false)
                         }
-                        1 -> startActivity(Intent(this@MainActivity, ani.dantotsu.media.CalendarActivity::class.java))
+                        1 -> navigateWithSwipe(Intent(this@MainActivity, ani.dantotsu.media.CalendarActivity::class.java), true)
                         2 -> if (!PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
-                            startActivity(Intent(this@MainActivity, FeedActivity::class.java))
+                            navigateWithSwipe(Intent(this@MainActivity, FeedActivity::class.java), true)
                         } else {
                             snackString(getString(R.string.rescue_mode_active))
+                            navbar.selectTabAt(0, false)
                         }
-                        3 -> startActivity(
+                        3 -> navigateWithSwipe(
                             Intent(this@MainActivity, ani.dantotsu.media.user.ListActivity::class.java)
                                 .putExtra("anime", true)
                                 .putExtra("username", Anilist.username ?: "")
-                                .putExtra("userId", Anilist.userid ?: 0)
+                                .putExtra("userId", Anilist.userid ?: 0),
+                            true
                         )
-                        4 -> {
-                            startActivity(Intent(this@MainActivity, AccountActivity::class.java))
-                        }
-                    }
-                    if (newIndex != 0) {
-                        navbar.selectTabAt(0, false)
-                        selectedOption = 0
+                        4 -> navigateWithSwipe(Intent(this@MainActivity, AccountActivity::class.java), true)
                     }
                 }
             })
@@ -364,7 +360,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = navBarHeight
+                bottomMargin = (navBarHeight - 6f.px).coerceAtLeast(0f.px)
             }
         }
 
@@ -631,6 +627,14 @@ class MainActivity : AppCompatActivity() {
             }
             show()
         }
+    }
+
+    private fun navigateWithSwipe(intent: Intent, forward: Boolean) {
+        startActivity(intent)
+        overridePendingTransition(
+            if (forward) R.anim.slide_in_right else R.anim.slide_in_left,
+            if (forward) R.anim.slide_out_left else R.anim.slide_out_right
+        )
     }
 
     //ViewPager
