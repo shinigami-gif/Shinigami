@@ -7,7 +7,6 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import ani.dantotsu.addons.download.DownloadAddonManager
-import ani.dantotsu.torrent.TorrentServerManager
 import ani.dantotsu.connections.comments.CommentsAPI
 import ani.dantotsu.connections.crashlytics.CrashlyticsInterface
 import ani.dantotsu.connections.discord.Discord
@@ -16,9 +15,6 @@ import ani.dantotsu.connections.discord.RPCManager
 import ani.dantotsu.notifications.TaskScheduler
 import ani.dantotsu.others.DisabledReports
 import ani.dantotsu.parsers.AnimeSources
-import ani.dantotsu.parsers.MangaSources
-import ani.dantotsu.parsers.NovelSources
-import ani.dantotsu.parsers.novel.NovelExtensionManager
 import ani.dantotsu.settings.SettingsActivity
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -27,7 +23,6 @@ import ani.dantotsu.util.Logger
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
-import eu.kanade.tachiyomi.extension.manga.MangaExtensionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -59,9 +54,6 @@ class App : Application(), GraphProvider<AppGraph> {
     @Inject lateinit var interopModule: MetroInteropModule
 
     private lateinit var animeExtensionManager: AnimeExtensionManager
-    private lateinit var mangaExtensionManager: MangaExtensionManager
-    private lateinit var novelExtensionManager: NovelExtensionManager
-    private lateinit var torrentServerManager: TorrentServerManager
     private lateinit var downloadAddonManager: DownloadAddonManager
 
     init {
@@ -148,27 +140,7 @@ class App : Application(), GraphProvider<AppGraph> {
             AnimeSources.init(animeExtensionManager.installedExtensionsFlow, animeExtensionManager)
         }
         applicationScope.launch(Dispatchers.IO) {
-            mangaExtensionManager = Injekt.get()
-            launch {
-                delay(1500)
-                mangaExtensionManager.findAvailableExtensions()
-            }
-            MangaSources.init(mangaExtensionManager.installedExtensionsFlow, mangaExtensionManager)
-        }
-        applicationScope.launch(Dispatchers.IO) {
-            novelExtensionManager = Injekt.get()
-            launch {
-                delay(1500)
-                novelExtensionManager.findAvailableExtensions()
-            }
-            NovelSources.init(novelExtensionManager.allInstalledExtensionsFlow)
-        }
-        applicationScope.launch(Dispatchers.IO) {
-            torrentServerManager = Injekt.get()
             downloadAddonManager = Injekt.get()
-            if (torrentServerManager.isAvailable()) {
-                torrentServerManager.start()
-            }
             downloadAddonManager.init()
             if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1) {
                 CommentsAPI.fetchAuthToken(this@App)
@@ -218,7 +190,7 @@ class App : Application(), GraphProvider<AppGraph> {
         }
 
         val activityName = activity.javaClass.simpleName
-        if (activityName == "ExoplayerView" || activityName == "MangaReaderActivity" || activityName == "NovelReaderActivity") {
+        if (activityName == "ExoplayerView") {
             // These activities manage their own Discord presence
             return
         }
@@ -237,7 +209,7 @@ class App : Application(), GraphProvider<AppGraph> {
                     val mediaDetailsActivity = activity as? ani.dantotsu.media.MediaDetailsActivity
                     val media = mediaDetailsActivity?.media
                     if (media != null) {
-                        details = if (media.anime != null) "Browsing Anime Info" else "Browsing Manga Info"
+                        details = "Browsing Anime Info"
                         state = media.userPreferredName
                         media.cover?.let {
                             if (it.isNotEmpty()) {
