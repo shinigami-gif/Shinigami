@@ -22,6 +22,7 @@ coil = "3.5.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 sqldelight = "2.3.2"
 sqldelight-androidx-driver = "0637a964a1"
+androidx-sqlite = "2.7.0"
 androidx-baselineProfile = "1.5.0"
 androidx-profileInstaller = "1.4.1"
 leakcanary = "2.14"
@@ -149,6 +150,7 @@ metrox-viewmodel = { module = "dev.zacsweers.metro:metrox-viewmodel", version.re
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 sqldelight-androidxDriver = { module = "com.github.mihon.sqldelight-androidx-driver:sqldelight-androidx-driver", version.ref = "sqldelight-androidx-driver" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight-async = { module = "app.cash.sqldelight:async-extensions", version.ref = "sqldelight" }
 sqldelight-androidxPaging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
