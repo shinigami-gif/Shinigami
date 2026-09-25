@@ -738,7 +738,7 @@ class AnilistSearch : ViewModel() {
             return
         }
         aniMangaResult.postValue(
-            Anilist.query.searchAniManga(
+            Anilist.metadata.searchAnime(
                 r.page,
                 r.perPage,
                 r.search,
@@ -986,7 +986,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        characterResult.postValue(Anilist.query.searchCharacters(r.page + 1, r.search))
+        characterResult.postValue(Anilist.metadata.searchCharacters(r.page + 1, r.search))
     }
 
     private suspend fun loadNextStudiosPage(r: StudioSearchResults) {
@@ -1008,7 +1008,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        studioResult.postValue(Anilist.query.searchStudios(r.page + 1, r.search))
+        studioResult.postValue(Anilist.metadata.searchStudios(r.page + 1, r.search))
     }
 
     private suspend fun loadNextStaffPage(r: StaffSearchResults) {
@@ -1030,7 +1030,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        staffResult.postValue(Anilist.query.searchStaff(r.page + 1, r.search))
+        staffResult.postValue(Anilist.metadata.searchStaff(r.page + 1, r.search))
     }
 
     private suspend fun loadNextUserPage(r: UserSearchResults) {
