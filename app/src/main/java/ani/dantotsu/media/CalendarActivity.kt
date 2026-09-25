@@ -77,6 +77,7 @@ class CalendarActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        binding.calendarNavbar.navbar.visibility = View.VISIBLE
         binding.calendarNavbar.navbar.selectTabAt(1)
         binding.calendarNavbar.navbar.setOnTabSelectListener(
             object : nl.joery.animatedbottombar.AnimatedBottomBar.OnTabSelectListener {
