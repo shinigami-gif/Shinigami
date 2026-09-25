@@ -107,8 +107,9 @@ class AnilistMutations {
         val variables = if (anime) """{"animeId":"$id"}""" else """{"mangaId":"$id"}"""
         executeQuery<JsonObject>(query, variables)
         val repository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
-        val current = repository.get(id) ?: AnimeStateRecord(animeId = id)
-        repository.upsert(current.copy(isFavorite = !current.isFavorite))
+        val current = repository.get(id)
+        val nextFavorite = current?.let { !it.isFavorite } ?: true
+        repository.upsert((current ?: AnimeStateRecord(animeId = id)).copy(isFavorite = nextFavorite))
     }
 
     suspend fun toggleFav(type: FavType, id: Int): Boolean {
