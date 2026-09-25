@@ -11,6 +11,8 @@
 
     <include layout="@layout/layout_profile_header" />
 
+    <include layout="@layout/layout_profile_header" />
+
     <include layout="@layout/layout_trending" />
 
     <HorizontalScrollView
