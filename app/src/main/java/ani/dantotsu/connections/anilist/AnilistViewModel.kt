@@ -49,7 +49,7 @@ class AnilistHomeViewModel : ViewModel() {
         MutableLiveData<ArrayList<String?>>(arrayListOf())
 
     fun getListImages(): LiveData<ArrayList<String?>> = listImages
-    suspend fun setListImages() = listImages.postValue(Anilist.query.getBannerImages())
+    suspend fun setListImages() = listImages.postValue(Anilist.metadata.getBannerImages())
 
     private val animeContinue: MutableLiveData<ArrayList<Media>> =
         MutableLiveData<ArrayList<Media>>(null)
@@ -103,7 +103,7 @@ class AnilistHomeViewModel : ViewModel() {
             while (addedMedia.isEmpty() && recommendationHasNextPage && attempts < 3) {
                 attempts++
                 val nextPage = recommendationPage + 1
-                val (newMedia, hasNext) = Anilist.query.getRecommendations(nextPage)
+                val (newMedia, hasNext) = Anilist.metadata.getAnimeRecommendations(nextPage)
                 recommendationPage = nextPage
                 recommendationHasNextPage = hasNext
                 val uniqueNew = newMedia.filter { it.id !in existingIds }
@@ -315,7 +315,7 @@ class AnilistHomeViewModel : ViewModel() {
         } else {
             syncPendingProgressUpdates()
             syncPendingDeletions()
-            val ret = Anilist.query.getGenresAndTags()
+            val ret = Anilist.metadata.getGenresAndTags()
             withContext(Dispatchers.Main) { genres.value = ret }
         }
     }
@@ -351,8 +351,8 @@ class AnilistAnimeViewModel : ViewModel() {
         }
         val (season, year) = Anilist.currentSeasons[i]
         trending.postValue(
-            Anilist.query.searchAniManga(
-                type,
+            Anilist.metadata.searchAnime(
+                
                 perPage = 12,
                 sort = Anilist.sortBy[2],
                 season = season,
@@ -400,8 +400,8 @@ class AnilistAnimeViewModel : ViewModel() {
             return
         }
         animePopular.postValue(
-            Anilist.query.searchAniManga(
-                type,
+            Anilist.metadata.searchAnime(
+                
                 search = searchVal,
                 onList = if (onList) null else false,
                 sort = sort,
@@ -440,8 +440,7 @@ class AnilistAnimeViewModel : ViewModel() {
             return
         }
         animePopular.postValue(
-            Anilist.query.searchAniManga(
-                r.type,
+            Anilist.metadata.searchAnime(
                 r.page + 1,
                 r.perPage,
                 r.search,
@@ -761,8 +760,7 @@ class AnilistSearch : ViewModel() {
             return
         }
         aniMangaResult.postValue(
-            Anilist.query.searchAniManga(
-                r.type,
+            Anilist.metadata.searchAnime(
                 r.page,
                 r.perPage,
                 r.search,
@@ -803,7 +801,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        characterResult.postValue(Anilist.query.searchCharacters(r.page, r.search))
+        characterResult.postValue(Anilist.metadata.searchCharacters(r.page, r.search))
     }
 
     private suspend fun loadStudiosSearch(r: StudioSearchResults) {
@@ -825,7 +823,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        studioResult.postValue(Anilist.query.searchStudios(r.page, r.search))
+        studioResult.postValue(Anilist.metadata.searchStudios(r.page, r.search))
     }
 
     private suspend fun loadStaffSearch(r: StaffSearchResults) {
@@ -847,7 +845,7 @@ class AnilistSearch : ViewModel() {
             }
             return
         }
-        staffResult.postValue(Anilist.query.searchStaff(r.page, r.search))
+        staffResult.postValue(Anilist.metadata.searchStaff(r.page, r.search))
     }
 
     private suspend fun loadUserSearch(r: UserSearchResults) {
@@ -969,8 +967,7 @@ class AnilistSearch : ViewModel() {
             return
         }
         aniMangaResult.postValue(
-            Anilist.query.searchAniManga(
-                r.type,
+            Anilist.metadata.searchAnime(
                 r.page + 1,
                 r.perPage,
                 r.search,
@@ -1091,7 +1088,7 @@ class GenresViewModel : ViewModel() {
             if (PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
                 loadGenresFromJikan(genre, listener)
             } else {
-                Anilist.query.getGenres(genre) {
+                Anilist.metadata.getGenres(genre) {
                     genres!![it.first] = it.second
                     listener.invoke(it)
                     if (genres!!.size == genre.size) {
