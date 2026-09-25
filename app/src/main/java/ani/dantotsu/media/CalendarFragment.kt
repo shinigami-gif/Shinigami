@@ -42,7 +42,7 @@ class CalendarFragment : Fragment(R.layout.activity_calendar) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = ActivityCalendarBinding.bind(view)
-        ThemeManager(requireContext()).applyTheme()
+        ThemeManager(requireActivity()).applyTheme()
         val activity = requireActivity()
         val surface = getThemeColor(com.google.android.material.R.attr.colorSurface)
         val outline = getThemeColor(com.google.android.material.R.attr.colorOutline)
