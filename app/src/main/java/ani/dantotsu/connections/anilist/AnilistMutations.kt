@@ -18,6 +18,17 @@ import kotlinx.serialization.json.contentOrNull
 
 class AnilistMutations {
 
+    private fun fuzzyDateToEpochDay(date: FuzzyDate): Long? {
+        val year = date.year ?: return null
+        val month = date.month ?: 1
+        val day = date.day ?: 1
+        return try {
+            java.time.LocalDate.of(year, month, day).toEpochDay()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     suspend fun updateSettings(
         timezone: String? = null,
         titleLanguage: String? = null,
@@ -288,6 +299,8 @@ class AnilistMutations {
                 score = score?.toDouble() ?: current.score,
                 repeat = repeat ?: current.repeat,
                 listStatus = status ?: current.listStatus,
+                startedAt = startedAt?.let { fuzzyDateToEpochDay(it) } ?: current.startedAt,
+                completedAt = completedAt?.let { fuzzyDateToEpochDay(it) } ?: current.completedAt,
                 updatedAt = System.currentTimeMillis(),
             )
         )
