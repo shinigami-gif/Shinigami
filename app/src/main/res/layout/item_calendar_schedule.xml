@@ -61,6 +61,7 @@
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/scheduleCover"
+                android:transitionName="mediaCover"
                 android:layout_width="72dp"
                 android:layout_height="102dp"
                 android:scaleType="centerCrop"
