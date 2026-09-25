@@ -1,7 +1,10 @@
 package ani.dantotsu.media
 
 import android.graphics.Bitmap
+import ani.dantotsu.App
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.database.AnimeStateDatabase
+import ani.dantotsu.database.AnimeStateRepository
 import ani.dantotsu.connections.anilist.api.FuzzyDate
 import ani.dantotsu.connections.anilist.api.MediaEdge
 import ani.dantotsu.connections.anilist.api.MediaExternalLink
@@ -815,6 +818,7 @@ fun Media?.deleteFromList(
                     _id?.let { listId ->
                         try {
                             Anilist.mutation.deleteList(listId)
+                            AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).delete(media.id)
                             MAL.query.deleteList(media.anime != null, media.idMAL)
 
                             val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
