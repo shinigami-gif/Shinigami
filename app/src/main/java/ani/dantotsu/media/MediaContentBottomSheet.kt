@@ -95,13 +95,8 @@ class MediaContentBottomSheet : BottomSheetDialogFragment() {
                     displayWatchOrder(items, media)
                 }
             } else {
-                val isAnime = media.anime != null || media.format in listOf("TV", "TV_SHORT", "MOVIE", "SPECIAL", "OVA", "ONA", "MUSIC")
                 val items = withContext(Dispatchers.IO) {
-                    if (isAnime) {
-                        model.getAnimeNews(media)
-                    } else {
-                        model.getMangaNovelNews(media)
-                    }
+                    model.getAnimeNews(media)
                 }
                 if (_binding == null) return@launch
                 binding.repliesRefresh.visibility = View.GONE
