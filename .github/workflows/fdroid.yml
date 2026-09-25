@@ -1,4 +1,4 @@
-name: F-Droid APK
+name: Build APK
 
 on:
   push:
@@ -10,17 +10,9 @@ permissions:
   contents: read
 
 jobs:
-  build-fdroid:
-    name: Build F-Droid ${{ matrix.abi }}
+  build-google:
+    name: Build Google Release APK
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        abi:
-          - armeabi-v7a
-          - arm64-v8a
-          - x86
-          - x86_64
 
     steps:
       - name: Checkout
@@ -44,12 +36,18 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses > /dev/null || true
 
-      - name: Build F-Droid APK
-        run: ./gradlew assembleFdroidRelease -Pfdroid -PfdroidAbi=${{ matrix.abi }} --no-daemon
+      - name: Build Google Release APK
+        run: ./gradlew assembleGoogleRelease --no-daemon
 
-      - name: Upload APK
+      - name: Verify universal APK
+        run: |
+          set -e
+          ls -lah app/build/outputs/apk
+          find app/build/outputs/apk -type f -name '*universal*.apk' -print -quit | grep -q .
+
+      - name: Upload single universal APK
         uses: actions/upload-artifact@v7
         with:
-          name: shinigami-fdroid-${{ matrix.abi }}
-          path: app/build/outputs/apk/**/*.apk
+          name: shinigami-google-universal
+          path: app/build/outputs/apk/**/*universal*.apk
           if-no-files-found: error
