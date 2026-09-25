@@ -324,12 +324,14 @@ class AnimeFragment : Fragment() {
     }
 
     override fun onResume() {
-        if (!model.loaded) Refresh.activity[this.hashCode()]!!.postValue(true)
-        if (animePageAdapter.trendingViewPager != null) {
-            binding.root.requestApplyInsets()
-            binding.root.requestLayout()
+        if (!model.loaded && Refresh.activity[this.hashCode()] != null) {
+            Refresh.activity[this.hashCode()]!!.postValue(true)
         }
         if (this::animePageAdapter.isInitialized && _binding != null) {
+            if (animePageAdapter.trendingViewPager != null) {
+                binding.root.requestApplyInsets()
+                binding.root.requestLayout()
+            }
             animePageAdapter.updateNotificationCount()
         }
         super.onResume()
