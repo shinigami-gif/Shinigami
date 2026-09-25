@@ -58,7 +58,7 @@ class CalendarFragment : Fragment(R.layout.activity_calendar) {
             binding.calendarHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = (statusBarHeight - 8f.px).coerceAtLeast(0f.px) }
         } else {
             binding.root.fitsSystemWindows = false
-            hideSystemBarsExtendView()
+            requireActivity().hideSystemBarsExtendView()
             binding.calendarHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = statusBarHeight }
         }
         binding.calendarSearch.setOnClickListener {
