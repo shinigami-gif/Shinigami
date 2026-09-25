@@ -2,7 +2,6 @@ package tachiyomi.source.local.archive
 
 import me.zhanghai.android.libarchive.Archive
 import me.zhanghai.android.libarchive.ArchiveEntry
-import me.zhanghai.android.libarchive.ArchiveException
 import java.io.InputStream
 import java.nio.ByteBuffer
 import kotlin.concurrent.Volatile
@@ -21,7 +20,7 @@ class ArchiveInputStream(buffer: Long, size: Long) : InputStream() {
             Archive.readSupportFilterAll(archive)
             Archive.readSupportFormatAll(archive)
             Archive.readOpenMemoryUnsafe(archive, buffer, size)
-        } catch (e: ArchiveException) {
+        } catch (e: Exception) {
             close()
             throw e
         }
