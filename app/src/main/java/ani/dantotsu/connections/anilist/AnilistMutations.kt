@@ -318,7 +318,8 @@ class AnilistMutations {
         """.trimIndent()
         val variables = """{"id":"$listId"}"""
         executeQuery<JsonObject>(query, variables)
-        AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).delete(listId)
+        // listId is the remote AniList MediaListEntry id, not the anime id.
+        // Local AnimeState is deleted by Media.deleteFromList(), where the anime id is known.
         Anilist.query.invalidateUserStatusCache()
         Anilist.query.invalidateHomePageCache()
     }
