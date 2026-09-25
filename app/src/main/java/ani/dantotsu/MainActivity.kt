@@ -41,7 +41,6 @@ import ani.dantotsu.databinding.SplashScreenBinding
 import ani.dantotsu.home.AnimeFragment
 import ani.dantotsu.home.HomeFragment
 import ani.dantotsu.home.LoginFragment
-import ani.dantotsu.home.MangaFragment
 import ani.dantotsu.media.CalendarFragment
 import ani.dantotsu.profile.activity.SocialFragment
 import ani.dantotsu.media.user.LibraryFragment
