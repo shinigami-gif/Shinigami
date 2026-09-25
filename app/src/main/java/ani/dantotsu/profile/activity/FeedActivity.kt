@@ -63,7 +63,7 @@ class FeedActivity : AppCompatActivity() {
             )
             cards.forEachIndexed { index, card ->
                 card.strokeColor = if (index == quickActionIndex) {
-                    getThemeColor(com.google.android.material.R.attr.colorPrimary)
+                    getThemeColor(androidx.appcompat.R.attr.colorPrimary)
                 } else {
                     getThemeColor(com.google.android.material.R.attr.colorOutline)
                 }
