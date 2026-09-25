@@ -56,6 +56,8 @@ fun updateProgress(media: Media, number: String) {
             // In rescue mode: cache the update for later AL sync and mirror to MAL
             val a = progressInt
             if (a > (media.userProgress ?: -1)) {
+                // Local AnimeState is the persistent source of playback progress.
+                AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).updateProgress(media.id, a)
                 val status = if (media.userStatus == "REPEATING") media.userStatus!! else "CURRENT"
                 val pending = PendingProgressUpdate(
                     mediaId = media.id,
@@ -96,7 +98,6 @@ fun updateProgress(media: Media, number: String) {
                         a, null,
                         if (media.userStatus == "REPEATING") media.userStatus!! else "CURRENT"
                     )
-                    AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).updateProgress(media.id, a)
                     toast(currContext()?.getString(R.string.setting_progress, a))
                     media.userProgress = a
                 }
