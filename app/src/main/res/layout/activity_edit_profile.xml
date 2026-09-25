@@ -97,7 +97,7 @@
                 android:layout_marginBottom="-4dp"
                 android:background="?attr/colorSurface"
                 android:contentDescription="Change photo"
-                android:src="@drawable/ic_round_camera_alt_24"
+                android:src="@drawable/ic_round_search_24"
                 app:tint="?attr/colorOnSurface" />
 
             <ImageButton
@@ -272,69 +272,5 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="14dp"
-            android:text="Accent Color"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="17sp"
-            android:textStyle="bold"/>
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="58dp"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp">
-
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_red"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_pink"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_purple"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_blue"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_cyan"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_green"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_accent_yellow"/>
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/bg_accent_orange"/>
-            </LinearLayout>
-        </HorizontalScrollView>
     </LinearLayout>
 </ScrollView>
