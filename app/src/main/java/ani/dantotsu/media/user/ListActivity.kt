@@ -126,40 +126,37 @@ class ListActivity : AppCompatActivity() {
         if (PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
             binding.listSort.visibility = View.GONE
         }
-        binding.listSort.setOnClickListener {
-            val popup = PopupMenu(this, it)
-            popup.setOnMenuItemClickListener { item ->
-                val sort = when (item.itemId) {
-                    R.id.score -> "score"
-                    R.id.title -> "title"
-                    R.id.updated -> "updatedAt"
-                    R.id.release -> "release"
-                    else -> null
-                }
-                PrefManager.setVal(
-                    if (anime) PrefName.AnimeListSortOrder else PrefName.MangaListSortOrder,
-                    sort ?: ""
-                )
-                binding.listProgressBar.visibility = View.VISIBLE
-                binding.listViewPager.adapter = null
-                scope.launch {
-                    withContext(Dispatchers.IO) {
-                        model.loadLists(
-                            anime,
-                            intent.getIntExtra("userId", 0),
-                            sort
-                        )
-                    }
-                }
-                true
-            }
-            popup.inflate(R.menu.list_sort_menu)
-            popup.show()
-        }
-
         binding.filter.setOnClickListener {
             val popup = PopupMenu(this, it)
             popup.menu.add(Menu.NONE, 0, Menu.NONE, "All")
+
+            val sortSubMenu = popup.menu.addSubMenu("Sort by")
+            listOf(
+                "Recently Added" to "updatedAt",
+                "Last Updated" to "updatedAt",
+                "Title (A - Z)" to "title",
+                "Score" to "score",
+                "Release" to "release"
+            ).forEachIndexed { index, (label, sort) ->
+                sortSubMenu.add(3, index + 20000, Menu.NONE, label).setOnMenuItemClickListener {
+                    PrefManager.setVal(
+                        if (anime) PrefName.AnimeListSortOrder else PrefName.MangaListSortOrder,
+                        sort
+                    )
+                    binding.listProgressBar.visibility = View.VISIBLE
+                    binding.listViewPager.adapter = null
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            model.loadLists(
+                                anime,
+                                intent.getIntExtra("userId", 0),
+                                sort
+                            )
+                        }
+                    }
+                    true
+                }
+            }
 
             val genres = model.getAllGenres()
             if (genres.isNotEmpty()) {
