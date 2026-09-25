@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="0dp"
+    android:layout_height="92dp"
+    android:layout_weight="1"
+    android:layout_margin="3dp"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:cardCornerRadius="14dp"
+    app:strokeColor="?attr/colorOutline"
+    app:strokeWidth="1dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+        <ImageView android:id="@+id/socialActionIcon" android:layout_width="25dp" android:layout_height="25dp" app:tint="?attr/colorPrimary" android:src="@drawable/ic_round_comment_24"/>
+        <TextView android:id="@+id/socialActionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:fontFamily="@font/poppins_semi_bold" android:textColor="?attr/colorOnSurface" android:textSize="11sp"/>
+        <TextView android:id="@+id/socialActionSubtitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:alpha="0.65" android:maxLines="2" android:textColor="?attr/colorOnSurface" android:textSize="8sp"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
