@@ -8,15 +8,11 @@ import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import ani.dantotsu.addons.download.DownloadAddonManager
-import ani.dantotsu.torrent.TorrentServerManager
 import ani.dantotsu.download.DownloadsManager
-import ani.dantotsu.media.manga.MangaCache
-import ani.dantotsu.parsers.novel.NovelExtensionManager
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.core.preference.AndroidPreferenceStore
 import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
-import eu.kanade.tachiyomi.extension.manga.MangaExtensionManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.anime.AndroidAnimeSourceManager
 import eu.kanade.tachiyomi.source.manga.AndroidMangaSourceManager
@@ -25,7 +21,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import tachiyomi.core.preference.PreferenceStore
 import tachiyomi.domain.source.anime.service.AnimeSourceManager
-import tachiyomi.domain.source.manga.service.MangaSourceManager
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -45,13 +40,9 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { NetworkHelper(app) }
         addSingletonFactory { get<NetworkHelper>().client }
         addSingletonFactory { AnimeExtensionManager(app, get()) }
-        addSingletonFactory { MangaExtensionManager(app, get()) }
-        addSingletonFactory { NovelExtensionManager(app) }
-        addSingletonFactory { TorrentServerManager(app) }
         addSingletonFactory { DownloadAddonManager(app) }
 
         addSingletonFactory<AnimeSourceManager> { AndroidAnimeSourceManager(app, get()) }
-        addSingletonFactory<MangaSourceManager> { AndroidMangaSourceManager(app, get()) }
 
         addSingletonFactory {
             Json {
@@ -63,11 +54,9 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { StandaloneDatabaseProvider(app) }
 
-        addSingletonFactory { MangaCache() }
 
         ContextCompat.getMainExecutor(app).execute {
             get<AnimeSourceManager>()
-            get<MangaSourceManager>()
         }
     }
 }
