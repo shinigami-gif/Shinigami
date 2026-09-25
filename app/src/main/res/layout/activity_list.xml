@@ -139,7 +139,18 @@
                     android:textSize="14sp"
                     tools:ignore="LabelFor,TextContrastCheck" />
             </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/filter"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/filter"
+                    app:srcCompat="@drawable/ic_round_filter_alt_24"
+                    app:tint="?attr/colorOnBackground" />
+
+            </LinearLayout>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/listTabLayout"
