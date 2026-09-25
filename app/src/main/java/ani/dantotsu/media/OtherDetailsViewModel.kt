@@ -423,7 +423,7 @@ class OtherDetailsViewModel : ViewModel() {
                 }
             }
 
-            for (offsetDay in -1..6) {
+            for (offsetDay in -1..13) {
                 val cal = Calendar.getInstance()
                 cal.add(Calendar.DAY_OF_YEAR, offsetDay)
                 val dayName = dayNames[cal.get(Calendar.DAY_OF_WEEK) - 1]
