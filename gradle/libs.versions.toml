@@ -150,6 +150,7 @@ materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "ma
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 sqldelight-androidxDriver = { module = "com.github.mihon.sqldelight-androidx-driver:sqldelight-androidx-driver", version.ref = "sqldelight-androidx-driver" }
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-async = { module = "app.cash.sqldelight:async-extensions", version.ref = "sqldelight" }
 sqldelight-androidxPaging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 androidx-profileInstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "androidx-profileInstaller" }
 play-services-base = "com.google.android.gms:play-services-base:18.5.0"
@@ -166,7 +167,7 @@ androidx-baselineProfile = { id = "androidx.baselineprofile", version.ref = "and
 
 [bundles]
 
-sqldelight = ["sqldelight-androidxDriver", "sqldelight-coroutines", "sqldelight-androidxPaging"]
+sqldelight = ["sqldelight-androidxDriver", "sqldelight-coroutines", "sqldelight-async", "sqldelight-androidxPaging"]
 
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
