@@ -34,8 +34,7 @@ class LocalMappingSearchDialog : BottomSheetDialogFragment() {
     private var searched = false
 
     var folderName: String? = null
-    var searchType: String = "ANIME" // ANIME or MANGA
-    var searchFormat: String? = null // NOVEL for local novels
+    var searchType: String = "ANIME"
     var onMappingSelected: ((Int) -> Unit)? = null
 
     override fun onCreateView(
@@ -71,9 +70,8 @@ class LocalMappingSearchDialog : BottomSheetDialogFragment() {
                 val results = withContext(Dispatchers.IO) {
                     tryWithSuspend {
                         Anilist.query.searchAniManga(
-                            type = searchType,
-                            search = binding.searchBarText.text.toString(),
-                            format = searchFormat
+                            type = "ANIME",
+                            search = binding.searchBarText.text.toString()
                         )
                     }
                 }
