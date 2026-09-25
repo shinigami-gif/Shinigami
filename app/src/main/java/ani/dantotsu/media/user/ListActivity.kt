@@ -14,6 +14,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
+import ani.dantotsu.MainActivity
+import ani.dantotsu.account.AccountActivity
+import ani.dantotsu.media.CalendarActivity
+import ani.dantotsu.profile.activity.FeedActivity
 import ani.dantotsu.Refresh
 import ani.dantotsu.databinding.ActivityListBinding
 import ani.dantotsu.getThemeColor
@@ -66,6 +70,42 @@ class ListActivity : AppCompatActivity() {
             }
         }
         setContentView(binding.root)
+
+        binding.includedNavbar.navbar.selectTabAt(3)
+        binding.includedNavbar.navbar.setOnTabSelectListener(
+            object : nl.joery.animatedbottombar.AnimatedBottomBar.OnTabSelectListener {
+                override fun onTabSelected(
+                    lastIndex: Int,
+                    lastTab: nl.joery.animatedbottombar.AnimatedBottomBar.Tab?,
+                    newIndex: Int,
+                    newTab: nl.joery.animatedbottombar.AnimatedBottomBar.Tab
+                ) {
+                    when (newIndex) {
+                        0 -> {
+                            startActivity(Intent(this@ListActivity, MainActivity::class.java).putExtra("goToHome", true))
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                            finish()
+                        }
+                        1 -> {
+                            startActivity(Intent(this@ListActivity, CalendarActivity::class.java))
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                            finish()
+                        }
+                        2 -> {
+                            startActivity(Intent(this@ListActivity, FeedActivity::class.java))
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                            finish()
+                        }
+                        3 -> Unit
+                        4 -> {
+                            startActivity(Intent(this@ListActivity, AccountActivity::class.java))
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                            finish()
+                        }
+                    }
+                }
+            }
+        )
 
         val anime = intent.getBooleanExtra("anime", true)
         binding.listTitle.text = getString(R.string.library)
