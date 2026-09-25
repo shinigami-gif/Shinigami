@@ -71,29 +71,14 @@ class FeedActivity : AppCompatActivity() {
     }
 
     private fun setupQuickActions() {
-        val cards = listOf(
-            Triple(R.drawable.ic_round_comment_24, "Global Chat", "Chat with anime fans around the world"),
-            Triple(R.drawable.ic_round_person_24, "Anime Chat", "Discuss anime, episodes, and more"),
-            Triple(R.drawable.ic_round_star_24, "Leaderboard", "See top fans and climb the ranks")
-        )
-        val views = listOf(
-            binding.socialQuickActions.getChildAt(0),
-            binding.socialQuickActions.getChildAt(1),
-            binding.socialQuickActions.getChildAt(2)
-        )
-        views.forEachIndexed { i, view ->
-            val title = view.findViewById<android.widget.TextView>(R.id.socialActionTitle)
-            val subtitle = view.findViewById<android.widget.TextView>(R.id.socialActionSubtitle)
-            val icon = view.findViewById<android.widget.ImageView>(R.id.socialActionIcon)
-            icon.setImageResource(cards[i].first)
-            title.text = cards[i].second
-            subtitle.text = cards[i].third
-            view.setOnClickListener {
-                when (i) {
-                    0, 1 -> startActivity(Intent(this, ani.dantotsu.forum.ForumActivity::class.java))
-                    2 -> binding.socialScroll.smoothScrollTo(0, binding.socialLeaderboardHeader.top)
-                }
-            }
+        binding.socialGlobalChatCard.setOnClickListener {
+            startActivity(Intent(this, ani.dantotsu.forum.ForumActivity::class.java))
+        }
+        binding.socialAnimeChatCard.setOnClickListener {
+            startActivity(Intent(this, ani.dantotsu.forum.ForumActivity::class.java))
+        }
+        binding.socialLeaderboardCard.setOnClickListener {
+            binding.socialScroll.smoothScrollTo(0, binding.socialLeaderboardHeader.top)
         }
     }
 
