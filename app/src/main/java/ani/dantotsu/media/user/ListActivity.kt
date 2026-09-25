@@ -138,7 +138,7 @@ class ListActivity : AppCompatActivity() {
 
             if (it != null) {
                 binding.listProgressBar.visibility = View.GONE
-                binding.listViewPager.adapter = ListViewPagerAdapter(it.size, false, this)
+                binding.listViewPager.adapter = ListViewPagerAdapter(it.size, false, supportFragmentManager, lifecycle)
                 val keys = it.keys.toList()
                     .map { key -> userKeys.getOrNull(defaultKeys.indexOf(key)) ?: key }
                 val values = it.values.toList()
