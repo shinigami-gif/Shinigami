@@ -134,21 +134,11 @@ class HomeFragment : Fragment() {
                             .putExtra("username", listUsername), null
                     )
                 }
-                currentBinding.homeMangaList.setOnClickListener {
-                    ContextCompat.startActivity(
-                        requireActivity(), Intent(requireActivity(), ListActivity::class.java)
-                            .putExtra("anime", false)
-                            .putExtra("userId", listUserId)
-                            .putExtra("username", listUsername), null
-                    )
-                }
-
                 binding.homeUserAvatarContainer.startAnimation(setSlideUp())
                 binding.homeUserDataContainer.visibility = View.VISIBLE
                 binding.homeUserDataContainer.layoutAnimation =
                     LayoutAnimationController(setSlideUp(), 0.25f)
                 binding.homeAnimeList.visibility = View.VISIBLE
-                binding.homeMangaList.visibility = View.VISIBLE
                 binding.homeListContainer.layoutAnimation =
                     LayoutAnimationController(setSlideIn(), 0.25f)
             }
@@ -528,9 +518,6 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
             "AnimeContinue",
             "AnimeFav",
             "AnimePlanned",
-            "MangaContinue",
-            "MangaFav",
-            "MangaPlanned",
             "Recommendation",
             "UserStatus",
             "MissingSequels",
@@ -540,9 +527,6 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
             binding.homeContinueWatchingContainer,
             binding.homeFavAnimeContainer,
             binding.homePlannedAnimeContainer,
-            binding.homeContinueReadingContainer,
-            binding.homeFavMangaContainer,
-            binding.homePlannedMangaContainer,
             binding.homeRecommendedContainer,
             binding.homeUserStatusContainer,
             binding.homeMissingSequelsContainer,
@@ -556,7 +540,6 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
 
                 val alOnlySections = listOf(
                     binding.homeFavAnimeContainer,
-                    binding.homeFavMangaContainer,
                     binding.homeUserStatusContainer,
                     binding.homeMissingSequelsContainer,
                 )
@@ -567,11 +550,9 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
 
                     binding.homeContinueWatchingContainer.visibility = View.VISIBLE
                     binding.homePlannedAnimeContainer.visibility = View.VISIBLE
-                    binding.homeContinueReadingContainer.visibility = View.VISIBLE
-                    binding.homePlannedMangaContainer.visibility = View.VISIBLE
                 } else {
                     val homeLayoutShow: List<Boolean> = PrefManager.getVal(PrefName.HomeLayout)
-                    val alOnlyIndices = listOf(1, 4, 7, 8)
+                    val alOnlyIndices = listOf(1, 7, 8)
                     alOnlySections.forEachIndexed { idx, view ->
                         if (homeLayoutShow.getOrElse(alOnlyIndices[idx]) { true }) {
                             view.visibility = View.VISIBLE
