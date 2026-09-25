@@ -16,6 +16,9 @@ import ani.dantotsu.databinding.ActivityCalendarBinding
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.hideSystemBarsExtendView
 import ani.dantotsu.media.user.ListViewPagerAdapter
+import ani.dantotsu.media.user.ListActivity
+import ani.dantotsu.profile.ProfileActivity
+import ani.dantotsu.profile.activity.FeedActivity
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.statusBarHeight
@@ -70,6 +73,40 @@ class CalendarActivity : AppCompatActivity() {
         }
 
         setContentView(binding.root)
+
+        binding.calendarNavbar.navbar.selectTabAt(1)
+        binding.calendarNavbar.navbar.setOnTabSelectListener(
+            object : nl.joery.animatedbottombar.AnimatedBottomBar.OnTabSelectListener {
+                override fun onTabSelected(
+                    lastIndex: Int,
+                    lastTab: nl.joery.animatedbottombar.AnimatedBottomBar.Tab?,
+                    newIndex: Int,
+                    newTab: nl.joery.animatedbottombar.AnimatedBottomBar.Tab
+                ) {
+                    when (newIndex) {
+                        0 -> {
+                            startActivity(android.content.Intent(this@CalendarActivity, MainActivity::class.java)
+                                .putExtra("goToHome", true))
+                            finish()
+                        }
+                        1 -> Unit
+                        2 -> startActivity(android.content.Intent(this@CalendarActivity, FeedActivity::class.java))
+                        3 -> startActivity(
+                            android.content.Intent(this@CalendarActivity, ListActivity::class.java)
+                                .putExtra("anime", true)
+                                .putExtra("userId", Anilist.userid)
+                        )
+                        4 -> startActivity(
+                            android.content.Intent(this@CalendarActivity, ProfileActivity::class.java)
+                                .putExtra("userId", Anilist.userid)
+                        )
+                    }
+                    if (newIndex != 1) {
+                        binding.calendarNavbar.navbar.selectTabAt(1, false)
+                    }
+                }
+            }
+        )
 
         binding.calendarSearch.setOnClickListener {
             startActivity(
