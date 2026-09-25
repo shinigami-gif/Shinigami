@@ -92,20 +92,6 @@ class App : Application(), GraphProvider<AppGraph> {
         }
         registerActivityLifecycleCallbacks(mFTActivityLifecycleCallbacks)
 
-        runCatching {
-            leakcanary.LeakCanary.config = leakcanary.LeakCanary.config.copy(
-                dumpHeap = false,
-                dumpHeapWhenDebugging = false
-            )
-            leakcanary.AppWatcher.objectWatcher.addOnObjectRetainedListener {
-                if (PrefManager.getVal<Boolean>(PrefName.TrackMemoryLeaks)) {
-                    val count = PrefManager.getVal<Int>(PrefName.DailyLeakCount) + 1
-                    PrefManager.setVal(PrefName.DailyLeakCount, count)
-                    Logger.log("LEAK DETECTED: Object retained in memory. Total retained: ${leakcanary.AppWatcher.objectWatcher.retainedObjectCount}, daily count: $count")
-                }
-            }
-        }
-
         val lastSummary = PrefManager.getVal<Long>(PrefName.LastLeakSummaryTimestamp)
         val now = System.currentTimeMillis()
         val oneDayMs = 24 * 60 * 60 * 1000L
