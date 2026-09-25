@@ -56,7 +56,7 @@ class CalendarActivity : AppCompatActivity() {
         window.navigationBarColor = surface
         binding.calendarAppBar.setBackgroundColor(surface)
         binding.calendarTitle.setTextColor(getThemeColor(androidx.appcompat.R.attr.colorOnBackground))
-        binding.calendarDays.setTabTextColors(outline, primary)
+        binding.calendarDays.setTabTextColors(outline, getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
 
         if (!(PrefManager.getVal(PrefName.ImmersiveMode) as Boolean)) {
             window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg_inv)
@@ -126,6 +126,7 @@ class CalendarActivity : AppCompatActivity() {
                 selectedTabIdx = tab?.position ?: 0
                 binding.calendarDays.post {
                     binding.calendarDays.setScrollPosition(selectedTabIdx, 0f, true)
+                    centerSelectedDay(selectedTabIdx)
                 }
                 updateSummary()
             }
@@ -153,6 +154,7 @@ class CalendarActivity : AppCompatActivity() {
                 binding.calendarViewPager.setCurrentItem(initialTab, false)
                 binding.calendarDays.getTabAt(initialTab)?.select()
                 binding.calendarDays.setScrollPosition(initialTab, 0f, true)
+                centerSelectedDay(initialTab)
                 updateSummary()
             }
         }
@@ -177,6 +179,15 @@ class CalendarActivity : AppCompatActivity() {
                     live.postValue(false)
                 }
             }
+        }
+    }
+
+    private fun centerSelectedDay(position: Int) {
+        binding.calendarDays.post {
+            val strip = binding.calendarDays.getChildAt(0) ?: return@post
+            val tab = strip.getChildAt(position) ?: return@post
+            val target = tab.left - ((binding.calendarDays.width - tab.width) / 2)
+            binding.calendarDays.scrollTo(target.coerceAtLeast(0), 0)
         }
     }
 
