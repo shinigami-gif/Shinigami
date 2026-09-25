@@ -147,7 +147,15 @@ class AnilistQueries {
             force = true
         )
         val fetchedMedia = response?.data?.media ?: return null
-        return Media(fetchedMedia)
+        val media = Media(fetchedMedia)
+        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
+        val localState = localStateRepository.get(media.id)
+        if (localState != null) {
+            localState.applyTo(media)
+        } else {
+            localStateRepository.upsert(media.toAnimeStateRecord())
+        }
+        return media
     }
 
     suspend fun getMediaList(ids: List<Int>): List<Media>? {
