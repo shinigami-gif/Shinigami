@@ -28,6 +28,9 @@ class AnilistMetadata internal constructor(
     fun getAnimeDetails(media: Media): Media =
         queries.mediaDetails(media)
 
+    suspend fun loadAnimeHomeLists(): Map<String, ArrayList<Media>> =
+        queries.loadAnimeMetadataList()
+
     suspend fun getAnimeRecommendations(
         page: Int,
         perPage: Int = 50
