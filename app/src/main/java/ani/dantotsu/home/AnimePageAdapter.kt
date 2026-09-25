@@ -227,9 +227,9 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding.trendingViewPager.layoutAnimation =
             LayoutAnimationController(setSlideIn(), 0.25f)
         trendingBinding.titleContainer.startAnimation(setSlideUp())
-        binding.animeListContainer.layoutAnimation =
+        binding.animeContainer.layoutAnimation =
             LayoutAnimationController(setSlideIn(), 0.25f)
-        binding.animeSeasonsCont.layoutAnimation =
+        binding.animeSeasons.layoutAnimation =
             LayoutAnimationController(setSlideIn(), 0.25f)
     }
 
