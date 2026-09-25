@@ -69,10 +69,10 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
         binding.socialHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = statusBarHeight }
 
         binding.socialGlobalChatCard.setOnClickListener {
-            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ForumActivity::class.java))
+            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ForumActivity::class.java).putExtra("forum_title", "Global Chat"))
         }
         binding.socialAnimeChatCard.setOnClickListener {
-            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ForumActivity::class.java))
+            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ForumActivity::class.java).putExtra("forum_title", "Anime Chat"))
         }
         binding.socialLeaderboardCard.setOnClickListener {
             binding.socialScroll.smoothScrollTo(0, binding.socialLeaderboardHeader.top)
