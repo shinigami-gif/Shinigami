@@ -82,7 +82,7 @@ class CalendarFragment : Fragment(R.layout.activity_calendar) {
             binding.calendarProgressBar.visibility = if (currentCalendar.isEmpty()) View.VISIBLE else View.GONE
             if (currentCalendar.isNotEmpty()) {
                 val keys = currentCalendar.keys.toList()
-                binding.calendarViewPager.adapter = ListViewPagerAdapter(keys.size, true, this)
+                binding.calendarViewPager.adapter = ListViewPagerAdapter(keys.size, true, childFragmentManager, viewLifecycleOwner.lifecycle)
                 TabLayoutMediator(binding.calendarDays, binding.calendarViewPager) { tab, position -> tab.text = formatDayTab(keys[position]) }.attach()
                 val initialTab = 1.coerceIn(0, keys.lastIndex)
                 selectedTabIdx = initialTab
