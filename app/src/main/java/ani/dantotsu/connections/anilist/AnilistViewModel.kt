@@ -1145,35 +1145,3 @@ class GenresViewModel : ViewModel() {
         }
     }
 }
-
-class ProfileViewModel : ViewModel() {
-
-    private val mangaFav: MutableLiveData<ArrayList<Media>> =
-        MutableLiveData<ArrayList<Media>>(null)
-
-    fun getMangaFav(): LiveData<ArrayList<Media>> = mangaFav
-
-    private val animeFav: MutableLiveData<ArrayList<Media>> =
-        MutableLiveData<ArrayList<Media>>(null)
-
-    fun getAnimeFav(): LiveData<ArrayList<Media>> = animeFav
-
-    suspend fun setData(id: Int) {
-        val res = Anilist.query.initProfilePage(id)
-        val mangaList = res?.data?.favoriteManga?.favourites?.manga?.edges?.mapNotNull {
-            it.node?.let { i -> Media(i) }
-        }
-        mangaFav.postValue(ArrayList(mangaList ?: arrayListOf()))
-        val animeList = res?.data?.favoriteAnime?.favourites?.anime?.edges?.mapNotNull {
-            it.node?.let { i -> Media(i) }
-        }
-        animeFav.postValue(ArrayList(animeList ?: arrayListOf()))
-
-    }
-
-    fun refresh() {
-        mangaFav.postValue(mangaFav.value)
-        animeFav.postValue(animeFav.value)
-
-    }
-}
