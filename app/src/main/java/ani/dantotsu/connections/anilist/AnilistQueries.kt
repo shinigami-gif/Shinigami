@@ -843,8 +843,19 @@ class AnilistQueries {
         }
 
         val returnMap = mutableMapOf<String, ArrayList<Media>>()
+        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
 
-        fun processMedia(
+        suspend fun localize(media: Media): Media {
+            val localState = localStateRepository.get(media.id)
+            if (localState != null) {
+                localState.applyTo(media)
+            } else {
+                localStateRepository.upsert(media.toAnimeStateRecord())
+            }
+            return media
+        }
+
+        suspend fun processMedia(
             type: String,
             currentMedia: List<MediaList>?,
             repeatingMedia: List<MediaList>?
@@ -853,7 +864,7 @@ class AnilistQueries {
             val returnArray = arrayListOf<Media>()
 
             (currentMedia ?: emptyList()).forEach { entry ->
-                val media = Media(entry)
+                val media = localize(Media(entry))
                 if (media.id !in removeList && (!hidePrivate || !media.isListPrivate)) {
                     media.cameFromContinue = true
                     subMap[media.id] = media
@@ -863,7 +874,7 @@ class AnilistQueries {
             }
 
             (repeatingMedia ?: emptyList()).forEach { entry ->
-                val media = Media(entry)
+                val media = localize(Media(entry))
                 if (media.id !in removeList && (!hidePrivate || !media.isListPrivate)) {
                     media.cameFromContinue = true
                     subMap[media.id] = media
@@ -916,11 +927,11 @@ class AnilistQueries {
             null
         )
 
-        fun processFavorites(type: String, favorites: List<MediaEdge>?) {
+        suspend fun processFavorites(type: String, favorites: List<MediaEdge>?) {
             val returnArray = arrayListOf<Media>()
             favorites?.forEach { edge ->
                 edge.node?.let {
-                    val media = Media(it).apply { isFav = true }
+                    val media = localize(Media(it).apply { isFav = true })
                     if (media.id !in removeList && (!hidePrivate || !media.isListPrivate)) {
                         returnArray.add(media)
                     } else {
@@ -944,7 +955,7 @@ class AnilistQueries {
             val subMap = mutableMapOf<Int, Media>()
             response?.data?.recommendationQuery?.recommendations?.forEach {
                 it.mediaRecommendation?.let { json ->
-                    val media = Media(json)
+                    val media = localize(Media(json))
                     if (media.userStatus == null) {
                         media.relation = json.type?.toString()
                         subMap[media.id] = media
@@ -953,7 +964,7 @@ class AnilistQueries {
             }
             response?.data?.recommendationQueryNew?.recommendations?.forEach {
                 it.mediaRecommendation?.let { json ->
-                    val media = Media(json)
+                    val media = localize(Media(json))
                     if (media.userStatus == null) {
                         media.relation = json.type?.toString()
                         subMap[media.id] = media
