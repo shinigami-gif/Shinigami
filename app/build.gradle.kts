@@ -239,6 +239,7 @@ sqldelight {
     databases {
         create("ShinigamiDatabase") {
             packageName.set("ani.dantotsu.database")
+            generateAsync.set(true)
         }
     }
 }
