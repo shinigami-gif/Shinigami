@@ -1,8 +1,6 @@
-import kotlin.Boolean
-
 CREATE TABLE AnimeState (
     animeId INTEGER NOT NULL PRIMARY KEY,
-    isFavorite INTEGER AS Boolean NOT NULL DEFAULT 0,
+    isFavorite INTEGER NOT NULL DEFAULT 0,
     listStatus TEXT,
     progress INTEGER NOT NULL DEFAULT 0,
     score REAL,
