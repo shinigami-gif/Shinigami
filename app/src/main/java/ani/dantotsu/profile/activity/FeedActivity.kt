@@ -15,6 +15,7 @@ import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.databinding.ActivitySocialBinding
 import ani.dantotsu.initActivity
+import ani.dantotsu.getThemeColor
 import ani.dantotsu.media.CalendarActivity
 import ani.dantotsu.media.user.ListActivity
 import ani.dantotsu.profile.ProfileActivity
