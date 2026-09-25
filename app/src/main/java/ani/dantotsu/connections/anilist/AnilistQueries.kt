@@ -1078,12 +1078,19 @@ class AnilistQueries {
         val unsorted = mutableMapOf<String, ArrayList<Media>>()
         val all = arrayListOf<Media>()
         val allIds = arrayListOf<Int>()
+        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
 
         response?.data?.mediaListCollection?.lists?.forEach { i ->
             val name = i.name.toString().trim('"')
             unsorted[name] = arrayListOf()
             i.entries?.forEach {
                 val a = Media(it)
+                val localState = localStateRepository.get(a.id)
+                if (localState != null) {
+                    localState.applyTo(a)
+                } else {
+                    localStateRepository.upsert(a.toAnimeStateRecord())
+                }
                 unsorted[name]?.add(a)
                 if (!allIds.contains(a.id)) {
                     allIds.add(a.id)
@@ -1109,6 +1116,7 @@ class AnilistQueries {
                 fav.userProgress = it.userProgress
                 fav.userProgressVolumes = it.userProgressVolumes
             }
+            localStateRepository.get(fav.id)?.applyTo(fav)
         }
 
         sorted["All"] = all
