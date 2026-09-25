@@ -63,16 +63,20 @@ android {
 
     splits {
         abi {
-            isEnable = true
-            reset()
-            val fdroidAbi = providers.gradleProperty("fdroidAbi").orNull
-            if (fdroidAbi != null) {
-                include(fdroidAbi)
-            } else {
-                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            val singleApk = providers.gradleProperty("singleApk").isPresent
+            isEnable = !singleApk
+
+            if (!singleApk) {
+                reset()
+                val fdroidAbi = providers.gradleProperty("fdroidAbi").orNull
+                if (fdroidAbi != null) {
+                    include(fdroidAbi)
+                } else {
+                    include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+                }
+                // F-Droid builds are consumed as per-ABI APKs; Google keeps the universal APK.
+                isUniversalApk = !providers.gradleProperty("fdroid").isPresent
             }
-            // F-Droid builds are consumed as per-ABI APKs; Google keeps the universal APK.
-            isUniversalApk = !providers.gradleProperty("fdroid").isPresent
         }
     }
 
