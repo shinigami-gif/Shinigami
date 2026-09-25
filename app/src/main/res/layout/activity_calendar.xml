@@ -48,30 +48,10 @@
                         android:id="@+id/calendarSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:alpha="0.65"
-                        android:text="Track upcoming anime episodes"
-                        android:textColor="?attr/colorOnBackground"
-                        android:textSize="13sp" />
+                        android:visibility="gone" />
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/calendarSearch"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/search"
-                    app:srcCompat="@drawable/ic_round_search_24"
-                    app:tint="?attr/colorOnBackground" />
 
-                <ImageButton
-                    android:id="@+id/calendarMore"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_round_dots_vertical_24"
-                    app:tint="?attr/colorOnBackground" />
             </LinearLayout>
 
             <LinearLayout
@@ -97,6 +77,24 @@
                     android:alpha="0.65"
                     android:textColor="?attr/colorOnBackground"
                     android:textSize="12sp" />
+
+                <ImageButton
+                    android:id="@+id/calendarSearch"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/search"
+                    app:srcCompat="@drawable/ic_round_search_24"
+                    app:tint="?attr/colorOnBackground" />
+
+                <ImageButton
+                    android:id="@+id/calendarMore"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_round_dots_vertical_24"
+                    app:tint="?attr/colorOnBackground" />
             </LinearLayout>
 
             <com.google.android.material.tabs.TabLayout
