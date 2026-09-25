@@ -234,7 +234,7 @@
                             app:cardCornerRadius="16dp"
                             app:layout_constrainedWidth="true"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@+id/homeMangaList"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintWidth_max="256dp"
@@ -278,7 +278,6 @@
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
 
-ialCardView>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
