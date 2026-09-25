@@ -11,6 +11,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
+import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.Refresh
 import ani.dantotsu.databinding.ActivityCalendarBinding
 import ani.dantotsu.getThemeColor
