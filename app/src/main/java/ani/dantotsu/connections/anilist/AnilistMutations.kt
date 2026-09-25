@@ -1,6 +1,10 @@
 package ani.dantotsu.connections.anilist
 
+import ani.dantotsu.App
 import ani.dantotsu.connections.anilist.Anilist.executeQuery
+import ani.dantotsu.database.AnimeStateDatabase
+import ani.dantotsu.database.AnimeStateRecord
+import ani.dantotsu.database.AnimeStateRepository
 import ani.dantotsu.connections.anilist.api.FuzzyDate
 import ani.dantotsu.connections.anilist.api.Query
 import ani.dantotsu.connections.anilist.api.ToggleLike
@@ -102,6 +106,9 @@ class AnilistMutations {
         """.trimIndent()
         val variables = if (anime) """{"animeId":"$id"}""" else """{"mangaId":"$id"}"""
         executeQuery<JsonObject>(query, variables)
+        val repository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
+        val current = repository.get(id) ?: AnimeStateRecord(animeId = id)
+        repository.upsert(current.copy(isFavorite = !current.isFavorite))
     }
 
     suspend fun toggleFav(type: FavType, id: Int): Boolean {
@@ -272,6 +279,17 @@ class AnilistMutations {
             }""".replace("\n", "").replace("""    """, "")
         println(variables)
         executeQuery<JsonObject>(query, variables, show = true)
+        val repository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
+        val current = repository.get(mediaID) ?: AnimeStateRecord(animeId = mediaID)
+        repository.upsert(
+            current.copy(
+                progress = progress ?: current.progress,
+                score = score?.toDouble() ?: current.score,
+                repeat = repeat ?: current.repeat,
+                listStatus = status ?: current.listStatus,
+                updatedAt = System.currentTimeMillis(),
+            )
+        )
         Anilist.query.invalidateUserStatusCache()
         Anilist.query.invalidateHomePageCache()
     }
@@ -286,6 +304,7 @@ class AnilistMutations {
         """.trimIndent()
         val variables = """{"id":"$listId"}"""
         executeQuery<JsonObject>(query, variables)
+        AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).delete(listId)
         Anilist.query.invalidateUserStatusCache()
         Anilist.query.invalidateHomePageCache()
     }
