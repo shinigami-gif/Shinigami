@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorBackground">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/socialScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="88dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="18dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="18dp">
+
+            <LinearLayout
+                android:id="@+id/socialHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/socialTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Social"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textSize="30sp" />
+
+                <TextView
+                    android:id="@+id/socialSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.72"
+                    android:text="Find friends. Chat. Watch together."
+                    android:textColor="?attr/colorOnBackground"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/socialFeaturePager"
+                android:layout_width="match_parent"
+                android:layout_height="188dp"
+                android:layout_marginTop="10dp"
+                android:clipChildren="false"
+                android:clipToPadding="false" />
+
+            <LinearLayout
+                android:id="@+id/socialFeatureDots"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:orientation="horizontal" />
+
+            <LinearLayout
+                android:id="@+id/socialQuickActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <include layout="@layout/item_social_action" />
+                <include layout="@layout/item_social_action" />
+                <include layout="@layout/item_social_action" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/socialLeaderboardHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/socialLeaderboardTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Community Leaderboard"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/socialLeaderboardMore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="See all  ›"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/socialLeaderboardPager"
+                android:layout_width="match_parent"
+                android:layout_height="292dp"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:id="@+id/socialActivityTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Friend Activity                         See all  ›"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="18sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/socialActivityList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_social_activity" />
+
+            <TextView
+                android:id="@+id/socialFriendsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Active Friends"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="18sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/socialFriendsList"
+                android:layout_width="match_parent"
+                android:layout_height="116dp"
+                android:nestedScrollingEnabled="false"
+                android:orientation="horizontal"
+                tools:listitem="@layout/item_social_friend" />
+
+            <TextView
+                android:id="@+id/socialMessagesTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Recent Messages                         See all  ›"
+                android:textColor="?attr/colorOnBackground"
+                android:textSize="18sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/socialMessagesList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_social_message" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <include
+        android:id="@+id/socialNavbar"
+        layout="@layout/item_navbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
