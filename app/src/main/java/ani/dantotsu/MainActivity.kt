@@ -666,9 +666,9 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (intent.getBooleanExtra("goToHome", false)) {
-            selectedOption = 1
-            binding.includedNavbar.navbar.selectTabAt(1)
-            binding.viewpager.setCurrentItem(1, false)
+            selectedOption = 0
+            binding.includedNavbar.navbar.selectTabAt(0)
+            binding.viewpager.setCurrentItem(0, false)
         }
         if (Intent.ACTION_VIEW == intent.action) {
             handleViewIntent(intent)
