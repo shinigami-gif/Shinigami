@@ -126,14 +126,11 @@ class LocalMappingSearchDialog : BottomSheetDialogFragment() {
     companion object {
         fun newInstance(
             folderName: String,
-            isAnime: Boolean,
-            isNovel: Boolean = false,
             onMappingSelected: (Int) -> Unit
         ): LocalMappingSearchDialog {
             return LocalMappingSearchDialog().apply {
                 this.folderName = folderName
-                this.searchType = if (isAnime) "ANIME" else "MANGA"
-                this.searchFormat = if (isNovel) "NOVEL" else null
+                this.searchType = "ANIME"
                 this.onMappingSelected = onMappingSelected
             }
         }
