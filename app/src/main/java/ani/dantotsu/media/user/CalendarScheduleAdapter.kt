@@ -7,13 +7,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.getThemeColor
-import ani.dantotsu.MediaSingleton
-import ani.dantotsu.getBitmapFromImageView
-import ani.dantotsu.resizeBitmap
+import ani.dantotsu.media.MediaSingleton
 import ani.dantotsu.databinding.ItemCalendarScheduleBinding
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.MediaDetailsActivity
 import ani.dantotsu.loadImage
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.widget.ImageView
 import ani.dantotsu.setSafeOnClickListener
 import java.text.DateFormat
 import java.util.concurrent.TimeUnit
@@ -36,7 +38,7 @@ class CalendarScheduleAdapter(
         val episode = parts.firstOrNull().orEmpty()
         val time = parts.getOrNull(1).orEmpty()
 
-        b.scheduleTime.text = time.replace(" ", "\n", limit = 1)
+        b.scheduleTime.text = time.replaceFirst(" ", "\n")
         b.scheduleCover.loadImage(item.cover)
         b.scheduleName.text = item.userPreferredName
         b.scheduleEpisode.text = episode
@@ -62,7 +64,7 @@ class CalendarScheduleAdapter(
         }
 
         b.scheduleCard.strokeColor = b.root.context.getThemeColor(
-            if (airingTime != null && airingTime > now) com.google.android.material.R.attr.colorPrimary else com.google.android.material.R.attr.colorOutline
+            if (airingTime != null && airingTime > now) androidx.appcompat.R.attr.colorPrimary else com.google.android.material.R.attr.colorOutline
         )
 
         b.root.setSafeOnClickListener {
@@ -106,6 +108,37 @@ class CalendarScheduleAdapter(
             minutes > 0 -> "${minutes}m left"
             else -> "<1m left"
         }
+    }
+
+    private fun getBitmapFromImageView(imageView: ImageView): Bitmap? {
+        val drawable = imageView.drawable ?: return null
+        if (drawable is BitmapDrawable) return drawable.bitmap
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else imageView.width
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else imageView.height
+        if (width <= 0 || height <= 0) return null
+        val bitmap = try {
+            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        } catch (_: Exception) {
+            return null
+        }
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    private fun resizeBitmap(source: Bitmap?, maxDimension: Int): Bitmap? {
+        if (source == null) return null
+        val width = source.width
+        val height = source.height
+        if (width <= 0 || height <= 0) return null
+        val scale = maxDimension.toFloat() / maxOf(width, height)
+        return Bitmap.createScaledBitmap(
+            source,
+            (width * scale).toInt().coerceAtLeast(1),
+            (height * scale).toInt().coerceAtLeast(1),
+            true
+        )
     }
 
     override fun getItemCount(): Int = media.size
