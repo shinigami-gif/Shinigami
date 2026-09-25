@@ -29,7 +29,14 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 
 object Anilist {
-    val query: AnilistQueries = AnilistQueries()
+    private val queries: AnilistQueries = AnilistQueries()
+
+    /** Anime metadata-only entry point. New metadata callers must use this facade. */
+    val metadata: AnilistMetadata = AnilistMetadata(queries)
+
+    /** Legacy mixed AniList surface kept only during migration. */
+    @Deprecated("Use Anilist.metadata for anime metadata; user/social data is not AniList-owned.")
+    val query: AnilistQueries = queries
     val mutation: AnilistMutations = AnilistMutations()
 
     var token: String? = null
