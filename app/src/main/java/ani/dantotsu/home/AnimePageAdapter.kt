@@ -26,13 +26,14 @@ import ani.dantotsu.databinding.LayoutTrendingBinding
 import ani.dantotsu.getAppString
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.loadImage
+import ani.dantotsu.media.CalendarActivity
+import ani.dantotsu.media.GenreActivity
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.MediaAdaptor
 import ani.dantotsu.media.MediaListViewActivity
 import ani.dantotsu.media.SearchActivity
 import ani.dantotsu.openLinkInCustomTab
 import ani.dantotsu.profile.ProfileActivity
-import ani.dantotsu.profile.notification.NotificationActivity
 import ani.dantotsu.px
 import ani.dantotsu.setSafeOnClickListener
 import ani.dantotsu.setSlideIn
@@ -62,6 +63,23 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         binding = holder.binding
         trendingBinding = LayoutTrendingBinding.bind(binding.root)
         trendingViewPager = trendingBinding.trendingViewPager
+
+        val textInputLayout = holder.itemView.findViewById<TextInputLayout>(R.id.searchBar)
+        val currentColor = textInputLayout.boxBackgroundColor
+        val semiTransparentColor = (currentColor and 0x00FFFFFF) or 0xA8000000.toInt()
+        textInputLayout.boxBackgroundColor = semiTransparentColor
+        val materialCardView =
+            holder.itemView.findViewById<MaterialCardView>(R.id.userAvatarContainer)
+        materialCardView.setCardBackgroundColor(semiTransparentColor)
+        val color = binding.root.context.getThemeColor(android.R.attr.windowBackground)
+        textInputLayout.boxBackgroundColor = (color and 0x00FFFFFF) or 0x28000000
+        materialCardView.setCardBackgroundColor((color and 0x00FFFFFF) or 0x28000000)
+
+        trendingBinding.titleContainer.updatePadding(top = statusBarHeight)
+
+        if (PrefManager.getVal(PrefName.SmallView)) trendingBinding.trendingContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = (-108f).px
+        }
 
         updateAvatar()
 
@@ -125,6 +143,24 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
             it.setOnLongClickListener { onSeasonLongClick.invoke(i) }
         }
 
+        binding.animeGenreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/16498-8jpFCOcDmneX.jpg")
+        binding.animeCalendarImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/125367-hGPJLSNfprO3.jpg")
+
+        binding.animeGenre.setOnClickListener {
+            ContextCompat.startActivity(
+                it.context,
+                Intent(it.context, GenreActivity::class.java).putExtra("type", "ANIME"),
+                null
+            )
+        }
+        binding.animeCalendar.setOnClickListener {
+            ContextCompat.startActivity(
+                it.context,
+                Intent(it.context, CalendarActivity::class.java),
+                null
+            )
+        }
+
         val rescueMode = PrefManager.getVal<Boolean>(PrefName.RescueMode)
         binding.animeIncludeList.isVisible = if (rescueMode) MAL.token != null else Anilist.token != null
 
@@ -175,9 +211,9 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding.trendingViewPager.layoutAnimation =
             LayoutAnimationController(setSlideIn(), 0.25f)
         trendingBinding.titleContainer.startAnimation(setSlideUp())
-        binding.animeContainer.layoutAnimation =
+        binding.animeListContainer.layoutAnimation =
             LayoutAnimationController(setSlideIn(), 0.25f)
-        binding.animeSeasons.layoutAnimation =
+        binding.animeSeasonsCont.layoutAnimation =
             LayoutAnimationController(setSlideIn(), 0.25f)
     }
 
