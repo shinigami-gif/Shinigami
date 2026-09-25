@@ -258,6 +258,24 @@ class MediaAdaptor(
                         media.status == b.root.context.getString(R.string.status_releasing)
                     b.itemCompactTitle.text = media.userPreferredName
                     bindCarouselLogo(media, b.itemCompactTitle, b.itemCompactLogo)
+
+                    b.itemCompactDescription.text = media.description
+                        ?.replace(Regex("<[^>]*>"), " ")
+                        ?.replace("&nbsp;", " ")
+                        ?.replace(Regex("\\s+"), " ")
+                        ?.trim()
+                        .orEmpty()
+                    b.itemCompactDescription.visibility =
+                        if (b.itemCompactDescription.text.isNullOrBlank()) View.GONE else View.VISIBLE
+
+                    b.itemCompactStatus.text = media.status?.replace("_", " ")?.uppercase().orEmpty()
+                    b.itemCompactStatus.visibility =
+                        if (b.itemCompactStatus.text.isNullOrBlank()) View.GONE else View.VISIBLE
+
+                    b.itemCompactGenres.text = media.genres.joinToString(" • ")
+                    b.itemCompactGenres.visibility =
+                        if (media.genres.isEmpty()) View.GONE else View.VISIBLE
+
                     b.itemCompactScore.text =
                         ((if (media.userScore == 0) (media.meanScore
                             ?: 0) else media.userScore) / 10.0).toString()
