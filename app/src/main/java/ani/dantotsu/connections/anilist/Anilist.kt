@@ -57,7 +57,6 @@ object Anilist {
     var activityMergeTime: Int? = null
     var timezone: String? = null
     var animeCustomLists: List<String>? = null
-    var mangaCustomLists: List<String>? = null
 
     /** Set to true when the AniList API reports a "disabled" error. Reset on next successful call. */
     @Volatile
@@ -101,24 +100,12 @@ object Anilist {
         "CANCELLED"
     )
 
-    val mangaStatus = listOf(
-        "FINISHED",
-        "RELEASING",
-        "NOT YET RELEASED",
-        "HIATUS",
-        "CANCELLED"
-    )
-
     val seasons = listOf(
         "WINTER", "SPRING", "SUMMER", "FALL"
     )
 
     val animeFormats = listOf(
         "TV", "TV SHORT", "MOVIE", "SPECIAL", "OVA", "ONA", "MUSIC"
-    )
-
-    val mangaFormats = listOf(
-        "MANGA", "NOVEL", "ONE SHOT"
     )
 
     val authorRoles = listOf(
