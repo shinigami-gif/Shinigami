@@ -7,7 +7,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.updateProgress
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.MediaDetailsViewModel
@@ -123,7 +122,7 @@ class PlayerProgressManager(
                 (duration > 0f && player.currentPosition.toFloat() / duration > PrefManager.getVal<Float>(PrefName.WatchPercentage))
         val episode0 = currentEpisodeIndex == 0 && PrefManager.getVal<Boolean>(PrefName.ChapterZeroPlayer)
 
-        if (!incognito && (episodeEnd || episode0) && Anilist.userid != null) {
+        if (!incognito && (episodeEnd || episode0)) {
             if (PrefManager.getCustomVal("${m.id}_save_progress", true) &&
                 (if (m.isAdult) PrefManager.getVal(PrefName.UpdateForHPlayer) else true)
             ) {
