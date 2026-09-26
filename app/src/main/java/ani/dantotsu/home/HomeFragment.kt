@@ -43,7 +43,7 @@ import ani.dantotsu.media.user.ListActivity
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.openLinkInBrowser
 import ani.dantotsu.profile.ProfileActivity
-import ani.dantotsu.profile.User
+import ani.dantotsu.home.status.StatusUser
 import ani.dantotsu.setSafeOnClickListener
 import ani.dantotsu.setSlideIn
 import ani.dantotsu.setSlideUp
@@ -408,7 +408,7 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
             LinearLayoutManager.HORIZONTAL,
             false
         )
-        var latestStatusUsers: ArrayList<User> = arrayListOf()
+        var latestStatusUsers: ArrayList<StatusUser> = arrayListOf()
         model.getUserStatus().observe(viewLifecycleOwner) { users ->
             when {
                 users == null -> {
