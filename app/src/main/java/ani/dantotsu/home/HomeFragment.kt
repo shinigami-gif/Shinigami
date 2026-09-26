@@ -99,20 +99,23 @@ class HomeFragment : Fragment() {
             if (activity != null && _binding != null) viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
                 val currentBinding = _binding ?: return@launch
                 val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
+                val sessionStore = ShinigamiSessionStore(requireContext())
+                val token = sessionStore.getToken()
+                val profile = if (!rescueMode && !token.isNullOrBlank()) runCatching { ShinigamiBackendClient().getMe(token) }.getOrNull() else null
+                val notificationCount = if (!rescueMode && !token.isNullOrBlank()) runCatching { ShinigamiNotificationClient().unreadCount(token) }.getOrDefault(0) else 0
                 if (rescueMode && MAL.token != null) {
                     currentBinding.homeUserName.text = MAL.username ?: Anilist.username
                     currentBinding.homeUserAvatar.loadImage(MAL.avatar ?: Anilist.avatar)
                 } else {
-                    currentBinding.homeUserName.text = Anilist.username
-                    currentBinding.homeUserAvatar.loadImage(Anilist.avatar)
+                    currentBinding.homeUserName.text = profile?.user?.username ?: "Shinigami"
+                    currentBinding.homeUserAvatar.loadImage(profile?.user?.avatarUrl)
                 }
 
                 if (!rescueMode) {
-                    currentBinding.homeUserEpisodesWatched.text = Anilist.episodesWatched.toString()
-                    currentBinding.homeUserChaptersRead.text = Anilist.chapterRead.toString()
-                    currentBinding.homeNotificationCount.isVisible = Anilist.unreadNotificationCount > 0
-                            && PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
-                    currentBinding.homeNotificationCount.text = Anilist.unreadNotificationCount.toString()
+                    currentBinding.homeUserEpisodesWatched.text = profile?.stats?.episodesWatched?.toString() ?: "0"
+                    currentBinding.homeUserChaptersRead.text = "—"
+                    currentBinding.homeNotificationCount.isVisible = notificationCount > 0 && PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
+                    currentBinding.homeNotificationCount.text = notificationCount.toString()
                 } else {
                     currentBinding.homeUserEpisodesWatched.text = MAL.episodesWatched?.toString() ?: "—"
                     currentBinding.homeUserChaptersRead.text = MAL.chaptersRead?.toString() ?: "—"
@@ -120,21 +123,18 @@ class HomeFragment : Fragment() {
                 }
 
                 val bannerAnimations: Boolean = PrefManager.getVal(PrefName.BannerAnimations)
-                val bannerUrl = if (rescueMode) (Anilist.bg ?: MAL.avatar) else Anilist.bg
+                val bannerUrl = if (rescueMode) MAL.avatar else (profile?.user?.bannerUrl ?: profile?.user?.avatarUrl)
                 blurImage(
                     if (bannerAnimations) currentBinding.homeUserBg else currentBinding.homeUserBgNoKen,
                     bannerUrl
                 )
                 currentBinding.homeUserDataProgressBar.visibility = View.GONE
 
-                val listUserId = Anilist.userid ?: 0
-                val listUsername = if (rescueMode) MAL.username ?: Anilist.username else Anilist.username
                 currentBinding.homeAnimeList.setOnClickListener {
                     ContextCompat.startActivity(
                         requireActivity(), Intent(requireActivity(), ListActivity::class.java)
                             .putExtra("anime", true)
-                            .putExtra("userId", listUserId)
-                            .putExtra("username", listUsername), null
+                            , null
                     )
                 }
                 binding.homeUserAvatarContainer.startAnimation(setSlideUp())
@@ -168,7 +168,7 @@ class HomeFragment : Fragment() {
             if (!PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
                 ContextCompat.startActivity(
                     requireContext(), Intent(requireContext(), ProfileActivity::class.java)
-                        .putExtra("userId", Anilist.userid), null
+                        .putExtra("userId", sessionStore.getUserId()), null
                 )
             } else {
                 val malUsername = MAL.username
