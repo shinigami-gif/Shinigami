@@ -28,8 +28,6 @@ data class CreateSocialReportRequest(
     val type: ReportType,
     val description: String
 )
-data class CreateForumThreadRequest(val title: String, val body: String, val mediaIds: List<Long> = emptyList())
-data class CreateForumCommentRequest(val content: String, val parentCommentId: String? = null)
 data class AdminUserActionRequest(
     val action: String,
     val reason: String? = null,
