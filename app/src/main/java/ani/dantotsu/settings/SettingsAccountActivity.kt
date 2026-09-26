@@ -13,7 +13,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.discord.Discord
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.ActivitySettingsAccountsBinding
@@ -68,12 +69,111 @@ class SettingsAccountActivity : AppCompatActivity() {
             }
 
             fun reload() {
-                if (Anilist.token != null) {
-                    settingsAnilistLogin.setText(R.string.logout)
-                    settingsAnilistLogin.setOnClickListener {
-                        Anilist.removeSavedToken()
-                        restartMainActivity.isEnabled = true
-                        reload()
+                lifecycleScope.launch {
+                    val token = ShinigamiSessionStore(context).getToken()
+                    if (token != null) {
+                        val session = runCatching { ShinigamiBackendClient().currentSession(token) }.getOrNull()
+                        val user = session?.user
+                        settingsAnilistLogin.setText(R.string.logout)
+                        settingsAnilistLogin.setOnClickListener {
+                            ShinigamiSessionStore(context).clear()
+                            restartMainActivity.isEnabled = true
+                            reload()
+                        }
+                        settingsAnilistUsername.visibility = View.VISIBLE
+                        settingsAnilistUsername.text = user?.displayName ?: user?.username
+                        user?.avatarUrl?.let { settingsAnilistAvatar.loadImage(it) }
+                        user?.bannerUrl?.let {
+                            settingsAnilistBanner.visibility = View.VISIBLE
+                            settingsAnilistScrim.visibility = View.VISIBLE
+                            settingsAnilistBanner.loadImage(it)
+                        }
+                        settingsAnilistTokenExpiry.visibility = View.GONE
+                        settingsRecyclerView.visibility = View.VISIBLE
+                        settingsMALLoginRequired.visibility = View.GONE
+                        settingsMALLogin.visibility = View.VISIBLE
+                        settingsMALUsername.visibility = View.VISIBLE
+                    } else {
+                        settingsAnilistAvatar.setImageResource(R.drawable.ic_round_person_24)
+                        settingsAnilistUsername.visibility = View.GONE
+                        settingsAnilistTokenExpiry.visibility = View.GONE
+                        settingsAnilistBanner.visibility = View.GONE
+                        settingsAnilistScrim.visibility = View.GONE
+                        settingsRecyclerView.visibility = View.GONE
+                        settingsAnilistLogin.setText(R.string.login)
+                        settingsAnilistLogin.setOnClickListener {
+                            startMainActivity(context)
+                        }
+                        settingsMALLoginRequired.visibility = View.VISIBLE
+                        settingsMALLogin.visibility = View.GONE
+                        settingsMALUsername.visibility = View.GONE
+                    }
+
+                    if (MAL.token != null) {
+                        settingsMALLogin.setText(R.string.logout)
+                        settingsMALLogin.setOnClickListener {
+                            MAL.removeSavedToken()
+                            restartMainActivity.isEnabled = true
+                            reload()
+                        }
+                        settingsMALUsername.visibility = View.VISIBLE
+                        settingsMALUsername.text = MAL.username
+                        settingsMALAvatar.loadImage(MAL.avatar)
+                    } else {
+                        settingsMALAvatar.setImageResource(R.drawable.ic_round_person_24)
+                        settingsMALUsername.visibility = View.GONE
+                        settingsMALLogin.setText(R.string.login)
+                        settingsMALLogin.setOnClickListener { MAL.loginIntent(context) }
+                    }
+
+                    if (Discord.token != null) {
+                        val id = PrefManager.getVal(PrefName.DiscordId, null as String?)
+                        val avatar = PrefManager.getVal(PrefName.DiscordAvatar, null as String?)
+                        val username = PrefManager.getVal(PrefName.DiscordUserName, null as String?)
+                        if (id != null && avatar != null) {
+                            settingsDiscordAvatar.loadImage("https://cdn.discordapp.com/avatars/$id/$avatar.png")
+                        }
+                        settingsDiscordUsername.visibility = View.VISIBLE
+                        settingsDiscordUsername.text = username ?: Discord.token?.replace(Regex("."), "*")
+                        settingsDiscordLogin.setText(R.string.logout)
+                        settingsDiscordLogin.setOnClickListener { Discord.removeSavedToken(context); restartMainActivity.isEnabled = true; reload() }
+                        settingsPresenceSwitcher.visibility = View.VISIBLE
+                        var initialStatus = when (PrefManager.getVal<String>(PrefName.DiscordStatus)) {
+                            "online" -> R.drawable.discord_status_online
+                            "idle" -> R.drawable.discord_status_idle
+                            "dnd" -> R.drawable.discord_status_dnd
+                            "invisible" -> R.drawable.discord_status_invisible
+                            else -> R.drawable.discord_status_online
+                        }
+                        settingsPresenceSwitcher.setImageResource(initialStatus)
+                        val zoomInAnimation = AnimationUtils.loadAnimation(context, R.anim.bounce_zoom)
+                        settingsPresenceSwitcher.setOnClickListener {
+                            var status = "online"
+                            initialStatus = when (initialStatus) {
+                                R.drawable.discord_status_online -> { status = "idle"; R.drawable.discord_status_idle }
+                                R.drawable.discord_status_idle -> { status = "dnd"; R.drawable.discord_status_dnd }
+                                R.drawable.discord_status_dnd -> { status = "invisible"; R.drawable.discord_status_invisible }
+                                else -> { status = "online"; R.drawable.discord_status_online }
+                            }
+                            PrefManager.setVal(PrefName.DiscordStatus, status)
+                            settingsPresenceSwitcher.setImageResource(initialStatus)
+                            settingsPresenceSwitcher.startAnimation(zoomInAnimation)
+                        }
+                        settingsPresenceSwitcher.setOnLongClickListener {
+                            it.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            DiscordDialogFragment().show(supportFragmentManager, "dialog")
+                            true
+                        }
+                    } else {
+                        settingsPresenceSwitcher.visibility = View.GONE
+                        settingsDiscordAvatar.setImageResource(R.drawable.ic_round_person_24)
+                        settingsDiscordUsername.visibility = View.GONE
+                        settingsDiscordLogin.setText(R.string.login)
+                        settingsDiscordLogin.setOnClickListener { Discord.warning(context).show(supportFragmentManager, "dialog") }
+                    }
+                }
+            }
+            reload()
                     }
                     settingsAnilistUsername.visibility = View.VISIBLE
                     settingsAnilistUsername.text = Anilist.username
@@ -271,7 +371,7 @@ class SettingsAccountActivity : AppCompatActivity() {
                         PrefManager.setVal(PrefName.CommentsEnabled, if (isChecked) 1 else 2)
                         reload()
                     },
-                    isVisible = Anilist.token != null
+                    isVisible = ShinigamiSessionStore(context).getToken() != null
                 ),
             ),
             highlightKey = highlightKey
