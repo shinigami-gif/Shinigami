@@ -26,16 +26,16 @@ class FileChatRepository(
         if (!Files.exists(file)) write(emptyList())
     }
 
-    override fun global(page: Int, perPage: Int): List<ChatMessageRef> = synchronized(lock) {
+    override fun global(viewerId: String, page: Int, perPage: Int): List<ChatMessageRef> = synchronized(lock) {
         paginate(
             read().filter { it.roomType == ChatRoomType.GLOBAL },
             page,
             perPage
-        ).filter { visibleTo(it, pageViewerId = null) }.mapNotNull(::toApi)
+        ).filter { visibleTo(it, viewerId) }.mapNotNull(::toApi)
     }
 
-    override fun anime(mediaId: Long, page: Int, perPage: Int): List<ChatMessageRef> = synchronized(lock) {
-        paginate(read().filter { it.roomType == ChatRoomType.ANIME && it.mediaId == mediaId }, page, perPage).mapNotNull(::toApi)
+    override fun anime(viewerId: String, mediaId: Long, page: Int, perPage: Int): List<ChatMessageRef> = synchronized(lock) {
+        paginate(read().filter { it.roomType == ChatRoomType.ANIME && it.mediaId == mediaId }, page, perPage).filter { visibleTo(it, viewerId) }.mapNotNull(::toApi)
     }
 
     override fun sendGlobal(senderId: String, content: String) =
