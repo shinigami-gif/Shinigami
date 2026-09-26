@@ -59,6 +59,9 @@ class SocialService(
     fun deleteComment(commentId: String, actorId: String) =
         repository.deleteComment(commentId, actorId)
 
+    fun editComment(commentId: String, actorId: String, content: String) =
+        repository.editComment(commentId, actorId, content)
+
     fun voteComment(commentId: String, userId: String, vote: Int?) =
         repository.voteComment(commentId, userId, vote)
 
