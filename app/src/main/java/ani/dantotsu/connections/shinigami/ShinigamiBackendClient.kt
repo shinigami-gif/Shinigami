@@ -156,7 +156,9 @@ class ShinigamiBackendClient(
             return gson.fromJson(body, ShinigamiUserProfile::class.java)
                 ?: throw IllegalStateException("Backend returned an empty profile")
         }
-    }\n\n    private fun executeUser(request: Request): ShinigamiUser {
+    }
+
+    private fun executeUser(request: Request): ShinigamiUser {
         val response = http.newCall(request).execute()
         response.use {
             val body = it.body?.string().orEmpty()
