@@ -27,7 +27,11 @@ class FileChatRepository(
     }
 
     override fun global(page: Int, perPage: Int): List<ChatMessageRef> = synchronized(lock) {
-        paginate(read().filter { it.roomType == ChatRoomType.GLOBAL }, page, perPage).mapNotNull(::toApi)
+        paginate(
+            read().filter { it.roomType == ChatRoomType.GLOBAL },
+            page,
+            perPage
+        ).filter { visibleTo(it, pageViewerId = null) }.mapNotNull(::toApi)
     }
 
     override fun anime(mediaId: Long, page: Int, perPage: Int): List<ChatMessageRef> = synchronized(lock) {
@@ -76,6 +80,7 @@ class FileChatRepository(
         require(senderId != recipientId) { "cannot message yourself" }
         require(users.findById(senderId) != null) { "sender not found" }
         require(users.findById(recipientId) != null) { "recipient not found" }
+        require(!blockedEitherWay(senderId, recipientId)) { "messaging is blocked" }
         return create(senderId, ChatRoomType.DIRECT, null, recipientId, content, false)
     }
 
@@ -112,6 +117,14 @@ class FileChatRepository(
         write(read() + stored)
         toApi(stored)!!
     }
+
+    private fun visibleTo(item: StoredMessage, pageViewerId: String?): Boolean {
+        if (pageViewerId == null) return true
+        return !users.relationship(pageViewerId, item.senderId).blocked
+    }
+
+    private fun blockedEitherWay(a: String, b: String): Boolean =
+        users.relationship(a, b).blocked || users.relationship(b, a).blocked
 
     private fun toApi(item: StoredMessage): ChatMessageRef? {
         val sender = users.findById(item.senderId) ?: return null
