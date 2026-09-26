@@ -283,8 +283,6 @@ object Anilist {
         adult = false
         initialized = false
         PrefManager.removeVal(PrefName.AnilistToken)
-        PrefManager.removeVal(PrefName.AnilistUserId)
-        PrefManager.removeVal(PrefName.AnilistUserName)
         // Reset per-section notification counts
         PrefManager.setVal(PrefName.UnreadUserNotifications, 0)
         PrefManager.setVal(PrefName.UnreadMediaNotifications, 0)
