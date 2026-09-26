@@ -496,18 +496,16 @@ class MainActivity : AppCompatActivity() {
             }
             val isRepoHost = uri.host == "add-repo" || uri.host == "extension-store"
             val schemeLower = uri.scheme?.lowercase() ?: ""
-            if (isRepoHost && (schemeLower == "tachiyomi" || schemeLower == "aniyomi" || schemeLower == "novelyomi" || schemeLower == "mihon" || schemeLower == "dantotsu")) {
+            if (isRepoHost && (schemeLower == "aniyomi" || schemeLower == "dantotsu")) {
                 val url = uri.getQueryParameter("url") ?: throw Exception("No url for repo import")
                 val (prefName, name) = when (schemeLower) {
-                    "tachiyomi", "mihon" -> PrefName.MangaExtensionRepos to "Manga"
                     "aniyomi" -> PrefName.AnimeExtensionRepos to "Anime"
-                    "novelyomi" -> PrefName.NovelExtensionRepos to "Novel"
                     "dantotsu" -> {
                         val type = uri.getQueryParameter("type")?.lowercase()
-                        when (type) {
-                            "anime" -> PrefName.AnimeExtensionRepos to "Anime"
-                            "novel" -> PrefName.NovelExtensionRepos to "Novel"
-                            else -> PrefName.MangaExtensionRepos to "Manga"
+                        if (type == "anime" || type == null) {
+                            PrefName.AnimeExtensionRepos to "Anime"
+                        } else {
+                            throw Exception("Only anime extension repositories are supported")
                         }
                     }
                     else -> throw Exception("Invalid scheme")
