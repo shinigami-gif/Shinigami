@@ -33,7 +33,6 @@ import ani.dantotsu.settings.saving.internal.PreferencePackager
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
 import ani.dantotsu.toast
-import ani.dantotsu.util.LauncherWrapper
 import ani.dantotsu.util.StoragePermissions
 import ani.dantotsu.util.customAlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -46,7 +45,6 @@ import java.util.UUID
 
 class SettingsCommonActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsCommonBinding
-    private lateinit var launcher: LauncherWrapper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,9 +95,6 @@ class SettingsCommonActivity : AppCompatActivity() {
                     }
                 }
             }
-        val contract = ActivityResultContracts.OpenDocumentTree()
-        launcher = LauncherWrapper(this, contract)
-
         binding.apply {
             settingsCommonLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = statusBarHeight
@@ -297,75 +292,8 @@ class SettingsCommonActivity : AppCompatActivity() {
                                 }
                             },
                         ),
-                        Settings(
-                            type = 1,
-                            name = getString(R.string.change_download_location),
-                            desc = getString(R.string.change_download_location_desc),
-                            icon = R.drawable.ic_round_source_24,
-                            onClick = {
-                                context.customAlertDialog().apply {
-                                    setTitle(R.string.change_download_location)
-                                    setMessage(R.string.download_location_msg)
-                                    setPosButton(R.string.ok) {
-                                        val oldUri = PrefManager.getVal<String>(PrefName.DownloadsDir)
-                                        launcher.registerForCallback { success ->
-                                            if (success) {
-                                                toast(getString(R.string.please_wait))
-                                                val newUri =
-                                                    PrefManager.getVal<String>(PrefName.DownloadsDir)
-                                                lifecycleScope.launch(Dispatchers.IO) {
-                                                    Injekt.get<DownloadsManager>().moveDownloadsDir(
-                                                        context,
-                                                        Uri.parse(oldUri),
-                                                        Uri.parse(newUri),
-                                                    ) { finished, message ->
-                                                        if (finished) {
-                                                            toast(getString(R.string.success))
-                                                        } else {
-                                                            toast(message)
-                                                        }
-                                                    }
-                                                }
-                                            } else {
-                                                toast(getString(R.string.error))
-                                            }
-                                        }
-                                        launcher.launch()
-                                    }
-                                    setNegButton(R.string.cancel)
-                                    show()
-                                }
-                            },
-                        ),
-                        Settings(
-                            type = 1,
-                            name = getString(R.string.rebuild_download_index),
-                            desc = getString(R.string.rebuild_download_index_desc),
-                            icon = R.drawable.ic_download_24,
-                            onClick = {
-                                context.customAlertDialog().apply {
-                                    setTitle(R.string.rebuild_download_index)
-                                    setMessage(R.string.rebuild_download_index_msg)
-                                    setPosButton(R.string.ok) {
-                                        toast(getString(R.string.please_wait))
-                                        lifecycleScope.launch(Dispatchers.IO) {
-                                            val recovered = Injekt.get<DownloadsManager>()
-                                                .rebuildIndexFromDisk()
-                                            withContext(Dispatchers.Main) {
-                                                toast(
-                                                    getString(
-                                                        R.string.rebuild_download_index_done,
-                                                        recovered,
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    }
-                                    setNegButton(R.string.cancel)
-                                    show()
-                                }
-                            },
-                        ),
+
+
                         Settings(
                             type = 2,
                             name = getString(R.string.always_continue_content),
