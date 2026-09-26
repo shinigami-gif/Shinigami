@@ -178,7 +178,7 @@ class ListActivity : AppCompatActivity() {
             ).forEachIndexed { index, (label, sort) ->
                 sortSubMenu.add(3, index + 20000, Menu.NONE, label).setOnMenuItemClickListener {
                     PrefManager.setVal(
-                        if (anime) PrefName.AnimeListSortOrder else PrefName.MangaListSortOrder,
+                        PrefName.AnimeListSortOrder,
                         sort
                     )
                     binding.listProgressBar.visibility = View.VISIBLE
