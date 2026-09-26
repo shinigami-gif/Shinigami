@@ -205,7 +205,7 @@ class MediaDetailsViewModel : ViewModel() {
             val charactersDeferred = async { MAL.jikan.getAnimeCharacters(malId) }
             val staffDeferred = async { MAL.jikan.getAnimeStaff(malId) }
             val reviewsDeferred = async { MAL.jikan.getAnimeReviews(malId) }
-            val recommendationsDeferred = async { MAL.jikan.getRecommendations(true, malId) }
+            val recommendationsDeferred = async { MAL.jikan.getRecommendations(malId) }
 
             val fullData = fullDeferred.await()
             if (fullData != null) {
