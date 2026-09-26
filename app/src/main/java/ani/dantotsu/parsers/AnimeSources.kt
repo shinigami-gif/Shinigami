@@ -27,7 +27,6 @@ object AnimeSources : WatchSources() {
 
     private fun runtimeSources(): List<Lazier<BaseParser>> = listOf(
         Lazier({ StreamixAnimeParser() }, "Shinigami Runtime"),
-        Lazier({ LocalAnimeParser() }, "Local")
     )
 
     private fun sortPinnedAnimeSources(
