@@ -8,8 +8,9 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiAuthProvider
 import ani.dantotsu.databinding.DialogUserAgentBinding
 import ani.dantotsu.databinding.FragmentLoginBinding
 import ani.dantotsu.openLinkInBrowser
@@ -18,6 +19,7 @@ import ani.dantotsu.settings.saving.internal.PreferencePackager
 import ani.dantotsu.toast
 import ani.dantotsu.util.Logger
 import ani.dantotsu.util.customAlertDialog
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -45,7 +47,19 @@ class LoginFragment : Fragment() {
             (binding.loginButton as com.google.android.material.button.MaterialButton).setIconResource(R.drawable.ic_myanimelist)
             binding.loginButton.setOnClickListener { ani.dantotsu.connections.mal.MAL.loginIntent(requireActivity()) }
         } else {
-            binding.loginButton.setOnClickListener { Anilist.loginIntent(requireActivity()) }
+            binding.loginButton.setOnClickListener {
+                lifecycleScope.launch {
+                    runCatching {
+                        ShinigamiAuthProvider.create(requireActivity())
+                            .signIn(requireActivity())
+                    }.onSuccess {
+                        ani.dantotsu.startMainActivity(requireActivity())
+                    }.onFailure {
+                        Logger.log(it)
+                        toast(it.message ?: getString(R.string.login_failed))
+                    }
+                }
+            }
         }
         binding.loginDiscord.setOnClickListener { openLinkInBrowser(getString(R.string.discord)) }
         binding.loginGithub.setOnClickListener { openLinkInBrowser(getString(R.string.github)) }
