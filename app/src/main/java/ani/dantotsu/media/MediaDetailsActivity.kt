@@ -322,14 +322,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             val userStatus =
                 if (media.userStatus != null) statusStrings[statuses.indexOf(media.userStatus).coerceAtLeast(0)] else statusStrings[0]
 
-            val statuses: Array<String> = resources.getStringArray(R.array.status)
-            val statusStrings =
-                if (media.manga == null) resources.getStringArray(R.array.status_anime) else resources.getStringArray(
-                    R.array.status_manga
-                )
-            val userStatus =
-                if (media.userStatus != null) statusStrings[statuses.indexOf(media.userStatus).coerceAtLeast(0)] else statusStrings[0]
-
             if (media.userStatus != null) {
                 binding.mediaTotal.visibility = View.VISIBLE
                 binding.mediaAddToList.text = userStatus
