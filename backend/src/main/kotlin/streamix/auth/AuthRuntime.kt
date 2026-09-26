@@ -14,6 +14,16 @@ import streamix.notification.NotificationEventPublisher
 import streamix.admin.AdminAccessService
 import streamix.admin.AdminRoleRepository
 import streamix.admin.FileAdminRoleRepository
+import streamix.admin.AdminAuditRepository
+import streamix.admin.FileAdminAuditRepository
+import streamix.admin.ModerationRepository
+import streamix.admin.FileModerationRepository
+import streamix.admin.ReportRepository
+import streamix.admin.FileReportRepository
+import streamix.admin.AdminService
+import streamix.admin.AnnouncementRepository
+import streamix.admin.FileAnnouncementRepository
+import streamix.admin.AnnouncementService
 import streamix.social.FileSocialRepository
 import streamix.social.SocialRepository
 import streamix.social.SocialService
@@ -65,5 +75,24 @@ class AuthRuntime(
         gson
     )
     val adminAccess: AdminAccessService = AdminAccessService(adminRoles)
+    val moderation: ModerationRepository = FileModerationRepository(dataRoot.resolve("admin"), gson)
+    val adminAudit: AdminAuditRepository = FileAdminAuditRepository(dataRoot.resolve("admin"), gson)
+    val reports: ReportRepository = FileReportRepository(dataRoot.resolve("admin"), gson)
+    val adminService: AdminService = AdminService(
+        users = users,
+        access = adminAccess,
+        roles = adminRoles,
+        moderation = moderation,
+        reports = reports,
+        audit = adminAudit
+    )
+    val announcements: AnnouncementRepository = FileAnnouncementRepository(dataRoot.resolve("admin"), gson)
+    val announcementService: AnnouncementService = AnnouncementService(
+        users = users,
+        access = adminAccess,
+        announcements = announcements,
+        notifications = notificationEvents,
+        audit = adminAudit
+    )
     val chatService: ChatService = ChatService(chat, notificationService)
 }
