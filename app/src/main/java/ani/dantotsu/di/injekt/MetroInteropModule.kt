@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.media3.database.StandaloneDatabaseProvider
 import ani.dantotsu.addons.download.DownloadAddonManager
-import ani.dantotsu.download.DownloadsManager
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
@@ -28,7 +27,6 @@ class MetroInteropModule(
     private val preferenceStore: PreferenceStore,
     private val sourcePreferences: SourcePreferences,
     private val basePreferences: BasePreferences,
-    private val downloadsManager: DownloadsManager,
     private val networkHelper: NetworkHelper,
     private val javaScriptEngine: JavaScriptEngine,
     private val animeExtensionManager: AnimeExtensionManager,
@@ -48,8 +46,6 @@ class MetroInteropModule(
         addSingleton(preferenceStore)
         addSingleton(sourcePreferences)
         addSingleton(basePreferences)
-
-        addSingleton(downloadsManager)
         addSingleton(networkHelper)
         addSingleton(networkHelper.client)
         addSingleton(javaScriptEngine)
