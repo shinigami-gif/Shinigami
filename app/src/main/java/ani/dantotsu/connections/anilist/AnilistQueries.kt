@@ -91,55 +91,6 @@ class AnilistQueries {
         PrefManager.setCustomVal("home_page_cache", null)
     }
 
-    suspend fun getUserData(): Boolean {
-        val response: Query.Viewer?
-        measureTimeMillis {
-            response = executeQuery(
-                """{Viewer{name options{timezone titleLanguage staffNameLanguage activityMergeTime airingNotifications displayAdultContent restrictMessagesToFollowing} avatar{medium} bannerImage id mediaListOptions{scoreFormat rowOrder animeList{customLists} mangaList{customLists}} statistics{anime{episodesWatched} manga{chaptersRead}} unreadNotificationCount}}"""
-            )
-        }.also { println("time : $it") }
-        val user = response?.data?.user ?: return false
-
-        PrefManager.setVal(PrefName.AnilistUserName, user.name)
-        Anilist.userid = user.id
-        PrefManager.setVal(PrefName.AnilistUserId, user.id.toString())
-        Anilist.username = user.name
-        Anilist.bg = user.bannerImage
-        Anilist.avatar = user.avatar?.medium
-        Anilist.episodesWatched = user.statistics?.anime?.episodesWatched
-        Anilist.chapterRead = user.statistics?.manga?.chaptersRead
-        Anilist.adult = user.options?.displayAdultContent ?: false
-        val anilistCount = user.unreadNotificationCount ?: 0
-        val userCount = PrefManager.getVal<Int>(PrefName.UnreadUserNotifications)
-        val mediaCount = PrefManager.getVal<Int>(PrefName.UnreadMediaNotifications)
-        val subsCount = PrefManager.getVal<Int>(PrefName.UnreadSubscriptionNotifications)
-        val commentCount = PrefManager.getVal<Int>(PrefName.UnreadCommentNotifications)
-        Anilist.unreadNotificationCount = anilistCount + subsCount + commentCount
-        Anilist.initialized = true
-
-        user.options?.let {
-            Anilist.titleLanguage = it.titleLanguage.toString()
-            Anilist.staffNameLanguage = it.staffNameLanguage.toString()
-            Anilist.airingNotifications = it.airingNotifications ?: false
-            Anilist.restrictMessagesToFollowing = it.restrictMessagesToFollowing ?: false
-            Anilist.timezone = it.timezone
-            Anilist.activityMergeTime = it.activityMergeTime
-        }
-        user.mediaListOptions?.let {
-            Anilist.scoreFormat = it.scoreFormat.toString()
-            Anilist.rowOrder = it.rowOrder
-
-            it.animeList?.let { animeList ->
-                Anilist.animeCustomLists = animeList.customLists
-            }
-
-            it.mangaList?.let { mangaList ->
-                Anilist.mangaCustomLists = mangaList.customLists
-            }
-        }
-        return true
-    }
-
     suspend fun getMedia(id: Int, mal: Boolean = false, type: String? = null): Media? {
         val typeArg = if (type != null) "type: $type," else ""
         val response = executeQuery<Query.Media>(
@@ -1102,82 +1053,6 @@ class AnilistQueries {
             arrayListOf(anime.await(), manga.await())
         }
     }
-
-    suspend fun getMediaLists(
-        anime: Boolean,
-        userId: Int,
-        sortOrder: String? = null
-    ): MutableMap<String, ArrayList<Media>> {
-        val response =
-            executeQuery<Query.MediaListCollection>("""{ MediaListCollection(userId: $userId, type: ${if (anime) "ANIME" else "MANGA"}) { lists { name isCustomList entries { status progress progressVolumes private score(format:POINT_100) updatedAt startedAt{year month day} completedAt{year month day} media { id idMal isAdult type status chapters volumes episodes nextAiringEpisode {episode} bannerImage genres tags { name isMediaSpoiler } meanScore isFavourite format coverImage{large} startDate{year month day} title {english romaji userPreferred } } } } user { id mediaListOptions { rowOrder animeList { sectionOrder } mangaList { sectionOrder } } } } }""")
-        val sorted = mutableMapOf<String, ArrayList<Media>>()
-        val unsorted = mutableMapOf<String, ArrayList<Media>>()
-        val all = arrayListOf<Media>()
-        val allIds = arrayListOf<Int>()
-        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
-
-        response?.data?.mediaListCollection?.lists?.forEach { i ->
-            val name = i.name.toString().trim('"')
-            unsorted[name] = arrayListOf()
-            i.entries?.forEach {
-                val a = Media(it)
-                val localState = localStateRepository.get(a.id)
-                if (localState != null) {
-                    localState.applyTo(a)
-                } else {
-                    localStateRepository.upsert(a.toAnimeStateRecord())
-                }
-                unsorted[name]?.add(a)
-                if (!allIds.contains(a.id)) {
-                    allIds.add(a.id)
-                    all.add(a)
-                }
-            }
-        }
-
-        val options = response?.data?.mediaListCollection?.user?.mediaListOptions
-        val mediaList = if (anime) options?.animeList else options?.mangaList
-        mediaList?.sectionOrder?.forEach {
-            if (unsorted.containsKey(it)) sorted[it] = unsorted[it]!!
-        }
-        unsorted.forEach {
-            if (!sorted.containsKey(it.key)) sorted[it.key] = it.value
-        }
-
-        sorted["Favourites"] = favMedia(anime, userId)
-        sorted["Favourites"]?.sortWith(compareBy { it.userFavOrder })
-        //favMedia doesn't fill userProgress, so we need to fill it manually by searching :(
-        sorted["Favourites"]?.forEach { fav ->
-            all.find { it.id == fav.id }?.let {
-                fav.userProgress = it.userProgress
-                fav.userProgressVolumes = it.userProgressVolumes
-            }
-            localStateRepository.get(fav.id)?.applyTo(fav)
-        }
-
-        sorted["All"] = all
-        val listSort: String? = if (anime) PrefManager.getVal(PrefName.AnimeListSortOrder)
-        else PrefManager.getVal(PrefName.MangaListSortOrder)
-        val sort = listSort ?: sortOrder ?: options?.rowOrder
-        for (i in sorted.keys) {
-            when (sort) {
-                "score" -> sorted[i]?.sortWith { b, a ->
-                    compareValuesBy(
-                        a,
-                        b,
-                        { it.userScore },
-                        { it.meanScore })
-                }
-
-                "title" -> sorted[i]?.sortWith(compareBy { it.userPreferredName })
-                "updatedAt" -> sorted[i]?.sortWith(compareByDescending { it.userUpdatedAt })
-                "release" -> sorted[i]?.sortWith(compareByDescending { it.startDate })
-                "id" -> sorted[i]?.sortWith(compareBy { it.id })
-            }
-        }
-        return sorted
-    }
-
 
     suspend fun getGenresAndTags(): Boolean {
         var genres: ArrayList<String>? = PrefManager.getVal<Set<String>>(PrefName.GenresList)
