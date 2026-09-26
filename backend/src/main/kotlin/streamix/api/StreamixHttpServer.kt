@@ -960,7 +960,8 @@ class StreamixHttpServer(
                 relative.endsWith("/resolve") && exchange.requestMethod.equals("POST", true) -> {
                     val id = relative.removeSuffix("/resolve").trim('/')
                     if (id.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "incident id is required"))
-                    respond(exchange, if (api.resolveIncident(id)) 200 else 404, mapOf("resolved" to api.resolveIncident(id)))
+                    val resolved = api.resolveIncident(id)
+                    respond(exchange, if (resolved) 200 else 404, mapOf("resolved" to resolved))
                 }
                 else -> method(exchange, "GET")
             }
