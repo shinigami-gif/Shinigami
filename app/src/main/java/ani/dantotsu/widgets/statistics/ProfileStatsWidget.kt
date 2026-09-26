@@ -109,7 +109,6 @@ class ProfileStatsWidget : AppWidgetProvider() {
                         val avatarUrl = prefs.getString("avatar_url", "")
                         val animeCount = prefs.getInt("anime_count", 0)
                         val episodesWatched = prefs.getInt("episodes_watched", 0)
-                        val mangaCount = prefs.getInt("manga_count", 0)
                         val chaptersRead = prefs.getInt("chapters_read", 0)
                         
                         renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, userPref, titleTextColor, statsTextColor,
