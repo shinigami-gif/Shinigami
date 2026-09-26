@@ -525,7 +525,7 @@ class StreamixHttpServer(
                 "GET" -> {
                     val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
                     val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
-                    respond(exchange, 200, auth.chatService.global(page, perPage))
+                    respond(exchange, 200, auth.chatService.global(viewer.id, page, perPage))
                 }
                 "POST" -> {
                     val request = runCatching {
@@ -554,7 +554,7 @@ class StreamixHttpServer(
                 "GET" -> {
                     val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
                     val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
-                    respond(exchange, 200, auth.chatService.anime(mediaId, page, perPage))
+                    respond(exchange, 200, auth.chatService.anime(viewer.id, mediaId, page, perPage))
                 }
                 "POST" -> {
                     val request = runCatching {
