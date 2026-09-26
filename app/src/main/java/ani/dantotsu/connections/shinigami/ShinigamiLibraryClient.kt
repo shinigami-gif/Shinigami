@@ -1,15 +1,33 @@
 package ani.dantotsu.connections.shinigami
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class ShinigamiLibraryClient(
     private val http: OkHttpClient = OkHttpClient(),
     private val gson: Gson = Gson()
 ) {
+    suspend fun upsert(token: String, mediaId: Long, state: ShinigamiLibraryWrite) = withContext(Dispatchers.IO) {
+        val body = gson.toJson(state).toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url(ShinigamiBackendConfig.baseUrl + "/api/v1/users/me/library/" + mediaId)
+            .header("Authorization", "Bearer " + token)
+            .put(body)
+            .build()
+        http.newCall(request).execute().use {
+            val responseBody = it.body?.string().orEmpty()
+            if (!it.isSuccessful) throw IllegalStateException("Library update failed: HTTP " + it.code + " " + responseBody)
+            gson.fromJson(responseBody, ShinigamiLibraryState::class.java)
+                ?: throw IllegalStateException("Backend returned an empty library state")
+        }
+    }
+
     suspend fun deleteFromLibrary(token: String, mediaId: Long) = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url(ShinigamiBackendConfig.baseUrl + "/api/v1/users/me/library/" + mediaId)
@@ -42,3 +60,13 @@ class ShinigamiLibraryClient(
             }
         }
 }
+
+
+data class ShinigamiLibraryWrite(
+    val status: String? = null,
+    val progress: Int = 0,
+    val score: Double? = null,
+    val isFavorite: Boolean = false,
+    val notes: String? = null
+)
+
