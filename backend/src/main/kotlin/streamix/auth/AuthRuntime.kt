@@ -1,6 +1,9 @@
 package streamix.auth
 
 import com.google.gson.Gson
+import streamix.library.FileUserLibraryRepository
+import streamix.library.UserLibraryRepository
+import streamix.library.UserLibraryService
 import java.nio.file.Path
 
 /**
@@ -32,4 +35,6 @@ class AuthRuntime(
     )
 
     val userService: UserService = UserService(users)
+    val library: UserLibraryRepository = FileUserLibraryRepository(dataRoot.resolve("user-library.json"), gson)
+    val libraryService: UserLibraryService = UserLibraryService(library)
 }
