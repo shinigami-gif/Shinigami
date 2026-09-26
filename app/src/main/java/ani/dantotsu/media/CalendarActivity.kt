@@ -104,7 +104,6 @@ class CalendarActivity : AppCompatActivity() {
                             startActivity(
                                 android.content.Intent(this@CalendarActivity, ListActivity::class.java)
                                     .putExtra("anime", true)
-                                    .putExtra("userId", Anilist.userid)
                             )
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                             finish()
@@ -112,7 +111,7 @@ class CalendarActivity : AppCompatActivity() {
                         4 -> {
                             startActivity(
                                 android.content.Intent(this@CalendarActivity, AccountActivity::class.java)
-                                    .putExtra("userId", Anilist.userid)
+
                             )
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                             finish()
