@@ -163,8 +163,7 @@ class CommentsFragment : Fragment() {
         model.getMedia().observe(viewLifecycleOwner) { newMedia ->
             if (newMedia != null && newMedia.id != 0) {
                 userProgress = newMedia.userProgress
-                totalEpisodesOrChapters = if (isAnime)
-                    newMedia.anime?.totalEpisodes
+                totalEpisodesOrChapters = newMedia.anime?.totalEpisodes
                 updateCurrentProgressButton()
 
                 if (!commentsLoaded || newMedia.id != this.mediaId) {
@@ -552,7 +551,7 @@ class CommentsFragment : Fragment() {
         val model: MediaDetailsViewModel by activityViewModels()
         val currentMedia = model.getMedia().value ?: return
 
-        if (isAnime) {
+        {
             val ep = currentMedia.anime?.episodes?.getEpisode(targetTag)
             if (ep != null) {
                 val cleanEp = MediaNameAdapter.findEpisodeNumber(targetTag)?.let {
@@ -613,7 +612,7 @@ class CommentsFragment : Fragment() {
             binding.commentCurrentProgress.visibility = View.GONE
             return
         }
-        val label = if (isAnime) "Ep" else "Ch"
+        val label = "Ep"
         val isManualFilter = filterTag != null && filterTag != progress
         val activeFilter = filterTag ?: progress
 
