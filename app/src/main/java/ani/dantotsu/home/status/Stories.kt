@@ -393,9 +393,9 @@ class Stories @JvmOverloads constructor(
         val likeColor = ContextCompat.getColor(context, R.color.yt_red)
         val notLikeColor = ContextCompat.getColor(context, R.color.bg_opp)
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            val res = ShinigamiSocialClient().likeActivity(token, story.id)
+            val res = runCatching { ShinigamiSocialClient().likeActivity(token, story.id) }.getOrNull()
             withContext(Dispatchers.Main) {
-                if (res) {
+                if (res != null) {
                     story.isLiked = !story.isLiked
                     story.likeCount += if (story.isLiked) 1 else -1
                     binding.activityLikeCount.text = story.likeCount.toString()
