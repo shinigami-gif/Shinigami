@@ -7,13 +7,17 @@ import streamix.api.ShinigamiNotification
 class NotificationService(
     private val repository: NotificationRepository
 ) {
-    fun list(userId: String, page: Int = 1, perPage: Int = 30): NotificationPage =
-        NotificationPage(
-            items = repository.list(userId, page, perPage),
-            page = page.coerceAtLeast(1),
-            perPage = perPage.coerceIn(1, 100),
-            hasNextPage = repository.list(userId, page, perPage).size == perPage.coerceIn(1, 100)
+    fun list(userId: String, page: Int = 1, perPage: Int = 30): NotificationPage {
+        val safePage = page.coerceAtLeast(1)
+        val safePerPage = perPage.coerceIn(1, 100)
+        val items = repository.list(userId, safePage, safePerPage)
+        return NotificationPage(
+            items = items,
+            page = safePage,
+            perPage = safePerPage,
+            hasNextPage = items.size == safePerPage
         )
+    }
 
     fun unreadCount(userId: String): Int =
         repository.unreadCount(userId)
