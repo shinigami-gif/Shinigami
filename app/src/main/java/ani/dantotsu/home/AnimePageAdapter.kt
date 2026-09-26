@@ -20,6 +20,7 @@ import androidx.viewpager2.widget.ViewPager2
 import ani.dantotsu.MediaPageTransformer
 import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.ItemAnimePageBinding
 import ani.dantotsu.databinding.LayoutProfileHeaderBinding
@@ -52,6 +53,22 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
     private var trendHandler: Handler? = null
     private lateinit var trendRun: Runnable
     var trendingViewPager: ViewPager2? = null
+    private var shinigamiUserId: String? = null
+    private var shinigamiAvatar: String? = null
+    private var shinigamiUsername: String? = null
+    private var shinigamiTokenAvailable = false
+    private var shinigamiNotificationCount = 0
+
+    fun updateShinigamiIdentity(userId: String?, username: String?, avatar: String?, notificationCount: Int) {
+        shinigamiUserId = userId
+        shinigamiUsername = username
+        shinigamiAvatar = avatar
+        shinigamiTokenAvailable = userId != null
+        shinigamiNotificationCount = notificationCount
+        if (this::binding.isInitialized) {
+            notifyItemChanged(0)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnimePageViewHolder {
         val binding =
@@ -67,15 +84,15 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
 
         profileHeaderBinding.profileHeaderRoot.updatePadding(top = statusBarHeight + 10f.px)
         val rescueModeForHeader = PrefManager.getVal<Boolean>(PrefName.RescueMode)
-        val headerAvatarUrl = if (rescueModeForHeader) MAL.avatar else Anilist.avatar
-        val headerUsername = if (rescueModeForHeader) MAL.username else Anilist.username
+        val headerAvatarUrl = if (rescueModeForHeader) MAL.avatar else shinigamiAvatar
+        val headerUsername = if (rescueModeForHeader) MAL.username else shinigamiUsername
         profileHeaderBinding.profileHeaderName.text =
             headerUsername?.takeIf { it.isNotBlank() } ?: getAppString(R.string.app_name)
         if (!headerAvatarUrl.isNullOrBlank()) {
             profileHeaderBinding.profileHeaderAvatar.loadImage(headerAvatarUrl)
         }
         profileHeaderBinding.profileHeaderNotification.setSafeOnClickListener {
-            if (!rescueModeForHeader && Anilist.token != null) {
+            if (!rescueModeForHeader && shinigamiTokenAvailable) {
                 ContextCompat.startActivity(
                     it.context,
                     Intent(it.context, ani.dantotsu.profile.notification.NotificationActivity::class.java),
@@ -117,7 +134,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding.searchBar.hint = binding.root.context.getString(R.string.search)
         trendingBinding.searchBarText.setOnClickListener {
             val context = binding.root.context
-            if (PrefManager.getVal(PrefName.AniMangaSearchDirect) && Anilist.token != null) {
+            if (PrefManager.getVal(PrefName.AniMangaSearchDirect) && shinigamiTokenAvailable) {
                 ContextCompat.startActivity(
                     context,
                     Intent(context, SearchActivity::class.java).putExtra("type", "ANIME"),
@@ -143,7 +160,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
                 ContextCompat.startActivity(
                     view.context,
                     Intent(view.context, ProfileActivity::class.java)
-                        .putExtra("userId", Anilist.userid), null
+                        .putExtra("userId", shinigamiUserId), null
                 )
             } else {
                 val malUsername = MAL.username
@@ -161,9 +178,9 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         }
 
         val isRescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-        trendingBinding.notificationCount.isVisible = !isRescueMode && Anilist.unreadNotificationCount > 0
+        trendingBinding.notificationCount.isVisible = !isRescueMode && shinigamiNotificationCount > 0
                 && PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
-        trendingBinding.notificationCount.text = Anilist.unreadNotificationCount.toString()
+        trendingBinding.notificationCount.text = shinigamiNotificationCount.toString()
 
         listOf(
             binding.animePreviousSeason,
@@ -175,7 +192,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         }
 
         val rescueMode = PrefManager.getVal<Boolean>(PrefName.RescueMode)
-        binding.animeIncludeList.isVisible = if (rescueMode) MAL.token != null else Anilist.token != null
+        binding.animeIncludeList.isVisible = if (rescueMode) MAL.token != null else shinigamiTokenAvailable
 
         binding.animeIncludeList.isChecked = PrefManager.getVal(PrefName.PopularAnimeList)
 
@@ -335,7 +352,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
 
     fun updateAvatar() {
         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-        val avatarUrl = if (rescueMode) MAL.avatar else Anilist.avatar
+        val avatarUrl = if (rescueMode) MAL.avatar else shinigamiAvatar
         if (avatarUrl != null && ready.value == true) {
             trendingBinding.userAvatar.loadImage(avatarUrl)
             trendingBinding.userAvatar.imageTintList = null
