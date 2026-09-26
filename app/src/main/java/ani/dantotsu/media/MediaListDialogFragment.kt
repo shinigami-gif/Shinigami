@@ -287,58 +287,25 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                                 val notes = notesText
                                 val startD = start.date
                                 val endD = end.date
-                                val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-                                if (rescueMode) {
-                                    val pending = PendingProgressUpdate(
-                                        mediaId = media!!.id,
-                                        idMAL = media!!.idMAL,
-                                        isAnime = media!!.anime != null,
-                                        progress = progress ?: 0,
-                                        status = status,
-                                        score = score,
-                                        rewatch = rewatch,
-                                        notes = notes,
-                                        isPrivate = media?.isListPrivate ?: false,
-                                        startDate = startD,
-                                        endDate = endD,
-                                        customLists = media?.inCustomListsOf
-                                            ?.mapNotNull { if (it.value) it.key else null },
-                                    )
-                                    val existing: List<PendingProgressUpdate> =
-                                        PrefManager.getVal(PrefName.PendingProgressUpdates, listOf())
-                                    val updated = existing.filterNot { it.mediaId == media!!.id } + pending
-                                    PrefManager.setVal(PrefName.PendingProgressUpdates, updated)
-                                } else {
-                                    if (media!!.anime != null) {
-                                        val token = ShinigamiSessionStore(requireContext()).getToken()
-                                            ?: throw IllegalStateException("Shinigami session is missing")
-                                        ShinigamiLibraryClient().upsert(
-                                            token = token,
-                                            mediaId = media!!.id.toLong(),
-                                            state = ShinigamiLibraryWrite(
-                                                status = when (status.name) {
-                                                    "CURRENT" -> "WATCHING"
-                                                    "REPEATING" -> "REWATCHING"
-                                                    else -> status.name
-                                                },
-                                                progress = progress ?: 0,
-                                                score = score?.div(10.0),
-                                                isFavorite = media?.isFav ?: false,
-                                                notes = notes
-                                            )
+                                if (media!!.anime != null) {
+                                    val token = ShinigamiSessionStore(requireContext()).getToken()
+                                        ?: throw IllegalStateException("Shinigami session is missing")
+                                    ShinigamiLibraryClient().upsert(
+                                        token = token,
+                                        mediaId = media!!.id.toLong(),
+                                        state = ShinigamiLibraryWrite(
+                                            status = when (status.name) {
+                                                "CURRENT" -> "WATCHING"
+                                                "REPEATING" -> "REWATCHING"
+                                                else -> status.name
+                                            },
+                                            progress = progress ?: 0,
+                                            score = score?.div(10.0),
+                                            isFavorite = media?.isFav ?: false,
+                                            notes = notes
                                         )
-                                    }
+                                    )
                                 }
-                                MAL.query.editList(
-                                    media!!.idMAL,
-                                    media!!.anime != null,
-                                    progress,
-                                    score,
-                                    status,
-                                    rewatch,
-                                    startD,
-                                    endD
-                                )
                             }
                         }
                         if (remove == true) {
