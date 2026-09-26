@@ -66,16 +66,10 @@ class AnilistLinkPreviewView @JvmOverloads constructor(
                     ""
                 }
             }
-            val animeData = media.anime
-            val mangaData = media.manga
-            val episodesOrChapters = when {
+            val animeData = media.anime            val episodesOrChapters = when {
                 animeData != null && animeData.totalEpisodes != null -> {
                     val eps = animeData.totalEpisodes
                     if (eps == 0) null else "$eps Episodes"
-                }
-                mangaData != null && mangaData.totalChapters != null -> {
-                    val chaps = mangaData.totalChapters
-                    if (chaps == 0) null else "$chaps Chapters"
                 }
                 else -> null
             }
