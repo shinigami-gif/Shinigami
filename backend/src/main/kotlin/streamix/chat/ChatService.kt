@@ -3,8 +3,8 @@ package streamix.chat
 import streamix.api.ChatPage
 
 class ChatService(private val repository: ChatRepository) {
-    fun global(page: Int = 1, perPage: Int = 30) = page(repository.global(page, perPage), page, perPage)
-    fun anime(mediaId: Long, page: Int = 1, perPage: Int = 30) = page(repository.anime(mediaId, page, perPage), page, perPage)
+    fun global(viewerId: String, page: Int = 1, perPage: Int = 30) = page(repository.global(viewerId, page, perPage), page, perPage)
+    fun anime(viewerId: String, mediaId: Long, page: Int = 1, perPage: Int = 30) = page(repository.anime(viewerId, mediaId, page, perPage), page, perPage)
     fun sendGlobal(senderId: String, content: String) = repository.sendGlobal(senderId, content)
     fun sendAnime(senderId: String, mediaId: Long, content: String) = repository.sendAnime(senderId, mediaId, content)
     fun conversations(userId: String, page: Int = 1, perPage: Int = 30) = page(repository.conversations(userId, page, perPage), page, perPage)
