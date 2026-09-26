@@ -102,12 +102,12 @@ class App : Application(), GraphProvider<AppGraph> {
         (PrefManager.getVal(PrefName.SharedUserID) as Boolean).let {
             if (!it) return@let
             val dUsername = PrefManager.getVal(PrefName.DiscordUserName, null as String?)
-            val aUsername = PrefManager.getVal(PrefName.AnilistUserName, null as String?)
+            val shinigamiUserId = ani.dantotsu.connections.shinigami.ShinigamiSessionStore(this).getUserId()
             if (dUsername != null) {
                 crashlytics.setCustomKey("dUsername", dUsername)
             }
-            if (aUsername != null) {
-                crashlytics.setCustomKey("aUsername", aUsername)
+            if (shinigamiUserId != null) {
+                crashlytics.setUserId(shinigamiUserId)
             }
         }
         crashlytics.setCustomKey("device Info", SettingsActivity.getDeviceInfo())
@@ -129,6 +129,19 @@ class App : Application(), GraphProvider<AppGraph> {
 
         val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         applicationScope.launch(Dispatchers.IO) {
+            runCatching {
+                val store = ani.dantotsu.connections.shinigami.ShinigamiSessionStore(this@App)
+                val token = store.getToken()
+                if (token != null) {
+                    ani.dantotsu.connections.shinigami.ShinigamiBackendClient()
+                        .currentSession(token)
+                        .also(store::save)
+                }
+            }.onFailure {
+                Logger.log("Shinigami session restore failed")
+                Logger.log(it)
+            }
+
             downloadAddonManager = Injekt.get()
             downloadAddonManager.init()
             if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1) {
