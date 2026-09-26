@@ -20,7 +20,6 @@ import androidx.viewpager2.widget.ViewPager2
 import ani.dantotsu.MediaPageTransformer
 import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.ItemAnimePageBinding
 import ani.dantotsu.databinding.LayoutProfileHeaderBinding
@@ -362,9 +361,9 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
     fun updateNotificationCount() {
         if (this::binding.isInitialized && this::trendingBinding.isInitialized) {
             val isRescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-            trendingBinding.notificationCount.isVisible = !isRescueMode && Anilist.unreadNotificationCount > 0
+            trendingBinding.notificationCount.isVisible = !isRescueMode && shinigamiNotificationCount > 0
                     && PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
-            trendingBinding.notificationCount.text = Anilist.unreadNotificationCount.toString()
+            trendingBinding.notificationCount.text = shinigamiNotificationCount.toString()
         }
     }
 
