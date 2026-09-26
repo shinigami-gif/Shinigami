@@ -1,0 +1,41 @@
+name: Provider Auto Update
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [provider-upstream-changed]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  provider-auto-update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Run JVM contract and provider tests
+        run: |
+          set -euo pipefail
+          chmod +x backend/gradlew
+          (cd backend && ./gradlew) :test :streamix-core:test --no-daemon --stacktrace
+
+      - name: Run provider stream E2E
+        run: |
+          set -euo pipefail
+          (cd backend && ./gradlew) :liveE2eTest --no-daemon --stacktrace
+
+      - name: Report pipeline gate
+        run: |
+          echo "Provider auto-update gate passed."
+          echo "Artifact adaptation/publishing/activation remains owned by the ProviderUpdateExecutor integration."

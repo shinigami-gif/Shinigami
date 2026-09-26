@@ -1,0 +1,56 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+      - Versi-1
+      - feat/jvm-streamix-core-foundation
+    paths:
+      - "backend/src/**"
+      - "backend/sources/**"
+      - "backend/streamix-core/**"
+      - "backend/build.gradle.kts"
+      - "backend/settings.gradle.kts"
+      - "gradle.properties"
+      - "backend/gradle/**"
+      - "backend/gradlew"
+      - ".github/workflows/**"
+  pull_request:
+    branches:
+      - main
+      - Versi-1
+  workflow_dispatch:
+
+jobs:
+  compile-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - name: Compile backend
+        run: |
+          set -euo pipefail
+          chmod +x backend/gradlew
+          (cd backend && ./gradlew) :compileKotlin --no-daemon --stacktrace
+      - name: Run JVM tests
+        run: |
+          set -euo pipefail
+          (cd backend && ./gradlew) :test :streamix-core:test --no-daemon --stacktrace
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            backend/build/test-results/**
+            backend/build/reports/tests/**
+            backend/streamix-core/build/test-results/**
+            backend/streamix-core/build/reports/tests/**
+          if-no-files-found: warn

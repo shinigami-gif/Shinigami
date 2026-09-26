@@ -1,0 +1,32 @@
+name: Provider Upstream Watch
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 */6 * * *"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  check-hatsune:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check Hatsune upstream
+        env:
+          HATSUNE_REPO: HatsuneMikuUwU/AnimeX
+          HATSUNE_BRANCH: master
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          upstream="$(curl -fsSL "https://api.github.com/repos/$HATSUNE_REPO/commits/$HATSUNE_BRANCH" | python -c 'import json,sys; print(json.load(sys.stdin)["sha"])')"
+          echo "Hatsune upstream commit: $upstream"
+
+      - name: Trigger provider auto-update pipeline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run provider-auto-update.yml             --repo "${{ github.repository }}"             --ref main

@@ -1,0 +1,14 @@
+package com.alqanime
+import com.baseprovider.streamix.ProviderExtractorsNative
+import com.baseprovider.streamix.StreamixRuntime
+import streamix.core.*
+import java.net.URLEncoder
+class Alqanime : StreamixProvider {
+ override val id="alqanime"; private val base="https://alqanime.net"; private val headers=mapOf("User-Agent" to "Mozilla/5.0")
+ private suspend fun get(u:String,r:String=base)=StreamixRuntime.http?.get(u,headers=headers,referer=r)
+ private fun abs(s:String,p:String=base)=if(s.startsWith("http",true))s else java.net.URI(p).resolve(s).toString()
+ override suspend fun search(q:String,page:Int)=get(base+"/?s="+URLEncoder.encode(q,"UTF-8"))?.document?.select("article.bs")?.mapNotNull{e->val a=e.selectFirst("a")?:return@mapNotNull null;val u=abs(a.attr("href"));val t=(e.selectFirst(".ntitle")?.text()?:a.attr("title")).trim();if(t.isBlank())return@mapNotNull null;ProviderAnime(id,u,t,u,e.selectFirst("img")?.attr("src")?.let{abs(it)})}?.distinctBy{it.url}?:emptyList()
+ override suspend fun detail(a:ProviderAnime):ProviderAnime?{val d=get(a.url)?.document?:return null;val t=d.selectFirst("h1.entry-title")?.text()?.trim()?:a.title;val p=d.selectFirst("meta[property=og:image],img.wp-post-image,.thumb img")?.let{it.attr("content").ifBlank{it.attr("src")}}?.let{abs(it,a.url)};val desc=d.select("div.entry-content > p").joinToString("\n\n"){it.text().trim()}.ifBlank{null};return a.copy(title=t,poster=p?:a.poster,description=desc)}
+ override suspend fun episodes(a:ProviderAnime):List<ProviderEpisode>{val d=get(a.url)?.document?:return emptyList();return d.select("div.content a[href],div.soraddl a[href],div.listing a[href]").mapNotNull{e->val n=Regex("Episode\\s*(\\d+)",RegexOption.IGNORE_CASE).find(e.text())?.groupValues?.get(1)?.toIntOrNull()?:return@mapNotNull null;val u=abs(e.attr("href"),a.url);ProviderEpisode(id,n,u,e.text().trim().ifBlank{"Episode "+n},u)}.distinctBy{it.id}.sortedBy{it.number}}
+ override suspend fun streams(e:ProviderEpisode):List<ProviderStream>{val d=get(e.url,e.url)?.document?:return emptyList();val out=mutableListOf<ProviderStream>();d.select("source[src],video[src],iframe[src],a[href]").forEach{el->val raw=el.attr("src").ifBlank{el.attr("href")};if(raw.isBlank())return@forEach;val u=abs(raw,e.url);if(u.contains(".m3u8",true)||u.contains(".mp4",true))out+=ProviderStream(id,u,Regex("\\d{3,4}").find(u)?.value?.toIntOrNull(),if(u.contains(".m3u8",true))"m3u8" else "video",referer=e.url)else runCatching{ProviderExtractorsNative.resolve(u,e.url){r->out+=ProviderStream(id,r.url,r.quality,r.type.name.lowercase(),headers=r.headers,referer=r.referer.takeIf{it.isNotBlank()})}}};return out.distinctBy{it.url}}
+}

@@ -1,0 +1,14 @@
+package com.otakudesu
+import com.baseprovider.streamix.ProviderExtractorsNative
+import com.baseprovider.streamix.StreamixRuntime
+import streamix.core.*
+import java.net.URLEncoder
+class OtakudesuProvider : StreamixProvider {
+ override val id="otakudesu"; private val baseUrl="https://otakudesu.blog"; private val headers=mapOf("User-Agent" to "Mozilla/5.0")
+ private suspend fun get(u:String,r:String=baseUrl)=StreamixRuntime.http?.get(u,headers=headers,referer=r)
+ private fun abs(s:String,p:String=baseUrl)=if(s.startsWith("http",true))s else java.net.URI(p).resolve(s).toString()
+ override suspend fun search(q:String,page:Int)=get(baseUrl+"/?s="+URLEncoder.encode(q,"UTF-8"))?.document?.select("div.venz > ul > li")?.mapNotNull{e->val a=e.selectFirst("a[href]")?:return@mapNotNull null;val u=abs(a.attr("href"));val t=(e.selectFirst("h2.jdlflm")?.text().orEmpty()).trim();if(t.isBlank())return@mapNotNull null;ProviderAnime(id,u,t,u,e.selectFirst("img")?.attr("src")?.let{abs(it)})}?.distinctBy{it.url}?:emptyList()
+ override suspend fun detail(a:ProviderAnime):ProviderAnime?{val d=get(a.url)?.document?:return null;val t=d.selectFirst("h1.entry-title, h1[itemprop=headline], div.infozingle span")?.text()?.trim()?:a.title;val p=d.selectFirst("meta[property=og:image],img.wp-post-image,.fotoanime img")?.let{it.attr("content").ifBlank{it.attr("src")}}?.let{abs(it,a.url)};val desc=d.selectFirst("div.entry-content p,div.sinopc p,div#Sinopsis p")?.text()?.trim();return a.copy(title=t,poster=p?:a.poster,description=desc)}
+ override suspend fun episodes(a:ProviderAnime):List<ProviderEpisode>{val d=get(a.url)?.document?:return emptyList();return d.select("div.episodelist ul > li a").mapNotNull{e->val u=abs(e.attr("href"),a.url);val s=e.text().trim();val n=Regex("(?i)(?:episode|ep)\\s*(\\d+)").find(s)?.groupValues?.get(1)?.toIntOrNull()?:Regex("\\b(\\d+)\\b").find(s)?.value?.toIntOrNull()?:return@mapNotNull null;ProviderEpisode(id,n,u,s.ifBlank{"Episode "+n},u)}.distinctBy{it.id}.sortedBy{it.number}}
+ override suspend fun streams(e:ProviderEpisode):List<ProviderStream>{val d=get(e.url,e.url)?.document?:return emptyList();val out=mutableListOf<ProviderStream>();d.select("iframe[src],source[src],video[src],a[href]").forEach{el->val raw=el.attr("src").ifBlank{el.attr("href")};if(raw.isBlank())return@forEach;val u=abs(raw,e.url);if(u.contains(".m3u8",true)||u.contains(".mp4",true))out+=ProviderStream(id,u,Regex("\\d{3,4}").find(u)?.value?.toIntOrNull(),if(u.contains(".m3u8",true))"m3u8" else "video",referer=e.url)else runCatching{ProviderExtractorsNative.resolve(u,e.url){x->out+=ProviderStream(id,x.url,x.quality,x.type.name.lowercase(),headers=x.headers,referer=x.referer.takeIf{it.isNotBlank()})}}};return out.distinctBy{it.url}}
+}
