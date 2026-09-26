@@ -241,7 +241,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                 if (episodes != null) {
                     val currentSourceName = model.watchSources?.get(media.selected!!.sourceIndex)?.name ?: ""
                     val isTorrentSource = currentSourceName.equals("Torrent", ignoreCase = true) ||
-                        episodes.values.any { it.extra?.containsKey("torrentHash") == true }
 
                     val metadataPriority = PrefManager.getVal<Int>(PrefName.EpisodeMetadataSource)
                     episodes.forEach { (i, episode) ->
