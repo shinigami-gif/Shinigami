@@ -176,15 +176,7 @@ class MediaAdaptor(
                             )
                             b.itemCompactTotal.text =
                                 " | ${if (media.anime.nextAiringEpisode != null) (media.anime.nextAiringEpisode.toString() + " | " + (media.anime.totalEpisodes ?: "~").toString()) else (media.anime.totalEpisodes ?: "~").toString()}"
-                        } else if (media.manga != null) {
-                            if (media.relation != null) b.itemCompactTypeImage.setImageDrawable(
-                                AppCompatResources.getDrawable(
-                                    activity,
-                                    R.drawable.ic_round_import_contacts_24
-                                )
-                            )
-                            b.itemCompactTotal.text = " | ${media.manga.totalChapters ?: "~"}"
-                        }
+                        
                     }
                     b.itemCompactProgressContainer.visibility = if (fav) View.GONE else View.VISIBLE
                 }
@@ -218,15 +210,7 @@ class MediaAdaptor(
                             if (media.anime.nextAiringEpisode != null) (media.anime.nextAiringEpisode.toString() + " / " + (media.anime.totalEpisodes
                                 ?: "??").toString()) else (media.anime.totalEpisodes
                                 ?: "??").toString()
-                    } else if (media.manga != null) {
-                        val itemTotal = " " + if ((media.manga.totalChapters
-                                ?: 0) != 1
-                        ) b.root.context.getString(R.string.chapter_plural) else b.root.context.getString(
-                            R.string.chapter_singular
-                        )
-                        b.itemTotal.text = itemTotal
-                        b.itemCompactTotal.text = "${media.manga.totalChapters ?: "??"}"
-                    }
+                    
                     if (position == mediaList.size - 2 && viewPager != null) viewPager.post {
                         val start = mediaList.size
                         mediaList.addAll(mediaList)
@@ -292,13 +276,7 @@ class MediaAdaptor(
                             if (media.anime.nextAiringEpisode != null) (media.anime.nextAiringEpisode.toString() + " / " + (media.anime.totalEpisodes
                                 ?: "??").toString()) else (media.anime.totalEpisodes
                                 ?: "??").toString()
-                    } else if (media.manga != null) {
-                        b.itemTotal.text = " " + if ((media.manga.totalChapters
-                                ?: 0) != 1
-                        ) b.root.context.getString(R.string.chapter_plural)
-                        else b.root.context.getString(R.string.chapter_singular)
-                        b.itemCompactTotal.text = "${media.manga.totalChapters ?: "??"}"
-                    }
+                    
                     @SuppressLint("NotifyDataSetChanged")
                     if (position == mediaList.size - 2 && viewPager != null) viewPager.post {
                         val size = mediaList.size
@@ -359,13 +337,7 @@ class MediaAdaptor(
                             if (media.anime.nextAiringEpisode != null) (media.anime.nextAiringEpisode.toString() + " / " + (media.anime.totalEpisodes
                                 ?: "??").toString()) else (media.anime.totalEpisodes
                                 ?: "??").toString()
-                    } else if (media.manga != null) {
-                        b.itemTotal.text = " " + if ((media.manga.totalChapters
-                                ?: 0) != 1
-                        ) b.root.context.getString(R.string.chapter_plural)
-                        else b.root.context.getString(R.string.chapter_singular)
-                        b.itemCompactTotal.text = "${media.manga.totalChapters ?: "??"}"
-                    }
+                    
                     @SuppressLint("NotifyDataSetChanged")
                     if (position == mediaList.size - 2 && viewPager != null) viewPager.post {
                         val size = mediaList.size
