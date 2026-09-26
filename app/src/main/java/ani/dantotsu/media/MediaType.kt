@@ -5,29 +5,12 @@ interface Type {
 }
 
 enum class MediaType : Type {
-    ANIME,
-    MANGA,
-    NOVEL;
+    ANIME;
 
-    override fun asText(): String {
-        return when (this) {
-            ANIME -> "Anime"
-            MANGA -> "Manga"
-            NOVEL -> "Novel"
-        }
-    }
+    override fun asText(): String = "Anime"
 
     companion object {
-        fun fromText(string: String): MediaType? {
-            return when (string) {
-                "Anime" -> ANIME
-                "Manga" -> MANGA
-                "Novel" -> NOVEL
-                else -> {
-                    null
-                }
-            }
-        }
+        fun fromText(string: String): MediaType? =
+            if (string == "Anime") ANIME else null
     }
 }
-
