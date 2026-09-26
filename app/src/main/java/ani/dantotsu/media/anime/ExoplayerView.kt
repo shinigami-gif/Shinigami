@@ -140,7 +140,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         private set
     lateinit var aniSkipManager: PlayerAniSkipManager
         private set
-        private set
     lateinit var castManager: PlayerCastManager
         private set
     lateinit var progressManager: PlayerProgressManager
