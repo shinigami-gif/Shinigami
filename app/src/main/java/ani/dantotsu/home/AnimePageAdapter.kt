@@ -133,7 +133,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         trendingBinding.searchBar.hint = binding.root.context.getString(R.string.search)
         trendingBinding.searchBarText.setOnClickListener {
             val context = binding.root.context
-            if (PrefManager.getVal(PrefName.AniMangaSearchDirect) && shinigamiTokenAvailable) {
+            if (shinigamiTokenAvailable) {
                 ContextCompat.startActivity(
                     context,
                     Intent(context, SearchActivity::class.java).putExtra("type", "ANIME"),
