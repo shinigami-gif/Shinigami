@@ -211,11 +211,10 @@ internal class ExtensionGithubApi {
 
                     val prefix = when (mediaType) {
                         MediaType.ANIME -> "Aniyomi: "
-                        MediaType.MANGA -> "Tachiyomi: "
                         else -> ""
                     }
 
-                    // Attempt decode as Anime store first if mediaType == ANIME, otherwise Manga store first
+                    // Decode the anime extension store
                     if (mediaType == MediaType.ANIME) {
                         val animeStore = if (firstByte == 0x7B.toByte()) {
                             val bodyString = responseBytes.toString(Charsets.UTF_8)
@@ -293,7 +292,7 @@ internal class ExtensionGithubApi {
                         }
                     }
 
-                    // Fallback or Manga store
+                    // Fallback extension store
                     val store: NetworkExtensionStore? = if (firstByte == 0x7B.toByte()) {
                         val bodyString = responseBytes.toString(Charsets.UTF_8)
                         runCatching { json.decodeFromString<NetworkExtensionStore>(bodyString) }.getOrNull()
