@@ -60,6 +60,10 @@ android {
             .toInt()
 
         signingConfig = signingConfigs.getByName("debug")
+
+        // Injected by the build pipeline; never hardcode deployment endpoints in source.
+        val shinigamiBackendUrl = providers.gradleProperty("shinigamiBackendUrl").orNull.orEmpty()
+        buildConfigField("String", "SHINIGAMI_BACKEND_URL", "\"${shinigamiBackendUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
     }
 
     splits {
