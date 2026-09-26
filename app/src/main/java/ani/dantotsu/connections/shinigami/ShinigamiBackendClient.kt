@@ -109,7 +109,7 @@ class ShinigamiBackendClient(
                 Request.Builder()
                     .url("$baseUrl/api/v1/users/$userId/follow?enabled=$enabled")
                     .header("Authorization", "Bearer $token")
-                    .post("{}".toRequestBody("application/json; charset=utf-8"))
+                    .post("{}".toRequestBody("application/json; charset=utf-8".toMediaType()))
                     .build()
             )
         }
@@ -120,7 +120,7 @@ class ShinigamiBackendClient(
                 Request.Builder()
                     .url("$baseUrl/api/v1/users/$userId/block?enabled=$enabled")
                     .header("Authorization", "Bearer $token")
-                    .post("{}".toRequestBody("application/json; charset=utf-8"))
+                    .post("{}".toRequestBody("application/json; charset=utf-8".toMediaType()))
                     .build()
             )
         }
@@ -175,7 +175,7 @@ class ShinigamiBackendClient(
             Request.Builder()
                 .url("$baseUrl/api/v1/auth/logout")
                 .header("Authorization", "Bearer $token")
-                .post("{}".toRequestBody("application/json; charset=utf-8"))
+                .post("{}".toRequestBody("application/json; charset=utf-8".toMediaType()))
                 .build()
         ).execute()
         response.use {
