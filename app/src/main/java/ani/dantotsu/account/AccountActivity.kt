@@ -1,13 +1,15 @@
 package ani.dantotsu.account
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
 import ani.dantotsu.MainActivity
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.media.CalendarActivity
 import ani.dantotsu.media.user.ListActivity
 import ani.dantotsu.profile.activity.FeedActivity
@@ -17,6 +19,7 @@ import ani.dantotsu.settings.SettingsActivity
 import ani.dantotsu.settings.SettingsNotificationActivity
 import ani.dantotsu.settings.UserInterfaceSettingsActivity
 import ani.dantotsu.themes.ThemeManager
+import kotlinx.coroutines.launch
 
 class AccountActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAccountBinding
@@ -59,7 +62,6 @@ class AccountActivity : AppCompatActivity() {
                             startActivity(
                                 Intent(this@AccountActivity, ListActivity::class.java)
                                     .putExtra("anime", true)
-                                    .putExtra("userId", ani.dantotsu.connections.anilist.Anilist.userid)
                             )
                             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                             finish()
@@ -75,7 +77,6 @@ class AccountActivity : AppCompatActivity() {
         binding.editProfileButton.setOnClickListener {
             startActivity(Intent(this, EditProfileActivity::class.java))
         }
-
         binding.appearanceOption.setOnClickListener {
             startActivity(Intent(this, UserInterfaceSettingsActivity::class.java))
         }
@@ -88,9 +89,7 @@ class AccountActivity : AppCompatActivity() {
         binding.aboutOption.setOnClickListener {
             startActivity(Intent(this, SettingsAboutActivity::class.java))
         }
-        binding.profileOption.setOnClickListener {
-            loadProfile()
-        }
+        binding.profileOption.setOnClickListener { loadProfile() }
     }
 
     override fun onResume() {
@@ -99,15 +98,16 @@ class AccountActivity : AppCompatActivity() {
     }
 
     private fun loadProfile() {
-        val profile = AccountRepository.getCurrentUser(this)
-        binding.accountUsername.text = profile.username
-        binding.accountBio.text = profile.bio
-
-        profile.avatarUri?.let {
-            runCatching { binding.accountAvatar.setImageURI(Uri.parse(it)) }
-        }
-        profile.bannerUri?.let {
-            runCatching { binding.accountBanner.setImageURI(Uri.parse(it)) }
+        lifecycleScope.launch {
+            val token = ShinigamiSessionStore(this@AccountActivity).getToken() ?: return@launch
+            val session = runCatching {
+                ShinigamiBackendClient().currentSession(token)
+            }.getOrNull() ?: return@launch
+            val profile = session.user
+            binding.accountUsername.text = profile.displayName ?: profile.username
+            binding.accountBio.text = profile.bio.orEmpty()
+            profile.avatarUrl?.let { ani.dantotsu.loadImage(binding.accountAvatar, it) }
+            profile.bannerUrl?.let { ani.dantotsu.loadImage(binding.accountBanner, it) }
         }
     }
 }
