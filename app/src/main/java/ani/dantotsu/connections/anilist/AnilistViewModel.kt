@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.BuildConfig
+import ani.dantotsu.App
 import ani.dantotsu.R
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.connections.mal.MalAnimeNode
@@ -47,7 +48,7 @@ class AnilistHomeViewModel : ViewModel() {
         MutableLiveData<ArrayList<String?>>(arrayListOf())
 
     fun getListImages(): LiveData<ArrayList<String?>> = listImages
-    suspend fun setListImages() = listImages.postValue(Anilist.metadata.getBannerImages())
+    suspend fun setListImages() = listImages.postValue(ArrayList(Anilist.metadata.getBannerImages().map { it }))
 
     private val animeContinue: MutableLiveData<ArrayList<Media>> =
         MutableLiveData<ArrayList<Media>>(null)
@@ -543,9 +544,8 @@ class AnilistSearch : ViewModel() {
         if (rescueMode) {
             val isAnime = true
 
-            if (!r.search.isNullOrBlank() && true) {
+            if (!r.search.isNullOrBlank()) {
                 val malRes = tryWithSuspend {
-                    MAL.query.searchAnime(r.search!!, limit = 25)
                     MAL.query.searchAnime(r.search!!, limit = 25)
                 }
                 animeSearchResult.postValue(AnimeSearchResults(
@@ -656,6 +656,10 @@ class AnilistSearch : ViewModel() {
                 r.season,
             )
         )
+    }
+
+    private suspend fun loadNextAnimePage(r: AnimeSearchResults) {
+        loadAnimeSearch(r.copy(page = r.page + 1))
     }
 
     private suspend fun loadCharacterSearch(r: CharacterSearchResults) {
