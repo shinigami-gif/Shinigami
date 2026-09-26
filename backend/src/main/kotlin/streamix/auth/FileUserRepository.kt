@@ -74,7 +74,7 @@ class FileUserRepository(
                 .sortedBy { it.username.lowercase() }
                 .drop((safePage - 1) * safeSize)
                 .take(safeSize)
-                .map(StoredUser::toApiUser)
+                .map { it.toApiUser() }
                 .toList()
         }
 
