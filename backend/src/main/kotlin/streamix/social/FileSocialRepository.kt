@@ -169,6 +169,7 @@ class FileSocialRepository(
         commentToApi(updated, userId)
     }
 
+    override fun notifications(userId: String, page: Int, perPage: Int): List<NotificationRef> = synchronized(lock) {
         paginate(read<StoredNotification>("notifications.json").filter { it.userId == userId }.sortedByDescending { it.createdAt }, page, perPage)
             .mapNotNull { notificationToApi(it) }
     }
@@ -213,6 +214,7 @@ class FileSocialRepository(
         return updated
     }
 
+    private fun toggle(current: Set<String>, userId: String): Set<String> =
         if (userId in current) current - userId else current + userId
 
     private inline fun <reified T> read(name: String): List<T> {
