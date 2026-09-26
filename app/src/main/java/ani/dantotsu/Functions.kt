@@ -1618,10 +1618,9 @@ fun ImageView.openImage(title: String, image: String) {
  * @param link the link to open
  */
 fun openOrCopyAnilistLink(link: String) {
-    if (link.startsWith("https://anilist.co/anime/") || link.startsWith("https://anilist.co/manga/")) {
-        val mangaAnime = link.substringAfter("https://anilist.co/").substringBefore("/")
+    if (link.startsWith("https://anilist.co/anime/")) {
         val id =
-            link.substringAfter("https://anilist.co/$mangaAnime/").substringBefore("/")
+            link.substringAfter("https://anilist.co/anime/").substringBefore("/")
                 .toIntOrNull()
         val context = currContext()
 
