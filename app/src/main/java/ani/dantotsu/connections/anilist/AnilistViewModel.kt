@@ -376,7 +376,7 @@ class AnilistAnimeViewModel : ViewModel() {
     }
 
 
-    suspend fun loadNextPage(r: AnimeSearchResults) {
+    private suspend fun loadNextAnimePage(r: AnimeSearchResults) {
         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
         if (rescueMode) {
             val searchTerm = r.search
@@ -807,6 +807,33 @@ class AnilistSearch : ViewModel() {
             return
         }
         staffResult.postValue(Anilist.metadata.searchStaff(r.page, r.search))
+    }
+
+    private suspend fun loadNextCharacterPage(r: CharacterSearchResults) {
+        val next = r.copy(page = r.page + 1)
+        val result = Anilist.metadata.searchCharacters(next.page, next.search) ?: return
+        r.results.addAll(result.results)
+        r.page = result.page
+        r.hasNextPage = result.hasNextPage
+        characterResult.postValue(r)
+    }
+
+    private suspend fun loadNextStudiosPage(r: StudioSearchResults) {
+        val next = r.copy(page = r.page + 1)
+        val result = Anilist.metadata.searchStudios(next.page, next.search) ?: return
+        r.results.addAll(result.results)
+        r.page = result.page
+        r.hasNextPage = result.hasNextPage
+        studioResult.postValue(r)
+    }
+
+    private suspend fun loadNextStaffPage(r: StaffSearchResults) {
+        val next = r.copy(page = r.page + 1)
+        val result = Anilist.metadata.searchStaff(next.page, next.search) ?: return
+        r.results.addAll(result.results)
+        r.page = result.page
+        r.hasNextPage = result.hasNextPage
+        staffResult.postValue(r)
     }
 
     private suspend fun loadUserSearch(r: UserSearchResults) {
