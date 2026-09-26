@@ -11,6 +11,9 @@ import streamix.notification.FileNotificationRepository
 import streamix.notification.NotificationRepository
 import streamix.notification.NotificationService
 import streamix.notification.NotificationEventPublisher
+import streamix.admin.AdminAccessService
+import streamix.admin.AdminRoleRepository
+import streamix.admin.FileAdminRoleRepository
 import streamix.social.FileSocialRepository
 import streamix.social.SocialRepository
 import streamix.social.SocialService
@@ -57,5 +60,10 @@ class AuthRuntime(
     )
     val notificationService: NotificationService = NotificationService(notification)
     val notificationEvents: NotificationEventPublisher = NotificationEventPublisher(notificationService)
+    val adminRoles: AdminRoleRepository = FileAdminRoleRepository(
+        dataRoot.resolve("admin"),
+        gson
+    )
+    val adminAccess: AdminAccessService = AdminAccessService(adminRoles)
     val chatService: ChatService = ChatService(chat, notificationService)
 }
