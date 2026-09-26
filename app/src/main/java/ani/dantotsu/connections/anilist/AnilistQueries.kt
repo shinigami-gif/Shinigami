@@ -1198,4 +1198,4 @@ Page(page:$page,perPage:50) {
         val query = """{Media(id:$mediaId){staff(sort:[RELEVANCE,ID],page:$page,perPage:25){pageInfo{hasNextPage currentPage}edges{role node{id name{userPreferred}image{medium large}}}}}}"""
         return executeQuery(query, force = true)
     }
-
+}
