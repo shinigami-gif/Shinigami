@@ -63,23 +63,6 @@ class OtherDetailsViewModel : ViewModel() {
                         }
                     }
 
-                    jikanData.manga.forEach { role ->
-                        role.manga?.let { mangaEntry ->
-                            val media = Media(
-                                id = mangaEntry.malId,
-                                idMAL = mangaEntry.malId,
-                                name = mangaEntry.title,
-                                nameRomaji = mangaEntry.title ?: "",
-                                userPreferredName = mangaEntry.title ?: "",
-                                cover = mangaEntry.images?.jpg?.largeImageUrl ?: mangaEntry.images?.jpg?.imageUrl,
-                                isAdult = false,
-                                format = "MANGA",
-                                manga = Manga()
-                            )
-                            media.relation = role.role
-                            roles.add(media)
-                        }
-                    }
                     roles.sortByDescending { it.idMAL }
                     m.roles = roles
                     
