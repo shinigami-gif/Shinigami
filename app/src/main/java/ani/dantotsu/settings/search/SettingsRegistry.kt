@@ -5,7 +5,6 @@ import android.os.Build
 import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
-import ani.dantotsu.settings.AnilistSettingsActivity
 import ani.dantotsu.settings.FAQActivity
 import ani.dantotsu.settings.PlayerSettingsActivity
 import ani.dantotsu.settings.SettingsAboutActivity
@@ -358,18 +357,6 @@ object SettingsRegistry {
             )
         )
 
-        // 10. Accounts & Anilist Settings
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.anilist_settings),
-                desc = context.getString(R.string.alsettings_desc),
-                icon = R.drawable.ic_anilist,
-                category = context.getString(R.string.accounts),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.accounts)}",
-                targetActivity = AnilistSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.anilist_settings)
-            )
-        )
         list.add(
             SearchableSetting(
                 title = context.getString(R.string.comments_button),
