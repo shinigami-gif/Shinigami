@@ -358,7 +358,6 @@ class MediaDetailsViewModel : ViewModel() {
                         if (score != null) rec.meanScore = score
                         if (statusStr != null) rec.status = statusStr
                         if (episodesCount != null) {
-                            if (rec.anime == null) rec.anime = ani.dantotsu.media.anime.Anime(null, null, null)
                             rec.anime?.totalEpisodes = episodesCount
                         }
                     } catch (_: Exception) {}
@@ -461,7 +460,6 @@ class MediaDetailsViewModel : ViewModel() {
                         if (score != null && rel.meanScore == null) rel.meanScore = score
                         if (statusStr != null && rel.status == null) rel.status = statusStr
                         if (episodesCount != null) {
-                            if (rel.anime == null) rel.anime = ani.dantotsu.media.anime.Anime(null, null, null)
                             rel.anime?.totalEpisodes = episodesCount
                         }
                         if (resolvedFmt != null) {
