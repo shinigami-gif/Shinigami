@@ -53,7 +53,6 @@ import ani.dantotsu.profile.ProfileActivity
 import ani.dantotsu.profile.activity.FeedActivity
 import ani.dantotsu.profile.notification.NotificationActivity
 import ani.dantotsu.settings.AddRepositoryBottomSheet
-import ani.dantotsu.settings.ExtensionsActivity
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefManager.asLiveBool
 import ani.dantotsu.settings.saving.PrefName
@@ -299,7 +298,6 @@ class MainActivity : AppCompatActivity() {
                 snackString(R.string.extension_updates_available)
                     ?.setDuration(Snackbar.LENGTH_SHORT)
                     ?.setAction(R.string.review) {
-                        startActivity(Intent(this, ExtensionsActivity::class.java))
                     }
             }
             window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
