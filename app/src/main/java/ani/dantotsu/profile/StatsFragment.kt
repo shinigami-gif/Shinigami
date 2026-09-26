@@ -97,7 +97,7 @@ class StatsFragment :
                             currentBinding.statisticList.visibility = View.GONE
                         }
                         val userStats =
-                            Anilist.query.getUserStatistics(Anilist.userid!!)?.data?.user
+                            null
                         if (userStats != null) {
                             stats.add(userStats)
                             withContext(Dispatchers.Main) {
@@ -134,7 +134,7 @@ class StatsFragment :
             if (!loadedFirstTime) {
                 viewLifecycleOwner.lifecycleScope.launch {
                     stats.clear()
-                    stats.add(Anilist.query.getUserStatistics(user.id)?.data?.user)
+                    stats.add(null)
                     withContext(Dispatchers.Main) {
                         val currentBinding = _binding ?: return@withContext
                         currentBinding.filterContainer.visibility = View.VISIBLE
