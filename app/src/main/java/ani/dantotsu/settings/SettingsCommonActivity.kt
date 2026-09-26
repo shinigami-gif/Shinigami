@@ -20,7 +20,6 @@ import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.databinding.ActivitySettingsCommonBinding
 import ani.dantotsu.databinding.DialogSetPasswordBinding
 import ani.dantotsu.databinding.DialogUserAgentBinding
-import ani.dantotsu.download.DownloadsManager
 import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.others.calc.BiometricPromptUtils
@@ -159,52 +158,9 @@ class SettingsCommonActivity : AppCompatActivity() {
                             },
                             isActivity = true,
                         ),
-                        Settings(
-                            type = 1,
-                            name = getString(R.string.download_manager_select),
-                            desc = getString(R.string.download_manager_select_desc),
-                            icon = R.drawable.ic_download_24,
-                            onClick = {
-                                val managers = arrayOf("Default", "1DM", "ADM")
-                                customAlertDialog().apply {
-                                    setTitle(getString(R.string.download_manager))
-                                    singleChoiceItems(
-                                        managers,
-                                        PrefManager.getVal(PrefName.DownloadManager),
-                                    ) { count ->
-                                        PrefManager.setVal(PrefName.DownloadManager, count)
-                                    }
-                                    show()
-                                }
-                            },
-                        ),
-                        Settings(
-                            type = 1,
-                            name = "Max Parallel Downloads",
-                            desc = "Concurrent download tasks (0 = Sequential, 1-10 = Concurrent). Note: High concurrency may trigger source rate limits.",
-                            icon = R.drawable.ic_download_24,
-                            onClick = {
-                                val options = arrayOf("0 (Off / Sequential)", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
-                                val current = PrefManager.getVal<Int>(PrefName.MaxParallelDownloads).coerceIn(0, 10)
-                                customAlertDialog().apply {
-                                    setTitle("Max Parallel Downloads")
-                                    singleChoiceItems(options, current) { which ->
-                                        PrefManager.setVal(PrefName.MaxParallelDownloads, which)
-                                    }
-                                    show()
-                                }
-                            },
-                        ),
-                        Settings(
-                            type = 2,
-                            name = getString(R.string.download_wifi_only),
-                            desc = getString(R.string.download_wifi_only_desc),
-                            icon = R.drawable.lan_24,
-                            isChecked = PrefManager.getVal(PrefName.DownloadWifiOnly),
-                            switch = { isChecked, _ ->
-                                PrefManager.setVal(PrefName.DownloadWifiOnly, isChecked)
-                            }
-                        ),
+
+
+
                         Settings(
                             type = 1,
                             name = getString(R.string.app_lock),
