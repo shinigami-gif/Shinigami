@@ -19,12 +19,10 @@ import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.BottomSheetSettingsBinding
 import ani.dantotsu.download.anime.OfflineAnimeFragment
-import ani.dantotsu.download.manga.OfflineMangaFragment
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.home.AnimeFragment
 import ani.dantotsu.home.HomeFragment
 import ani.dantotsu.home.LoginFragment
-import ani.dantotsu.home.MangaFragment
 import ani.dantotsu.home.NoInternet
 import ani.dantotsu.incognitoNotification
 import ani.dantotsu.loadImage
@@ -231,12 +229,6 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
                             startActivity(intent)
                         }
 
-                        PageType.OfflineMANGA -> {
-                            val intent = Intent(currentActivity, MainActivity::class.java)
-                            intent.putExtra("FRAGMENT_CLASS_NAME", MangaFragment::class.java.name)
-                            startActivity(intent)
-                        }
-
                         PageType.OfflineHOME -> {
                             val intent = Intent(currentActivity, MainActivity::class.java)
                             intent.putExtra(
@@ -267,7 +259,7 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
 
     companion object {
         enum class PageType {
-            MANGA, ANIME, HOME, OfflineMANGA, OfflineANIME, OfflineHOME
+            ANIME, HOME, OfflineANIME, OfflineHOME
         }
 
         fun newInstance(pageType: PageType): SettingsDialogFragment {
