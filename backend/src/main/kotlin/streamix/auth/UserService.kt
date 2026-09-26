@@ -14,9 +14,7 @@ class UserService(
     fun profile(userId: String, viewerId: String? = null): UserProfile {
         val user = users.findById(userId) ?: error("user not found")
         val viewer = viewerId?.let(users::findById)
-        val relationship = viewerId?.let { users.relationship(it, userId) }
-        val storedFollowing = viewer?.let { users.findById(it.id) }
-        val followingCount = storedFollowing?.let { countFollowing(it.id) } ?: 0
+        val relationship = viewerId?.takeIf { it != userId }?.let { users.relationship(it, userId) }
         return UserProfile(
             user = user.copy(
                 isFollowing = relationship?.following ?: false,
