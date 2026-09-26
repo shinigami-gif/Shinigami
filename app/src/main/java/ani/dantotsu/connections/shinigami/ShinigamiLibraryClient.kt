@@ -23,7 +23,7 @@ class ShinigamiLibraryClient(
         http.newCall(request).execute().use {
             val responseBody = it.body?.string().orEmpty()
             if (!it.isSuccessful) throw IllegalStateException("Library update failed: HTTP " + it.code + " " + responseBody)
-            gson.fromJson(responseBody, ShinigamiLibraryState::class.java)
+            gson.fromJson(responseBody, ShinigamiLibraryItem::class.java)
                 ?: throw IllegalStateException("Backend returned an empty library state")
         }
     }
