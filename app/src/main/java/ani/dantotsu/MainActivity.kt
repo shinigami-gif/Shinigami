@@ -52,7 +52,6 @@ import ani.dantotsu.others.calc.CalcActivity
 import ani.dantotsu.profile.ProfileActivity
 import ani.dantotsu.profile.activity.FeedActivity
 import ani.dantotsu.profile.notification.NotificationActivity
-import ani.dantotsu.settings.AddRepositoryBottomSheet
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefManager.asLiveBool
 import ani.dantotsu.settings.saving.PrefName
@@ -499,11 +498,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 val savedRepos: Set<String> = PrefManager.getVal(prefName)
                 val newRepos = savedRepos.toMutableSet()
-                AddRepositoryBottomSheet.addRepoWarning(this) {
-                    newRepos.add(url)
-                    PrefManager.setVal(prefName, newRepos)
-                    toast("$name Extension Repo added")
-                }
+                newRepos.add(url)
+                PrefManager.setVal(prefName, newRepos)
+                toast("$name Extension Repo added")
                 return
             }
             if (uri.scheme.equals("dantotsu", ignoreCase = true)) {
