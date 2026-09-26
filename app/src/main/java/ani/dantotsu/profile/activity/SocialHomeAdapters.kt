@@ -11,7 +11,7 @@ import ani.dantotsu.loadImage
 
 class SocialActivityAdapter(private val items:List<ShinigamiActivity>):RecyclerView.Adapter<SocialActivityAdapter.Holder>(){
  override fun onCreateViewHolder(p:ViewGroup,v:Int)=Holder(ItemSocialActivityBinding.inflate(LayoutInflater.from(p.context),p,false))
- override fun onBindViewHolder(h:Holder,pos:Int){val a=items[pos];h.binding.socialActivityAvatar.loadImage(a.author.avatarUrl);h.binding.socialActivityText.text=when(a.typename){"ListActivity"->"${a.author.displayName ?: a.author.username} ${a.type} ${a.mediaTitle ?: ""}";"TextActivity"->"${a.author.displayName ?: a.author.username} shared an update";"MessageActivity"->"${a.author.displayName ?: a.author.username} sent a message";else->"${a.user?.name ?: "User"} was active"};h.binding.socialActivityTime.text=ActivityItemBuilder.getDateTime(a.createdAt)}
+ override fun onBindViewHolder(h:Holder,pos:Int){val a=items[pos];h.binding.socialActivityAvatar.loadImage(a.author.avatarUrl);h.binding.socialActivityText.text=when(a.type){"LIST"->"${a.author.displayName ?: a.author.username} ${a.mediaTitle ?: ""}";"MESSAGE"->"${a.author.displayName ?: a.author.username} sent a message";else->"${a.author.displayName ?: a.author.username} was active"};h.binding.socialActivityTime.text=ActivityItemBuilder.getDateTime(a.createdAt)}
  override fun getItemCount()=items.size
  class Holder(val binding:ItemSocialActivityBinding):RecyclerView.ViewHolder(binding.root)
 }
@@ -21,7 +21,7 @@ class SocialFriendAdapter(private val users:List<SocialLeaderboardUser>):Recycle
  override fun getItemCount()=users.size
  class Holder(val binding:ItemSocialFriendBinding):RecyclerView.ViewHolder(binding.root)
 }
-class SocialMessageAdapter(private val items:List<Activity>):RecyclerView.Adapter<SocialMessageAdapter.Holder>(){
+class SocialMessageAdapter(private val items:List<ShinigamiActivity>):RecyclerView.Adapter<SocialMessageAdapter.Holder>(){
  override fun onCreateViewHolder(p:ViewGroup,v:Int)=Holder(ItemSocialMessageBinding.inflate(LayoutInflater.from(p.context),p,false))
  override fun onBindViewHolder(h:Holder,pos:Int){val a=items[pos];h.binding.socialMessageAvatar.loadImage(a.author.avatarUrl);h.binding.socialMessageText.text=a.text ?: a.mediaTitle ?: "Anime activity";h.binding.socialMessageTime.text=ActivityItemBuilder.getDateTime(a.createdAt)}
  override fun getItemCount()=items.size
