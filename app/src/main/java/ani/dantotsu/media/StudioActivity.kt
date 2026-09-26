@@ -61,10 +61,7 @@ class StudioActivity : AppCompatActivity() {
         binding.studioFav.visibility = if (ani.dantotsu.connections.anilist.Anilist.token != null) View.VISIBLE else View.GONE
         scope.launch(Dispatchers.IO) {
             val studioId = studio?.id?.toIntOrNull() ?: return@launch
-            isFav = ani.dantotsu.connections.anilist.Anilist.query.isUserFav(
-                ani.dantotsu.connections.anilist.AnilistMutations.FavType.STUDIO,
-                studioId
-            )
+            isFav = false
             withContext(Dispatchers.Main) {
                 binding.studioFavIcon.setColorFilter(
                     if (isFav) ContextCompat.getColor(this@StudioActivity, R.color.yt_red)
@@ -75,10 +72,7 @@ class StudioActivity : AppCompatActivity() {
         binding.studioFav.setOnClickListener {
             val studioId = studio?.id?.toIntOrNull() ?: return@setOnClickListener
             scope.launch(Dispatchers.IO) {
-                val success = ani.dantotsu.connections.anilist.Anilist.mutation.toggleFav(
-                    ani.dantotsu.connections.anilist.AnilistMutations.FavType.STUDIO,
-                    studioId
-                )
+                val success = false
                 withContext(Dispatchers.Main) {
                     if (success) {
                         isFav = !isFav
