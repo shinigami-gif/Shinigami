@@ -24,4 +24,6 @@ interface UserRepository {
     fun update(user: ShinigamiUser): ShinigamiUser
     fun setRelationship(userId: String, targetUserId: String, following: Boolean? = null, blocked: Boolean? = null): ShinigamiUser
     fun relationship(userId: String, targetUserId: String): UserRelationship
+    fun countFollowing(userId: String): Long
+    fun countFollowers(userId: String): Long
 }
