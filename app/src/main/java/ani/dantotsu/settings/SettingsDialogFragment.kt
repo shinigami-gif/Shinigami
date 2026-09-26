@@ -18,16 +18,13 @@ import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.BottomSheetSettingsBinding
-import ani.dantotsu.download.anime.OfflineAnimeFragment
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.home.AnimeFragment
 import ani.dantotsu.home.HomeFragment
 import ani.dantotsu.home.LoginFragment
-import ani.dantotsu.home.NoInternet
 import ani.dantotsu.incognitoNotification
 import ani.dantotsu.loadImage
 import ani.dantotsu.snackString
-import ani.dantotsu.offline.OfflineFragment
 import ani.dantotsu.profile.ProfileActivity
 import ani.dantotsu.profile.activity.FeedActivity
 import ani.dantotsu.profile.notification.NotificationActivity
@@ -198,49 +195,6 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
             startActivity(Intent(activity, NotificationActivity::class.java))
             dismiss()
         }
-        binding.settingsDownloads.isChecked = PrefManager.getVal(PrefName.OfflineMode)
-        binding.settingsDownloads.setOnCheckedChangeListener { _, isChecked ->
-            binding.root.postDelayed({
-                val currentActivity = activity
-                // Ensure fragment is added and activity is not null
-                if (currentActivity != null && isAdded) {
-                    when (pageType) {
-                        PageType.ANIME -> {
-                            val intent = Intent(currentActivity, NoInternet::class.java)
-                            intent.putExtra(
-                                "FRAGMENT_CLASS_NAME",
-                                OfflineAnimeFragment::class.java.name
-                            )
-                            startActivity(intent)
-                        }
-
-                        PageType.HOME -> {
-                            val intent = Intent(currentActivity, NoInternet::class.java)
-                            intent.putExtra("FRAGMENT_CLASS_NAME", OfflineFragment::class.java.name)
-                            startActivity(intent)
-                        }
-
-                        PageType.OfflineHOME -> {
-                            val intent = Intent(currentActivity, MainActivity::class.java)
-                            intent.putExtra(
-                                "FRAGMENT_CLASS_NAME",
-                                if (!ShinigamiSessionStore(currentActivity).getToken().isNullOrBlank()) HomeFragment::class.java.name else LoginFragment::class.java.name
-                            )
-                            startActivity(intent)
-                        }
-
-                        PageType.OfflineANIME -> {
-                            val intent = Intent(currentActivity, MainActivity::class.java)
-                            intent.putExtra("FRAGMENT_CLASS_NAME", AnimeFragment::class.java.name)
-                            startActivity(intent)
-                        }
-                    }
-
-                    dismiss()
-                    PrefManager.setVal(PrefName.OfflineMode, isChecked)
-                }
-            }, 300)
-        }
     }
 
     override fun onDestroyView() {
@@ -250,7 +204,7 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
 
     companion object {
         enum class PageType {
-            ANIME, HOME, OfflineANIME, OfflineHOME
+            ANIME, HOME
         }
 
         fun newInstance(pageType: PageType): SettingsDialogFragment {
