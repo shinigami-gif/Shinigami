@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 
 object AnimeSources : WatchSources() {
-    override var list: List<Lazier<BaseParser>> = emptyList()
+    override var list: List<Lazier<BaseParser>> = runtimeSources()
     var pinnedAnimeSources: List<String> = emptyList()
     var isInitialized = false
 
@@ -22,25 +22,11 @@ object AnimeSources : WatchSources() {
             PrefManager.getNullableVal<List<String>>(PrefName.AnimeSourcesOrder, null)
                 ?: emptyList()
 
-        val initialExtensions = fromExtensions.value
-        list = sortPinnedAnimeSources(
-            createParsersFromExtensions(initialExtensions),
-            pinnedAnimeSources
-        ) + listOf(
-            Lazier({ TorrentAnimeParser() }, "Torrent"),
-            Lazier({ LocalAnimeParser() }, "Local")
-        )
+        // Extension APKs are intentionally ignored. Anime providers are owned by
+        // the embedded JVM Streamix runtime.
+        list = sortPinnedAnimeSources(runtimeSources(), pinnedAnimeSources)
         isInitialized = true
 
-        fromExtensions.collect { extensions ->
-            list = sortPinnedAnimeSources(
-                createParsersFromExtensions(extensions),
-                pinnedAnimeSources
-            ) + listOf(
-                Lazier({ TorrentAnimeParser() }, "Torrent"),
-                Lazier({ LocalAnimeParser() }, "Local")
-            )
-        }
     }
 
     fun performReorderAnimeSources() {
@@ -51,12 +37,11 @@ object AnimeSources : WatchSources() {
         )
     }
 
-    private fun createParsersFromExtensions(extensions: List<AnimeExtension.Installed>): List<Lazier<BaseParser>> {
-        return extensions.map { extension ->
-            val name = extension.name
-            Lazier({ DynamicAnimeParser(extension) }, name)
-        }
-    }
+    private fun runtimeSources(): List<Lazier<BaseParser>> = listOf(
+        Lazier({ StreamixAnimeParser() }, "Shinigami Runtime"),
+        Lazier({ TorrentAnimeParser() }, "Torrent"),
+        Lazier({ LocalAnimeParser() }, "Local")
+    )
 
     private fun sortPinnedAnimeSources(
         sources: List<Lazier<BaseParser>>,
