@@ -70,10 +70,8 @@ abstract class BaseParser {
      * Isn't necessary to override, but recommended, if you want to improve auto search results
      * **/
     open suspend fun autoSearch(mediaObj: Media): ShowResponse? {
-        }
         var response: ShowResponse? = loadSavedShowResponse(mediaObj.id)
         if (response != null) {
-            }
             if (response.sAnime == null) {
                 response.sAnime = SAnime.create().apply {
                     url = response.link
@@ -242,7 +240,6 @@ abstract class BaseParser {
             ShowResponse::class.java
         )
         if (resp != null) {
-            }
             if (resp.sAnime == null) {
                 resp.sAnime = SAnime.create().apply {
                     url = resp.link
