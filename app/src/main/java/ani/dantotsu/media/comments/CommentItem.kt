@@ -256,7 +256,7 @@ class CommentItem(
                 comment.author.avatarUrl ?: ""
             )
             comment.author.avatarUrl?.let { commentUserAvatar.loadImage(it) }
-            commentUserName.text = comment.username
+            commentUserName.text = comment.author.username
             val userColor = "[${levelColor.second}]"
             commentUserLevel.text = userColor
             commentUserLevel.setTextColor(levelColor.first)
