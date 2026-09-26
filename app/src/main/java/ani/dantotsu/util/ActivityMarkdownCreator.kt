@@ -11,13 +11,14 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import ani.dantotsu.R
 import ani.dantotsu.buildMarkwon
-import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiChatClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.ActivityMarkdownCreatorBinding
 import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
-import ani.dantotsu.openLinkInBrowser
 import ani.dantotsu.others.AndroidBug5497Workaround
-import android.widget.ArrayAdapter
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
 import ani.dantotsu.toast
@@ -35,7 +36,7 @@ class ActivityMarkdownCreator : AppCompatActivity() {
     private lateinit var type: String
     private var text: String = ""
     private var ping: String? = null
-    private var parentId: Int = 0
+    private var parentId: String = ""
     private var isPreviewMode: Boolean = false
 
     enum class MarkdownFormat(
@@ -101,7 +102,7 @@ class ActivityMarkdownCreator : AppCompatActivity() {
             return
         }
         val editId = intent.getIntExtra("edit", -1)
-        val userId = intent.getIntExtra("userId", -1)
+        val userId = intent.getStringExtra("userId") ?: intent.getIntExtra("userId", -1).takeIf { it >= 0 }?.toString()
         val mediaId = intent.getIntExtra("mediaId", -1)
         val initialSummary = intent.getStringExtra("summary") ?: ""
         val initialScore = intent.getIntExtra("score", 0)
@@ -109,7 +110,7 @@ class ActivityMarkdownCreator : AppCompatActivity() {
         val initialCategories = intent.getIntegerArrayListExtra("categories")
         var selectedCategoryId = initialCategories?.firstOrNull() ?: 1
         var private = intent.getBooleanExtra("private", false)
-        parentId = intent.getIntExtra("parentId", -1)
+        parentId = intent.getStringExtra("parentId") ?: intent.getIntExtra("parentId", -1).takeIf { it >= 0 }?.toString().orEmpty()
 
         ping = intent.getStringExtra("other")
         text = ping ?: ""
@@ -149,24 +150,6 @@ class ActivityMarkdownCreator : AppCompatActivity() {
                 binding.reviewBodyCountText.text = "Review body: ${text.length} / 2200 min characters"
             }
 
-            "thread" -> {
-                binding.threadTitleLayout.visibility = ViewGroup.VISIBLE
-                binding.threadCategoryLayout.visibility = ViewGroup.VISIBLE
-                if (initialTitle.isNotEmpty()) binding.threadTitleEditText.setText(initialTitle)
-                val categoryNames = FORUM_CATEGORIES.map { it.second }
-                val categoryAdapter = ArrayAdapter(
-                    this,
-                    android.R.layout.simple_dropdown_item_1line,
-                    categoryNames
-                )
-                binding.threadCategoryAutoComplete.setAdapter(categoryAdapter)
-                val defaultCategory = FORUM_CATEGORIES.find { it.first == selectedCategoryId }
-                    ?: FORUM_CATEGORIES.first()
-                binding.threadCategoryAutoComplete.setText(defaultCategory.second, false)
-                binding.threadCategoryAutoComplete.setOnItemClickListener { _, _, position, _ ->
-                    selectedCategoryId = FORUM_CATEGORIES.getOrNull(position)?.first ?: 1
-                }
-            }
         }
 
         binding.privateCheckbox.setOnCheckedChangeListener { _, isChecked ->
@@ -174,7 +157,8 @@ class ActivityMarkdownCreator : AppCompatActivity() {
         }
         if (type == "bio" && text.isBlank()) {
             launchIO {
-                val currentBio = Anilist.userid?.let { Anilist.query.getUserRawBio(it) } ?: ""
+                val token = ShinigamiSessionStore(this@ActivityMarkdownCreator).getToken()
+                val currentBio = if (token.isNullOrBlank()) "" else runCatching { ShinigamiBackendClient().getMe(token).user.bio.orEmpty() }.getOrDefault("")
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                     if (currentBio.isNotBlank() && !isFinishing) {
                         text = currentBio
@@ -218,61 +202,39 @@ class ActivityMarkdownCreator : AppCompatActivity() {
 
             customAlertDialog().apply {
                 setTitle(R.string.warning)
-                setMessage(R.string.post_to_anilist_warning)
+                setMessage("This content will be saved to your Shinigami account.")
                 setPosButton(R.string.ok) {
                     launchIO {
-                        val isEdit = editId != -1
-                        val success = when (type) {
-                            "activity" -> if (isEdit) {
-                                Anilist.mutation.postActivity(text, editId)
-                            } else {
-                                Anilist.mutation.postActivity(text)
+                        val token = ShinigamiSessionStore(this@ActivityMarkdownCreator).getToken()
+                        val success = runCatching {
+                            if (token.isNullOrBlank()) return@runCatching "Login required"
+                            when (type) {
+                                "activity" -> if (editId != -1) "Activity editing is not supported yet" else {
+                                    ShinigamiSocialClient().createActivity(token, "TEXT", text)
+                                    "Success"
+                                }
+                                "replyActivity" -> if (editId != -1) "Reply editing is not supported yet" else {
+                                    ShinigamiSocialClient().createReply(token, parentId, text)
+                                    "Success"
+                                }
+                                "message" -> if (userId.isNullOrBlank()) "Recipient is required" else if (editId != -1) "Message editing is not supported yet" else {
+                                    ShinigamiChatClient().sendMessage(token, userId, text)
+                                    "Success"
+                                }
+                                "bio" -> {
+                                    val me = ShinigamiBackendClient().getMe(token)
+                                    ShinigamiBackendClient().updateProfile(token, me.user.username, text)
+                                    "Profile bio updated"
+                                }
+                                "review" -> "Reviews are not migrated to Shinigami yet"
+                                else -> "Error: Unknown type"
                             }
-
-                            "review" -> {
-                                val score = scoreText.toIntOrNull() ?: 0
-                                Anilist.mutation.postReview(
-                                    summary = summary,
-                                    body = text,
-                                    mediaId = mediaId,
-                                    score = score,
-                                    edit = if (isEdit) editId else null,
-                                    isPrivate = private
-                                )
-                            }
-
-                            "bio" -> {
-                                val ok = Anilist.mutation.updateUserBio(text)
-                                if (ok) "Profile bio updated" else "Failed to update bio"
-                            }
-
-                            "replyActivity" -> if (isEdit) {
-                                Anilist.mutation.postReply(parentId, text, editId)
-                            } else {
-                                Anilist.mutation.postReply(parentId, text)
-                            }
-
-                            "message" -> if (isEdit) {
-                                Anilist.mutation.postMessage(userId, text, editId)
-                            } else {
-                                Anilist.mutation.postMessage(userId, text, isPrivate = private)
-                            }
-
-                            else -> "Error: Unknown type"
-                        }
-                        val isSuccess = success == getString(R.string.success) ||
-                                success == "Success" ||
-                                success == "Profile bio updated"
+                        }.getOrElse { "Failed: ${it.message ?: "backend request failed"}" }
                         withContext(Dispatchers.Main) {
                             toast(success)
-                            if (isSuccess) {
-                                finish()
-                            }
+                            if (success == "Success" || success == "Profile bio updated") finish()
                         }
                     }
-                }
-                setNeutralButton(R.string.open_rules) {
-                    openLinkInBrowser("https://anilist.co/forum/thread/14")
                 }
                 setNegButton(R.string.cancel)
                 show()
