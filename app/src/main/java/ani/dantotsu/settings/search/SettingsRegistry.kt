@@ -125,8 +125,6 @@ object SettingsRegistry {
                 highlightKey = context.getString(R.string.backup_restore)
             )
         )
-
-        )
         list.add(
             SearchableSetting(
                 title = context.getString(R.string.always_continue_content),
