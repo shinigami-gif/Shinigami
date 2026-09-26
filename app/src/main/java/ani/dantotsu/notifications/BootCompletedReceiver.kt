@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import ani.dantotsu.notifications.TaskScheduler.TaskType
-import ani.dantotsu.notifications.anilist.AnilistNotificationWorker
-import ani.dantotsu.notifications.comment.CommentNotificationWorker
 import ani.dantotsu.notifications.subscription.SubscriptionNotificationWorker
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -19,22 +17,12 @@ class BootCompletedReceiver : BroadcastReceiver() {
             val scheduler = AlarmManagerScheduler(context)
             PrefManager.init(context)
             Logger.init(context)
-            Logger.log("Starting Dantotsu Subscription Service on Boot")
+            Logger.log("Starting Shinigami Subscription Service on Boot")
             if (PrefManager.getVal(PrefName.UseAlarmManager)) {
-                val commentInterval =
-                    CommentNotificationWorker.checkIntervals[PrefManager.getVal(PrefName.CommentNotificationInterval)]
-                val anilistInterval =
-                    AnilistNotificationWorker.checkIntervals[PrefManager.getVal(PrefName.AnilistNotificationInterval)]
                 val subscriptionInterval =
-                    SubscriptionNotificationWorker.checkIntervals[PrefManager.getVal(PrefName.SubscriptionNotificationInterval)]
-                scheduler.scheduleRepeatingTask(
-                    TaskType.COMMENT_NOTIFICATION,
-                    commentInterval
-                )
-                scheduler.scheduleRepeatingTask(
-                    TaskType.ANILIST_NOTIFICATION,
-                    anilistInterval
-                )
+                    SubscriptionNotificationWorker.checkIntervals[
+                        PrefManager.getVal(PrefName.SubscriptionNotificationInterval)
+                    ]
                 scheduler.scheduleRepeatingTask(
                     TaskType.SUBSCRIPTION_NOTIFICATION,
                     subscriptionInterval
