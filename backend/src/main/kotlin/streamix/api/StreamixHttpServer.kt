@@ -139,6 +139,17 @@ class StreamixHttpServer(
             runSuspend(exchange) { auth.userService.search(query, page, perPage) }
         }
 
+        http.createContext(UserLibraryApiContract.LISTS) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val user = auth.auth.currentUser(token)
+                ?: return@createContext unauthorized(exchange)
+            val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+            val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 50
+            runSuspend(exchange) { auth.libraryService.list(user.id, page, perPage) }
+        }
+
         http.createContext(BackendApiContract.SEARCH) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val query = query(exchange, "q")?.trim().orEmpty()
