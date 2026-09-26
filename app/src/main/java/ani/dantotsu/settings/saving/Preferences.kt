@@ -46,14 +46,10 @@ enum class PrefName(val data: Pref) {
     SortedStudioSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
     SortedUserSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
     NovelSourcesOrder(Pref(Location.General, List::class, listOf<String>())),
-    CommentNotificationInterval(Pref(Location.General, Int::class, 0)),
-    AnilistNotificationInterval(Pref(Location.General, Int::class, 3)),
     UnreadUserNotifications(Pref(Location.General, Int::class, 0)),
     UnreadMediaNotifications(Pref(Location.General, Int::class, 0)),
     UnreadSubscriptionNotifications(Pref(Location.General, Int::class, 0)),
     SubscriptionNotificationInterval(Pref(Location.General, Int::class, 2)),
-    LastAnilistNotificationId(Pref(Location.General, Int::class, 0)),
-    AnilistFilteredTypes(Pref(Location.General, Set::class, setOf<String>())),
     UseAlarmManager(Pref(Location.General, Boolean::class, false)),
     IncludeAnimeList(Pref(Location.General, Boolean::class, true)),
     IncludeMangaList(Pref(Location.General, Boolean::class, true)),
@@ -265,7 +261,6 @@ enum class PrefName(val data: Pref) {
     DailyLeakCount(Pref(Location.Irrelevant, Int::class, 0)),
     LastLeakSummaryTimestamp(Pref(Location.Irrelevant, Long::class, 0L)),
     RecentGlobalNotification(Pref(Location.Irrelevant, Int::class, 0)),
-    CommentNotificationStore(Pref(Location.Irrelevant, List::class, listOf<CommentStore>())),
     SubscriptionNotificationStore(
         Pref(
             Location.Irrelevant,
@@ -273,7 +268,6 @@ enum class PrefName(val data: Pref) {
             listOf<SubscriptionStore>()
         )
     ),
-    UnreadCommentNotifications(Pref(Location.Irrelevant, Int::class, 0)),
     DownloadsDir(Pref(Location.Irrelevant, String::class, "")),
     LocalDir(Pref(Location.Irrelevant, String::class, "")),
     OC(Pref(Location.Irrelevant, Boolean::class, false)),
