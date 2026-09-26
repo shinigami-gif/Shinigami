@@ -34,12 +34,8 @@ suspend fun getUserId(context: Context? = null, block: () -> Unit) {
         val token = appContext?.let { ani.dantotsu.connections.shinigami.ShinigamiSessionStore(it).getToken() }
         if (!token.isNullOrBlank()) {
             val profile = ani.dantotsu.connections.shinigami.ShinigamiBackendClient().getMe(token)
-            Anilist.userid = profile.user.id.toIntOrNull()
-            Anilist.username = profile.user.displayName ?: profile.user.username
-            Anilist.avatar = profile.user.avatarUrl
-            Anilist.bg = profile.user.bannerUrl
-            Anilist.episodesWatched = profile.stats.episodesWatched
-            Anilist.initialized = true
+            // Shinigami owns identity/session state. Do not mirror it into AniList globals.
+            ShinigamiSessionStore(appContext!!).setProfile(profile.user)
         }
     } catch (e: Exception) {
         Logger.log("Failed to load Shinigami user data: ${e.message}")
