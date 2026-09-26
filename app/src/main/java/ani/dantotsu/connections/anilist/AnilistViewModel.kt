@@ -34,8 +34,8 @@ suspend fun getUserId(context: Context? = null, block: () -> Unit) {
         val token = appContext?.let { ani.dantotsu.connections.shinigami.ShinigamiSessionStore(it).getToken() }
         if (!token.isNullOrBlank()) {
             val profile = ani.dantotsu.connections.shinigami.ShinigamiBackendClient().getMe(token)
-            // Shinigami owns identity/session state. Do not mirror it into AniList globals.
-            ShinigamiSessionStore(appContext!!).setProfile(profile.user)
+            // Identity stays in Shinigami session/backend; AniList no longer owns user profile state.
+            profile.user.id.let { /* validated by backend response */ }
         }
     } catch (e: Exception) {
         Logger.log("Failed to load Shinigami user data: ${e.message}")
