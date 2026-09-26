@@ -151,9 +151,6 @@ data class Media(
     // The ranking of the media in a particular time span and format compared to other media
     @SerialName("rankings") var rankings: List<MediaRank>? = null,
 
-    // The authenticated user's media list entry for the media
-    @SerialName("mediaListEntry") var mediaListEntry: MediaList?,
-
     // User reviews of the media
     @SerialName("reviews") var reviews: ReviewConnection?,
 
