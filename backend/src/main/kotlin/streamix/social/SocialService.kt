@@ -35,6 +35,48 @@ class SocialService(
     fun unreadNotificationCount(userId: String) =
         repository.unreadNotificationCount(userId)
 
+    fun createActivity(authorId: String, type: String, text: String?, mediaId: Long?, mediaTitle: String?) =
+        repository.createActivity(authorId, type, text, mediaId, mediaTitle)
+
+    fun deleteActivity(activityId: String, actorId: String) =
+        repository.deleteActivity(activityId, actorId)
+
+    fun createReply(activityId: String, authorId: String, text: String) =
+        repository.createReply(activityId, authorId, text)
+
+    fun likeActivity(activityId: String, userId: String) =
+        repository.toggleActivityLike(activityId, userId)
+
+    fun subscribeActivity(activityId: String, userId: String) =
+        repository.toggleActivitySubscription(activityId, userId)
+
+    fun createComment(mediaId: Long, authorId: String, content: String, parentCommentId: String?) =
+        repository.createComment(mediaId, authorId, content, parentCommentId)
+
+    fun deleteComment(commentId: String, actorId: String) =
+        repository.deleteComment(commentId, actorId)
+
+    fun voteComment(commentId: String, userId: String, vote: Int?) =
+        repository.voteComment(commentId, userId, vote)
+
+    fun createForumThread(authorId: String, title: String, body: String, mediaIds: List<Long>) =
+        repository.createForumThread(authorId, title, body, mediaIds)
+
+    fun deleteForumThread(threadId: String, actorId: String) =
+        repository.deleteForumThread(threadId, actorId)
+
+    fun createForumComment(threadId: String, authorId: String, content: String, parentCommentId: String?) =
+        repository.createForumComment(threadId, authorId, content, parentCommentId)
+
+    fun likeThread(threadId: String, userId: String) =
+        repository.toggleThreadLike(threadId, userId)
+
+    fun subscribeThread(threadId: String, userId: String) =
+        repository.toggleThreadSubscription(threadId, userId)
+
+    fun markNotificationRead(notificationId: String, userId: String) =
+        repository.markNotificationRead(notificationId, userId)
+
     private fun <T> page(items: List<T>, page: Int, perPage: Int): SocialPage<T> {
         val safePage = page.coerceAtLeast(1)
         val safePerPage = perPage.coerceIn(1, 100)
