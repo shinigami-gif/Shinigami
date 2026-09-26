@@ -14,7 +14,6 @@ import ani.dantotsu.connections.discord.RPC
 import ani.dantotsu.connections.discord.RPCManager
 import ani.dantotsu.notifications.TaskScheduler
 import ani.dantotsu.others.DisabledReports
-import ani.dantotsu.parsers.AnimeSources
 import ani.dantotsu.settings.SettingsActivity
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -22,7 +21,6 @@ import ani.dantotsu.util.FinalExceptionHandler
 import ani.dantotsu.util.Logger
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +51,6 @@ class App : Application(), GraphProvider<AppGraph> {
 
     @Inject lateinit var interopModule: MetroInteropModule
 
-    private lateinit var animeExtensionManager: AnimeExtensionManager
     private lateinit var downloadAddonManager: DownloadAddonManager
 
     init {
@@ -131,14 +128,6 @@ class App : Application(), GraphProvider<AppGraph> {
         }
 
         val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        applicationScope.launch(Dispatchers.IO) {
-            animeExtensionManager = Injekt.get()
-            launch {
-                delay(1500)
-                animeExtensionManager.findAvailableExtensions()
-            }
-            AnimeSources.init(animeExtensionManager.installedExtensionsFlow, animeExtensionManager)
-        }
         applicationScope.launch(Dispatchers.IO) {
             downloadAddonManager = Injekt.get()
             downloadAddonManager.init()

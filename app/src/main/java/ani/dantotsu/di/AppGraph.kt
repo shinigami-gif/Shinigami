@@ -11,7 +11,6 @@ import ani.dantotsu.addons.download.DownloadAddonManager
 import ani.dantotsu.di.injekt.MetroInteropModule
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
-import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
 import eu.kanade.tachiyomi.network.JavaScriptEngine
 import eu.kanade.tachiyomi.network.NetworkHelper
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -37,7 +36,6 @@ interface AppGraph {
     val basePreferences: BasePreferences
     val networkHelper: NetworkHelper
     val javaScriptEngine: JavaScriptEngine
-    val animeExtensionManager: AnimeExtensionManager
     val downloadAddonManager: DownloadAddonManager
     val animeSourceManager: AnimeSourceManager
     val json: Json

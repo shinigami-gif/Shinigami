@@ -7,10 +7,8 @@ import ani.dantotsu.addons.download.DownloadAddonManager
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
-import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
 import eu.kanade.tachiyomi.network.JavaScriptEngine
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.source.anime.AndroidAnimeSourceManager
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -29,7 +27,6 @@ class MetroInteropModule(
     private val basePreferences: BasePreferences,
     private val networkHelper: NetworkHelper,
     private val javaScriptEngine: JavaScriptEngine,
-    private val animeExtensionManager: AnimeExtensionManager,
     private val downloadAddonManager: DownloadAddonManager,
     private val animeSourceManager: AnimeSourceManager,
     private val databaseProvider: StandaloneDatabaseProvider,
@@ -50,7 +47,6 @@ class MetroInteropModule(
         addSingleton(networkHelper.client)
         addSingleton(javaScriptEngine)
 
-        addSingleton(animeExtensionManager)
         addSingleton(downloadAddonManager)
 
         addSingleton(animeSourceManager)
