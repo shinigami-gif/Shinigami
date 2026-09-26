@@ -288,22 +288,7 @@ class AnimeFragment : Fragment() {
                 scope.launch {
                     withContext(Dispatchers.IO) {
                         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-                        if (rescueMode) {
-                            withContext(Dispatchers.Main) { load() }
-                        } else {
-                            Anilist.userid =
-                                PrefManager.getNullableVal<String>(PrefName.AnilistUserId, null)
-                                    ?.toIntOrNull()
-                            if (Anilist.userid == null) {
-                                getUserId(context) {
-                                    load()
-                                }
-                            } else {
-                                getUserId(context) {
-                                    load()
-                                }
-                            }
-                        }
+                        withContext(Dispatchers.Main) { load() }
                     }
                     model.loaded = true
                     if (_binding?.animeRefresh?.isRefreshing == true) {
