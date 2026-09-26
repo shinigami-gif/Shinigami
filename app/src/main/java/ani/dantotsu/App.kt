@@ -7,7 +7,6 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import ani.dantotsu.addons.download.DownloadAddonManager
-import ani.dantotsu.connections.comments.CommentsAPI
 import ani.dantotsu.connections.crashlytics.CrashlyticsInterface
 import ani.dantotsu.notifications.TaskScheduler
 import ani.dantotsu.others.DisabledReports
@@ -137,10 +136,6 @@ class App : Application(), GraphProvider<AppGraph> {
 
             downloadAddonManager = Injekt.get()
             downloadAddonManager.init()
-            if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1) {
-                CommentsAPI.fetchAuthToken(this@App)
-            }
-
             val useAlarmManager = PrefManager.getVal<Boolean>(PrefName.UseAlarmManager)
             val scheduler = TaskScheduler.create(this@App, useAlarmManager)
             try {
