@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.shinigami.ShinigamiBackendConfig
 import ani.dantotsu.connections.shinigami.ShinigamiLibraryClient
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.mal.MAL
@@ -12,8 +11,6 @@ import ani.dantotsu.media.Media
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.tryWithSuspend
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class ListViewModel : ViewModel() {
     var grid = MutableLiveData(PrefManager.getVal<Boolean>(PrefName.ListGrid))
