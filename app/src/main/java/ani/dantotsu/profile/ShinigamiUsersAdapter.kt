@@ -89,8 +89,10 @@ class ShinigamiUsersAdapter(
                                 ?: throw IllegalStateException("Not signed in")
                             val updated = ShinigamiBackendClient().setFollow(token, user.id, !user.isFollowing)
                             val index = holder.bindingAdapterPosition
-                            if (index >= 0 && index < users.size) users[index] = updated
-                            withContext(Dispatchers.Main) { notifyItemChanged(index) }
+                            if (index >= 0 && index < users.size) {
+                                users[index] = updated
+                                withContext(Dispatchers.Main) { notifyItemChanged(index) }
+                            }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
                                 snackString(e.message ?: "Failed to update follow status")
