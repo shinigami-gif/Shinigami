@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.BottomSheetDialogFragment
 import ani.dantotsu.MainActivity
 import ani.dantotsu.R
