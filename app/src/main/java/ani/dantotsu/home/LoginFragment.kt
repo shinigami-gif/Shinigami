@@ -56,7 +56,7 @@ class LoginFragment : Fragment() {
                         ani.dantotsu.startMainActivity(requireActivity())
                     }.onFailure {
                         Logger.log(it)
-                        toast(it.message ?: getString(R.string.login_failed))
+                        toast(it.message ?: "Login failed")
                     }
                 }
             }
