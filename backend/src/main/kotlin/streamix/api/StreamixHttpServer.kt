@@ -856,18 +856,6 @@ class StreamixHttpServer(
         }
 
         http.createContext(BackendApiContract.PROVIDERS) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            if (!method(exchange, "GET")) return@createContext
-            respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
-        }
-
-        http.createContext(BackendApiContract.PROVIDER_STATUS) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            if (!method(exchange, "GET")) return@createContext
-            respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
-        }
-
-        http.createContext(BackendApiContract.PROVIDERS) { exchange ->
             requireControlAccess(exchange) ?: return@createContext
             if (!method(exchange, "GET")) return@createContext
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
@@ -894,8 +882,7 @@ class StreamixHttpServer(
                 .trim('/')
             if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
             val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
-            runSuspendValue { api.checkUpdate(providerId) }
-                .let { respond(exchange, 200, it) }
+            runSuspendValue { api.checkUpdate(providerId) }.let { respond(exchange, 200, it) }
         }
 
         http.createContext(BackendApiContract.PROVIDER_UPDATE_QUEUE) { exchange ->
@@ -916,8 +903,7 @@ class StreamixHttpServer(
                 .trim('/')
             if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
             val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
-            runSuspendValue { api.runUpdate(providerId) }
-                .let { respond(exchange, 200, it) }
+            runSuspendValue { api.runUpdate(providerId) }.let { respond(exchange, 200, it) }
         }
 
         http.createContext(BackendApiContract.PROVIDER_ACTIVATE) { exchange ->
@@ -929,8 +915,7 @@ class StreamixHttpServer(
                 .trim('/')
             if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
             val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
-            runSuspendValue { api.activateUpdate(providerId) }
-                .let { respond(exchange, 200, it) }
+            runSuspendValue { api.activateUpdate(providerId) }.let { respond(exchange, 200, it) }
         }
 
         http.createContext(BackendApiContract.PROVIDER_ROLLBACK) { exchange ->
@@ -946,8 +931,7 @@ class StreamixHttpServer(
                 ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid rollback request"))
             val targetVersion = request["targetVersion"]?.toString()?.trim()
                 ?: return@createContext respond(exchange, 400, mapOf("error" to "targetVersion is required"))
-            runSuspendValue { api.rollback(providerId, targetVersion) }
-                .let { respond(exchange, 200, it) }
+            runSuspendValue { api.rollback(providerId, targetVersion) }.let { respond(exchange, 200, it) }
         }
 
         http.createContext(BackendApiContract.PROVIDER_INCIDENTS) { exchange ->
@@ -972,7 +956,9 @@ class StreamixHttpServer(
             if (!method(exchange, "GET")) return@createContext
             val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
             respond(exchange, 200, api.extractors())
-        }\n\n        http.createContext(NotificationApiContract.NOTIFICATIONS) { exchange ->
+        }
+
+        http.createContext(NotificationApiContract.NOTIFICATIONS) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
