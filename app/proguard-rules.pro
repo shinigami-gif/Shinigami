@@ -150,28 +150,8 @@
 -dontwarn com.github.aachartmodel.**
 
 #############################################
-# libtorrent4j
-#############################################
--keep class org.libtorrent4j.swig.libtorrent_jni { *; }
-
-#############################################
 # FFmpegKit (com.antonkarpenko)
 #############################################
 -keep class com.antonkarpenko.ffmpegkit.** { *; }
 -dontwarn com.antonkarpenko.ffmpegkit.**
 
-#############################################
-# WebGPU Viewer (ca.mpreg:webgpuviewer)
-#############################################
--keep class ca.mpreg.webgpuviewer.** { *; }
--dontwarn ca.mpreg.webgpuviewer.**
-
-#############################################
-# ML Kit Text Recognition
-#############################################
--keep class com.google.mlkit.vision.** { *; }
-# ML Kit component discovery uses internal common classes reflectively; keep the executor selector and related runtime types from R8.
--keep class com.google.mlkit.common.sdkinternal.** { *; }
--dontwarn com.google.mlkit.vision.**
--keep class com.google.android.gms.internal.mlkit_vision_text** { *; }
--dontwarn com.google.android.gms.internal.mlkit_vision_text**
