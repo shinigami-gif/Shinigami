@@ -8,7 +8,6 @@ import ani.dantotsu.media.Media
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.util.Logger
 import eu.kanade.tachiyomi.animesource.model.SAnime
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.network.NetworkHelper
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import okhttp3.OkHttpClient
@@ -59,7 +58,7 @@ abstract class BaseParser {
     open val iconUrl: String? = null
 
     /**
-     *  Search for Anime/Manga/Novel, returns a List of Responses
+     *  Search for Anime, returns a List of Responses
      *
      *  use `encode(query)` to encode the query for making requests
      * **/
@@ -71,19 +70,9 @@ abstract class BaseParser {
      * Isn't necessary to override, but recommended, if you want to improve auto search results
      * **/
     open suspend fun autoSearch(mediaObj: Media): ShowResponse? {
-        (this as? DynamicMangaParser)?.let { ext ->
-            mediaObj.selected?.langIndex?.let {
-                ext.sourceLanguage = it
-            }
         }
         var response: ShowResponse? = loadSavedShowResponse(mediaObj.id)
         if (response != null) {
-            if (response.sManga == null) {
-                response.sManga = SManga.create().apply {
-                    url = response.link
-                    title = response.name
-                    thumbnail_url = response.coverUrl.url
-                }
             }
             if (response.sAnime == null) {
                 response.sAnime = SAnime.create().apply {
@@ -253,12 +242,6 @@ abstract class BaseParser {
             ShowResponse::class.java
         )
         if (resp != null) {
-            if (resp.sManga == null) {
-                resp.sManga = SManga.create().apply {
-                    url = resp.link
-                    title = resp.name
-                    thumbnail_url = resp.coverUrl.url
-                }
             }
             if (resp.sAnime == null) {
                 resp.sAnime = SAnime.create().apply {
@@ -339,8 +322,6 @@ data class ShowResponse(
     //SAnime object from Aniyomi
     @Transient var sAnime: SAnime? = null,
 
-    //SManga object from Aniyomi
-    @Transient var sManga: SManga? = null
 ) : Serializable {
     constructor(
         name: String,
@@ -368,9 +349,6 @@ data class ShowResponse(
     constructor(name: String, link: String, coverUrl: String, sAnime: SAnime)
             : this(name, link, FileUrl(coverUrl), sAnime = sAnime)
 
-    constructor(name: String, link: String, coverUrl: String, sManga: SManga)
-            : this(name, link, FileUrl(coverUrl), sManga = sManga)
-
     private fun writeObject(out: java.io.ObjectOutputStream) {
         out.defaultWriteObject()
         val anime = sAnime
@@ -387,21 +365,6 @@ data class ShowResponse(
             out.writeObject(anime.background_url)
             out.writeDouble(anime.season_number)
             out.writeBoolean(anime.initialized)
-        } else {
-            out.writeBoolean(false)
-        }
-        val manga = sManga
-        if (manga != null) {
-            out.writeBoolean(true)
-            out.writeObject(manga.url)
-            out.writeObject(manga.title)
-            out.writeObject(manga.artist)
-            out.writeObject(manga.author)
-            out.writeObject(manga.description)
-            out.writeObject(manga.genre)
-            out.writeInt(manga.status)
-            out.writeObject(manga.thumbnail_url)
-            out.writeBoolean(manga.initialized)
         } else {
             out.writeBoolean(false)
         }
@@ -424,20 +387,6 @@ data class ShowResponse(
                 initialized = inStream.readBoolean()
             }
             sAnime = anime
-        }
-        if (inStream.readBoolean()) {
-            val manga = SManga.create().apply {
-                url = inStream.readObject() as String
-                title = inStream.readObject() as String
-                artist = inStream.readObject() as? String
-                author = inStream.readObject() as? String
-                description = inStream.readObject() as? String
-                genre = inStream.readObject() as? String
-                status = inStream.readInt()
-                thumbnail_url = inStream.readObject() as? String
-                initialized = inStream.readBoolean()
-            }
-            sManga = manga
         }
     }
 
