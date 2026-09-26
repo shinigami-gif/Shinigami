@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
@@ -458,9 +459,8 @@ class SearchActivity : AppCompatActivity() {
             }
             return
         }
-        runCatching {
-            ShinigamiBackendClient().searchUsers(token, cleanQuery, page = page, perPage = 30)
-        }.onSuccess { result ->
+        try {
+            val result = ShinigamiBackendClient().searchUsers(token, cleanQuery, page = page, perPage = 30)
             withContext(Dispatchers.Main) {
                 val existing = shinigamiUsers.mapTo(HashSet()) { it.id }
                 val newUsers = result.items.filter { existing.add(it.id) }
@@ -471,7 +471,7 @@ class SearchActivity : AppCompatActivity() {
                 if (newUsers.isNotEmpty()) usersAdapter.notifyItemRangeInserted(previous, newUsers.size)
                 progressAdapter.bar?.isVisible = result.hasNextPage
             }
-        }.onFailure {
+        } catch (_: Exception) {
             withContext(Dispatchers.Main) {
                 shinigamiUserHasNext = false
                 progressAdapter.bar?.isVisible = false
