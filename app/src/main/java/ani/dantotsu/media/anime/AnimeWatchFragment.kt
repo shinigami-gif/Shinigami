@@ -1,12 +1,8 @@
 package ani.dantotsu.media.anime
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,15 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import ani.dantotsu.R
-import ani.dantotsu.addons.download.DownloadAddonManager
 import ani.dantotsu.databinding.FragmentMediaSourceBinding
-import ani.dantotsu.download.DownloadedType
-import ani.dantotsu.download.DownloadsManager
-import ani.dantotsu.download.DownloadsManager.Companion.compareName
-import ani.dantotsu.download.DownloadsManager.Companion.getSubDirectory
-import ani.dantotsu.download.anime.AnimeDownloader
-import ani.dantotsu.download.anime.AnimeDownloaderService
-import ani.dantotsu.download.findValidName
 import ani.dantotsu.dp
 import ani.dantotsu.isOnline
 import ani.dantotsu.media.Media
@@ -60,17 +48,11 @@ import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.snackString
 import ani.dantotsu.toast
 import ani.dantotsu.util.Logger
-import ani.dantotsu.util.StoragePermissions.Companion.accessAlertDialog
-import ani.dantotsu.util.StoragePermissions.Companion.hasDirAccess
 import ani.dantotsu.util.customAlertDialog
-import com.anggrayudi.storage.file.extension
 import com.google.android.material.appbar.AppBarLayout
 import eu.kanade.tachiyomi.animesource.ConfigurableAnimeSource
 import eu.kanade.tachiyomi.extension.anime.model.AnimeExtension
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tachiyomi.core.util.lang.launchIO
@@ -95,14 +77,12 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
     private lateinit var headerAdapter: AnimeWatchAdapter
     private lateinit var episodeAdapter: EpisodeAdapter
 
-    val downloadManager = Injekt.get<DownloadsManager>()
 
     var screenWidth = 0f
     private var progress = View.VISIBLE
 
     var continueEp: Boolean = false
     var loaded = false
-    private var isReceiverRegistered = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,22 +95,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val intentFilter = IntentFilter().apply {
-            addAction(ACTION_DOWNLOAD_STARTED)
-            addAction(ACTION_DOWNLOAD_FINISHED)
-            addAction(ACTION_DOWNLOAD_FAILED)
-            addAction(ACTION_DOWNLOAD_PROGRESS)
-        }
-
-        if (!isReceiverRegistered) {
-            ContextCompat.registerReceiver(
-                requireContext(),
-                downloadStatusReceiver,
-                intentFilter,
-                ContextCompat.RECEIVER_EXPORTED
-            )
-            isReceiverRegistered = true
-        }
 
 
         binding.mediaSourceRecycler.updatePadding(bottom = binding.mediaSourceRecycler.paddingBottom + navBarHeight)
@@ -691,266 +655,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
         model.onEpisodeClick(media, i, requireActivity().supportFragmentManager)
     }
 
-    fun openDirectTorrent() {
-        val clipboard = ContextCompat.getSystemService(requireContext(), android.content.ClipboardManager::class.java)
-        val clipText = clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()?.trim()
-        val clipTorrentUrl = if (clipText != null && (
-                clipText.startsWith("magnet:?xt=", ignoreCase = true) ||
-                clipText.endsWith(".torrent", ignoreCase = true) ||
-                (clipText.startsWith("http", ignoreCase = true) && clipText.contains(".torrent", ignoreCase = true))
-            )) {
-            clipText
-        } else null
-
-        // If no clipboard torrent, check if one is already saved for this media (shows info on re-click)
-        val savedUrl = PrefManager.getNullableCustomVal("${media.id}_torrent_url", null, String::class.java)
-            ?.takeIf { it.isNotBlank() }
-
-        // Prefer clipboard URL (allows replacing torrent), fall back to saved URL (shows existing torrent info)
-        val torrentUrl = clipTorrentUrl ?: savedUrl
-
-        val sheet = ani.dantotsu.torrent.DirectTorrentBottomSheet.newInstanceLinked(media, torrentUrl)
-        sheet.onTorrentSelected = { chosenUrl ->
-            PrefManager.setCustomVal("${media.id}_torrent_url", chosenUrl)
-            val torrentIndex = model.watchSources?.names?.indexOf("Torrent") ?: -1
-            if (torrentIndex != -1) {
-                val torrentParser = model.watchSources?.get(torrentIndex)
-                val title = media.userPreferredName.ifBlank { media.mainName() }
-                val sAnime = eu.kanade.tachiyomi.animesource.model.SAnime.create().apply {
-                    this.title = title
-                    this.url = chosenUrl
-                }
-                val showResponse = ani.dantotsu.parsers.ShowResponse(
-                    name = title,
-                    link = chosenUrl,
-                    coverUrl = ani.dantotsu.FileUrl(media.cover ?: media.banner ?: ""),
-                    sAnime = sAnime
-                )
-                torrentParser?.saveShowResponse(media.id, showResponse, true)
-
-                media.selected!!.scanlators = null
-                media.selected!!.sourceIndex = torrentIndex
-                model.saveSelected(media.id, media.selected!!)
-                model.invalidateSource(torrentIndex)
-                headerAdapter.hiddenScanlators.clear()
-                headerAdapter.options = emptyList()
-                onSourceChange(torrentIndex)
-                headerAdapter.updateSelectedSource(torrentIndex)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    model.overrideEpisodes(torrentIndex, showResponse, media.id)
-                }
-                toast(getString(R.string.play_via_torrent_magnet))
-            }
-        }
-        sheet.show(parentFragmentManager, "DirectTorrentBottomSheet")
-    }
-
-    fun onAnimeEpisodesDownload(episodesToDownload: ArrayList<String>) {
-        if (PrefManager.getVal<Boolean>(PrefName.DownloadWifiOnly) && !ani.dantotsu.isWifiConnected(requireContext())) {
-            snackString(getString(R.string.download_wifi_only_warning))
-            return
-        }
-        activity?.let {
-            if (!hasDirAccess(it)) {
-                (it as MediaDetailsActivity).accessAlertDialog(it.launcher) { success ->
-                    if (success) {
-                        model.onEpisodeClick(
-                            media =  media,
-                            manager =  requireActivity().supportFragmentManager,
-                            isDownload = true,
-                            episodes = episodesToDownload
-                        )
-                    } else {
-                        snackString(getString(R.string.download_permission_required))
-                    }
-                }
-            } else {
-                model.onEpisodeClick(
-                    media =  media,
-                    manager =  requireActivity().supportFragmentManager,
-                    isDownload = true,
-                    episodes = episodesToDownload
-                )
-            }
-        }
-    }
-
-    fun onAnimeEpisodeStopDownloadClick(i: String) {
-        // Idle UI immediately (not "Failed"); ignore late progress broadcasts
-        AnimeDownloader.stopDownload(media.id, i)
-        episodeAdapter.clearDownloadState(i)
-
-        val cancelIntent = Intent().apply {
-            action = AnimeDownloaderService.ACTION_CANCEL_DOWNLOAD
-            putExtra(
-                AnimeDownloaderService.EXTRA_TASK_NAME,
-                AnimeDownloaderService.AnimeDownloadTask.getTaskName(media.mainName(), i)
-            )
-        }
-        requireContext().sendBroadcast(cancelIntent)
-
-        // Remove partial files from the manager
-        downloadManager.removeDownload(
-            DownloadedType(
-                media.mainName(),
-                i,
-                MediaType.ANIME
-            )
-        ) {}
-    }
-
-    @OptIn(UnstableApi::class)
-    fun onAnimeEpisodeRemoveDownloadClick(i: String) {
-        downloadManager.removeDownload(
-            DownloadedType(
-                media.mainName(),
-                i,
-                MediaType.ANIME
-            )
-        ) {
-            val taskName = AnimeDownloaderService.AnimeDownloadTask.getTaskName(media.mainName(), i)
-            PrefManager.getAnimeDownloadPreferences().edit().remove(taskName).apply()
-            episodeAdapter.deleteDownload(i)
-            val isDownloaded = model.watchSources?.isDownloadedSource(media.selected?.sourceIndex ?: 0) == true
-            if (isDownloaded) {
-                model.invalidateSource(media.selected?.sourceIndex ?: 0)
-                loadEpisodes(media.selected?.sourceIndex ?: 0, true)
-            }
-        }
-    }
-
-    @kotlin.OptIn(DelicateCoroutinesApi::class)
-    fun fixDownload(i: String) {
-        toast(R.string.running_fixes)
-        launchIO {
-            try {
-                val context = context ?: throw Exception("Context is null")
-                val directory =
-                    getSubDirectory(context, MediaType.ANIME, false, media.mainName(), i)
-                        ?: throw Exception("Directory is null")
-                val files = directory.listFiles()
-                val videoFiles = files.filter { it.extension == "mp4" || it.extension == "mkv" }
-                if (videoFiles.size != 1) {
-                    val biggest =
-                        videoFiles.filter { it.length() > 1000 }.maxByOrNull { it.length() }
-                            ?: throw Exception("No video files found")
-                    val newName =
-                        AnimeDownloaderService.AnimeDownloadTask.getTaskName(media.mainName(), i)
-                            .findValidName() + "." + biggest.extension
-                    videoFiles.forEach {
-                        if (it != biggest) {
-                            it.delete()
-                        }
-                    }
-                    if (newName != biggest.name) {
-                        biggest.renameTo(newName)
-                    }
-                    toast(context.getString(R.string.success) + " (1)")
-                } else {
-                    val ffExtension = Injekt.get<DownloadAddonManager>().extension?.extension!!
-                    val extension = ffExtension.getFileExtension()
-                    val tempFile =
-                        directory.createFile(extension.second, "temp.${extension.first}")
-                            ?: throw Exception("Temp file is null")
-                    val tempPath = ffExtension.setDownloadPath(
-                        context,
-                        tempFile.uri
-                    )
-                    val videoPath = ffExtension.getReadPath(
-                        context,
-                        videoFiles[0].uri
-                    )
-
-                    val id = ffExtension.customFFMpeg(
-                        "1", listOf(videoPath, tempPath)
-                    ) { log ->
-                        Logger.log(log)
-                    }
-                    val timeOut = System.currentTimeMillis() + 1000 * 60 * 10
-                    while (ffExtension.getState(id) != "COMPLETED") {
-                        if (ffExtension.getState(id) == "FAILED") {
-                            Logger.log("Failed to fix download")
-                            ffExtension.getStackTrace(id)?.let {
-                                Logger.log(it)
-                            }
-                            toast(R.string.failed_to_fix)
-                            return@launchIO
-                        }
-                        if (System.currentTimeMillis() > timeOut) {
-                            Logger.log("Failed to fix download: Timeout")
-                            toast(R.string.failed_to_fix)
-                            return@launchIO
-                        }
-                    }
-                    if (ffExtension.hadError(id)) {
-                        Logger.log("Failed to fix download: ${ffExtension.getStackTrace(id)}")
-                        toast(R.string.failed_to_fix)
-                        return@launchIO
-                    }
-                    val name = videoFiles[0].name
-                    if (videoFiles[0].delete().not()) {
-                        toast(R.string.delete_fail)
-                        return@launchIO
-                    }
-                    tempFile.renameTo(name!!)
-                    toast(context.getString(R.string.success) + " (2)")
-                }
-            } catch (e: Exception) {
-                toast(getString(R.string.error_msg, e.message))
-                Logger.log(e)
-            }
-        }
-    }
-
-    private val downloadStatusReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (!this@AnimeWatchFragment::episodeAdapter.isInitialized) return
-            when (intent.action) {
-                ACTION_DOWNLOAD_STARTED -> {
-                    val chapterNumber = intent.getStringExtra(EXTRA_EPISODE_NUMBER)
-                    val mediaId = intent.getIntExtra("mediaId", -1)
-                    if (mediaId != media.id) return
-                    chapterNumber?.let { episodeAdapter.startDownload(it) }
-                }
-
-                ACTION_DOWNLOAD_FINISHED -> {
-                    val chapterNumber = intent.getStringExtra(EXTRA_EPISODE_NUMBER)
-                    val mediaId = intent.getIntExtra("mediaId", -1)
-                    val size = intent.getDoubleExtra("size", 0.0)
-                    if (mediaId != media.id) return
-                    chapterNumber?.let { episodeAdapter.addToDownloadedEpisodes(it, size) }
-                }
-
-                ACTION_DOWNLOAD_FAILED -> {
-                    val chapterNumber = intent.getStringExtra(EXTRA_EPISODE_NUMBER)
-                    val mediaId = intent.getIntExtra("mediaId", -1)
-                    if (mediaId != media.id) return
-                    chapterNumber?.let {
-                        episodeAdapter.purgeDownload(it)
-                    }
-                }
-
-                ACTION_DOWNLOAD_PROGRESS -> {
-                    val chapterNumber = intent.getStringExtra(EXTRA_EPISODE_NUMBER)
-                    val progress = intent.getIntExtra("progress", 0)
-                    val mediaId = intent.getIntExtra("mediaId", -1)
-                    val downloadedBytes = intent.getLongExtra(EXTRA_DOWNLOADED_BYTES, -1L)
-                    val estimatedTotalBytes = intent.getLongExtra(EXTRA_ESTIMATED_TOTAL_BYTES, -1L)
-                    if (mediaId != media.id) return
-                    chapterNumber?.let {
-                        episodeAdapter.updateDownloadProgress(
-                            it,
-                            progress,
-                            downloadedBytes,
-                            estimatedTotalBytes
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
     private fun reload() {
         val selected = model.loadSelected(media)
 
@@ -962,8 +666,7 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
 
         model.saveSelected(media.id, selected)
         headerAdapter.handleEpisodes()
-        val isDownloaded = model.watchSources!!.isDownloadedSource(media.selected!!.sourceIndex)
-        episodeAdapter.offlineMode = isDownloaded
+        episodeAdapter.offlineMode = false
         episodeAdapter.notifyItemRangeRemoved(0, episodeAdapter.arr.size)
         var arr: ArrayList<Episode> = arrayListOf()
         if (media.anime!!.episodes != null) {
@@ -978,21 +681,10 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
         episodeAdapter.arr = arr
         episodeAdapter.updateType(style ?: PrefManager.getVal(PrefName.AnimeDefaultView))
         episodeAdapter.notifyItemRangeInserted(0, arr.size)
-        episodeAdapter.clearAllDownloaded()
-        for (download in downloadManager.animeDownloadedTypes) {
-            if (media.compareName(download.titleName)) {
-                episodeAdapter.addToDownloadedEpisodes(download.chapterName, downloadManager.getSize(download))
-            }
         }
     }
 
     override fun onDestroyView() {
-        if (isReceiverRegistered) {
-            try {
-                context?.unregisterReceiver(downloadStatusReceiver)
-            } catch (_: Exception) {}
-            isReceiverRegistered = false
-        }
         if (::headerAdapter.isInitialized) {
             headerAdapter.clearBinding()
         }
@@ -1003,12 +695,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
 
     override fun onDestroy() {
         model.watchSources?.flushText()
-        if (isReceiverRegistered) {
-            try {
-                context?.unregisterReceiver(downloadStatusReceiver)
-            } catch (_: Exception) {}
-            isReceiverRegistered = false
-        }
         super.onDestroy()
     }
 
@@ -1035,13 +721,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
     }
 
     companion object {
-        const val ACTION_DOWNLOAD_STARTED = "ani.dantotsu.ACTION_DOWNLOAD_STARTED"
-        const val ACTION_DOWNLOAD_FINISHED = "ani.dantotsu.ACTION_DOWNLOAD_FINISHED"
-        const val ACTION_DOWNLOAD_FAILED = "ani.dantotsu.ACTION_DOWNLOAD_FAILED"
-        const val ACTION_DOWNLOAD_PROGRESS = "ani.dantotsu.ACTION_DOWNLOAD_PROGRESS"
-        const val EXTRA_EPISODE_NUMBER = "extra_episode_number"
-        const val EXTRA_DOWNLOADED_BYTES = "extra_downloaded_bytes"
-        const val EXTRA_ESTIMATED_TOTAL_BYTES = "extra_estimated_total_bytes"
     }
 
 }
