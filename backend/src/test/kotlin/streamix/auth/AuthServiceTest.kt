@@ -31,9 +31,10 @@ class AuthServiceTest {
         val second = auth.signIn("google", "valid", verifier)
 
         assertEquals(first.user.id, second.user.id)
-        assertNotNull(first.expiresAt)
-        assertNotNull(second.expiresAt)
-        assertNotNull(auth.currentUser(first.expiresAt?.let { _ -> "" } ?: ""))
+        assertNotNull(first.token)
+        assertNotNull(second.token)
+        assertEquals(first.user.id, auth.currentUser(first.token!!)?.id)
+        assertEquals(first.user.id, auth.currentUser(second.token!!)?.id)
     }
 
     @Test
@@ -51,11 +52,9 @@ class AuthServiceTest {
             )
         )
 
-        assertNotNull(auth.currentUser(sessionToken(sessions, session.user.id)))
-    }
-
-    private fun sessionToken(sessions: SessionRepository, userId: String): String {
-        val created = sessions.create(userId, 3600)
-        return created.token
+        val token = session.token!!
+        assertNotNull(auth.currentUser(token))
+        auth.logout(token)
+        assertNull(auth.currentUser(token))
     }
 }
