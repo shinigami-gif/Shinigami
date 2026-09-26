@@ -12,6 +12,13 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executors
 
+data class CreateActivityRequest(
+    val type: String,
+    val text: String? = null,
+    val mediaId: Long? = null,
+    val mediaTitle: String? = null
+)
+
 interface CanonicalAnimeRequestResolver {
     suspend fun resolve(anilistId: Long): CanonicalAnimeIdentity?
 }
@@ -259,7 +266,6 @@ class StreamixHttpServer(
             }
         }
 
-        http.createContext(SocialApiContract.ACTIVITY_REPLIES.replace("{activityId}", "")) { exchange -> }
         http.createContext(BackendApiContract.SEARCH) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val query = query(exchange, "q")?.trim().orEmpty()
