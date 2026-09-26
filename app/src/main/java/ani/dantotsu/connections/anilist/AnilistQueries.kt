@@ -23,7 +23,6 @@ import ani.dantotsu.media.Author
 import ani.dantotsu.media.Character
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.Studio
-import ani.dantotsu.others.MalScraper
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -365,18 +364,7 @@ class AnilistQueries {
                     }
                 }
             }
-            val mal = async {
-                if (media.idMAL == null) {
-                    anilist.await()
-                }
-                if (media.idMAL == null && media.id != 0) {
-                    media.idMAL = ani.dantotsu.others.IdMappers.getMalId(media.id)
-                }
-                if (media.idMAL != null) {
-                    MalScraper.loadMedia(media)
-                }
-            }
-            awaitAll(anilist, mal)
+            awaitAll(anilist)
 
             // Local AnimeState is the source for persistent user progress/state.
             // Seed it once from the existing remote state so the migration is non-destructive.
@@ -484,9 +472,6 @@ class AnilistQueries {
         return returnMap
     }
     private suspend fun bannerImage(type: String): String? {
-        if (PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
-            return if (MAL.token != null) MAL.avatar else null
-        }
         val cached = BannerImage(
             PrefManager.getCustomVal("banner_${type}_url", ""),
             PrefManager.getCustomVal("banner_${type}_time", 0L)
@@ -958,7 +943,7 @@ class AnilistQueries {
             }?.toCollection(ArrayList()) ?: arrayListOf()
         }
 
-        val animeList = async { executeQuery<Query.AnimeList>(queryAnimeMetadataList(), force = true) }
+        val animeList = async { executeQuery<Query.AnimeList>(queryAnimeList(), force = true) }
 
         animeList.await()?.data?.apply {
             list["recentUpdates"] = filterRecentUpdates(recentUpdates)
