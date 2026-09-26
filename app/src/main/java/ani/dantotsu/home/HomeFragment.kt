@@ -252,7 +252,6 @@ class HomeFragment : Fragment() {
                 list.add(
                     Media(
                         anime = ani.dantotsu.media.anime.Anime(),
-                        manga = null,
                         id = -100 - i,
                         name = "•••",
                         nameRomaji = "•••",
