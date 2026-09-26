@@ -152,7 +152,7 @@ class FileUserRepository(
             } ?: current.blockedUserIds
         )
         write(users.map { if (it.id == userId) updated else it })
-        updated.asPublic()
+        updated.toApiUser()
     }
 
     override fun relationship(userId: String, targetUserId: String): UserRelationship = synchronized(lock) {
