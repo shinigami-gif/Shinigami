@@ -3,7 +3,6 @@ package ani.dantotsu.di.injekt
 import android.app.Application
 import android.content.Context
 import androidx.media3.database.StandaloneDatabaseProvider
-import ani.dantotsu.addons.download.DownloadAddonManager
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
@@ -26,7 +25,6 @@ class MetroInteropModule(
     private val basePreferences: BasePreferences,
     private val networkHelper: NetworkHelper,
     private val javaScriptEngine: JavaScriptEngine,
-    private val downloadAddonManager: DownloadAddonManager,
     private val databaseProvider: StandaloneDatabaseProvider,
     private val json: Json,
     private val protoBuf: ProtoBuf,
@@ -45,7 +43,6 @@ class MetroInteropModule(
         addSingleton(networkHelper.client)
         addSingleton(javaScriptEngine)
 
-        addSingleton(downloadAddonManager)
 
 
         addSingleton(json)
