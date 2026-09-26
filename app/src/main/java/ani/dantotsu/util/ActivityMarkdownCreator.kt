@@ -214,11 +214,6 @@ class ActivityMarkdownCreator : AppCompatActivity() {
                     toast("Please enter a valid score between 0 and 100")
                     return@setOnClickListener
                 }
-            } else if (type == "thread") {
-                if (titleText.length < 6) {
-                    toast(getString(R.string.thread_title_length_error))
-                    return@setOnClickListener
-                }
             }
 
             customAlertDialog().apply {
@@ -249,28 +244,6 @@ class ActivityMarkdownCreator : AppCompatActivity() {
                             "bio" -> {
                                 val ok = Anilist.mutation.updateUserBio(text)
                                 if (ok) "Profile bio updated" else "Failed to update bio"
-                            }
-
-                            "thread" -> {
-                                val mediaCategories = intent.getIntegerArrayListExtra("mediaCategories")
-                                Anilist.mutation.saveThread(
-                                    title = titleText,
-                                    body = text,
-                                    categories = arrayListOf(selectedCategoryId),
-                                    mediaCategories = mediaCategories,
-                                    edit = if (isEdit) editId else null
-                                )
-                            }
-
-                            "threadComment" -> {
-                                val parentCommentId = if (parentId != -1) parentId else null
-                                val threadId = intent.getIntExtra("threadId", -1)
-                                Anilist.mutation.saveThreadComment(
-                                    threadId = threadId,
-                                    comment = text,
-                                    parentCommentId = parentCommentId,
-                                    edit = if (isEdit) editId else null
-                                )
                             }
 
                             "replyActivity" -> if (isEdit) {
