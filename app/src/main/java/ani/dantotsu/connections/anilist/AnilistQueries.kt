@@ -914,14 +914,14 @@ class AnilistQueries {
         val countryFilter = country?.let { "countryOfOrigin:$it, " } ?: ""
 
         return buildString {
-            append("""Page(page:1,perPage:50){$standardPageInformation media(sort:$sort, type:$type, $formatFilter $countryFilter $includeList $isAdult){id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore isFavourite format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler } }}""")
+            append("""Page(page:1,perPage:50){$standardPageInformation media(sort:$sort, type:$type, $formatFilter $countryFilter $includeList $isAdult){id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler } }}""")
         }
     }
 
     private fun recentAnimeUpdates(page: Int): String {
         val currentTime = System.currentTimeMillis() / 1000
         return buildString {
-            append("""Page(page:$page,perPage:50){$standardPageInformation airingSchedules(airingAt_greater:0 airingAt_lesser:${currentTime - 10000} sort:TIME_DESC){episode airingAt media{id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore isFavourite format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler } }}}""")
+            append("""Page(page:$page,perPage:50){$standardPageInformation airingSchedules(airingAt_greater:0 airingAt_lesser:${currentTime - 10000} sort:TIME_DESC){episode airingAt media{id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler } }}}""")
         }
     }
 
@@ -942,7 +942,7 @@ class AnilistQueries {
                         "SCORE_DESC",
                         "ANIME"
                     )
-                } mostFav:${buildQueryString("FAVOURITES_DESC", "ANIME")} trending: Page(page:1, perPage:12) { $standardPageInformation media(sort:TRENDING_DESC, type:ANIME, season:$season, seasonYear:$year, $isAdult) { id idMal status episodes nextAiringEpisode{episode} isAdult type meanScore isFavourite format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } } popular: Page(page:1, perPage:50) { $standardPageInformation media(sort:POPULARITY_DESC, type:ANIME, $includeList $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore isFavourite format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } }}"""
+                } mostFav:${buildQueryString("FAVOURITES_DESC", "ANIME")} trending: Page(page:1, perPage:12) { $standardPageInformation media(sort:TRENDING_DESC, type:ANIME, season:$season, seasonYear:$year, $isAdult) { id idMal status episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } } popular: Page(page:1, perPage:50) { $standardPageInformation media(sort:POPULARITY_DESC, type:ANIME, $includeList $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } }}"""
             )
         }
     }
@@ -976,7 +976,7 @@ class AnilistQueries {
                         "SCORE_DESC",
                         "MANGA"
                     )
-                } mostFav:${buildQueryString("FAVOURITES_DESC", "MANGA")} trending: Page(page:1, perPage:10) { $standardPageInformation media(sort:TRENDING_DESC, type:MANGA, $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore isFavourite format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } } popular: Page(page:1, perPage:50) { $standardPageInformation media(sort:POPULARITY_DESC, type:MANGA, $includeList $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore isFavourite format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } }}"""
+                } mostFav:${buildQueryString("FAVOURITES_DESC", "MANGA")} trending: Page(page:1, perPage:10) { $standardPageInformation media(sort:TRENDING_DESC, type:MANGA, $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } } popular: Page(page:1, perPage:50) { $standardPageInformation media(sort:POPULARITY_DESC, type:MANGA, $includeList $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } }}"""
             )
         }
     }
@@ -1251,7 +1251,7 @@ Page(page:$page,perPage:50) {
     }
 
     suspend fun getMediaCharacters(mediaId: Int, page: Int = 1): Query.Media? {
-        val query = """{Media(id:$mediaId){characters(sort:[ROLE,FAVOURITES_DESC],page:$page,perPage:25){pageInfo{hasNextPage currentPage}edges{role voiceActors{id name{userPreferred}image{medium large}languageV2}node{id name{userPreferred}image{medium large}isFavourite}}}}}"""
+        val query = """{Media(id:$mediaId){characters(sort:[ROLE,FAVOURITES_DESC],page:$page,perPage:25){pageInfo{hasNextPage currentPage}edges{role voiceActors{id name{userPreferred}image{medium large}languageV2}node{id name{userPreferred}image{medium large}}}}}}"""
         return executeQuery(query, force = true)
     }
 
