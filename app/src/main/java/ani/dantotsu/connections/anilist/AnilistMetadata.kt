@@ -69,7 +69,7 @@ class AnilistMetadata internal constructor(
         id: Int? = null,
         hd: Boolean = false,
         adultOnly: Boolean = false
-    ): AniMangaSearchResults? = queries.searchAniManga(
+    ): AnimeSearchResults? = queries.searchAnime(
         type = "ANIME",
         page = page,
         perPage = perPage,
