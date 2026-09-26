@@ -503,9 +503,7 @@ class AnilistQueries {
     }
     suspend fun getBannerImages(): ArrayList<String?> {
         return coroutineScope {
-            val anime = async { bannerImage("ANIME") }
-            val manga = async { bannerImage("MANGA") }
-            arrayListOf(anime.await(), manga.await())
+            arrayListOf(bannerImage("ANIME"))
         }
     }
 
