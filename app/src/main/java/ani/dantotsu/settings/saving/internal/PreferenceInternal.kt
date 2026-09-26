@@ -12,8 +12,6 @@ enum class Location(val location: String, val exportable: Boolean) {
     General("ani.dantotsu.general", true),
     UI("ani.dantotsu.ui", true),
     Player("ani.dantotsu.player", true),
-    Reader("ani.dantotsu.reader", true),
-    NovelReader("ani.dantotsu.novelReader", true),
     Irrelevant("ani.dantotsu.irrelevant", false),
     AnimeDownloads("animeDownloads", false),  //different for legacy reasons
     Protected("ani.dantotsu.protected", true),
