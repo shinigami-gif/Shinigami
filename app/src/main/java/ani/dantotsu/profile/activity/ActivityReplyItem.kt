@@ -13,8 +13,6 @@ import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.ItemActivityReplyBinding
 import ani.dantotsu.loadImage
-import ani.dantotsu.profile.User
-import ani.dantotsu.profile.UsersDialogFragment
 import ani.dantotsu.snackString
 import ani.dantotsu.util.ActivityMarkdownCreator
 import ani.dantotsu.util.AniMarkdown.Companion.getBasicAniHTML
