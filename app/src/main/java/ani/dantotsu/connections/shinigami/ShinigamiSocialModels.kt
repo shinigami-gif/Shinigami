@@ -8,9 +8,9 @@ data class ShinigamiActivity(
     val mediaId: Long? = null,
     val mediaTitle: String? = null,
     val replyCount: Int = 0,
-    val likeCount: Int = 0,
-    val isLiked: Boolean = false,
-    val isSubscribed: Boolean = false,
+    var likeCount: Int = 0,
+    var isLiked: Boolean = false,
+    var isSubscribed: Boolean = false,
     val createdAt: String
 )
 
