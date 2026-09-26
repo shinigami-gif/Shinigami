@@ -148,18 +148,6 @@ class SettingsActivity : AppCompatActivity() {
                         },
                         isActivity = true
                     ),
-                    /*
-                    Settings(
-                        type = 1,
-                        name = getString(R.string.addons),
-                        desc = getString(R.string.addons_desc),
-                        icon = R.drawable.ic_round_restaurant_24,
-                        onClick = {
-                            startActivity(Intent(context, SettingsAddonActivity::class.java))
-                        },
-                        isActivity = true
-                    ),
-                    */
                     Settings(
                         type = 1,
                         name = getString(R.string.notifications),
