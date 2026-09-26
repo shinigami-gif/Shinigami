@@ -158,16 +158,6 @@ class SettingsActivity : AppCompatActivity() {
                         },
                         isActivity = true
                     ),
-                    Settings(
-                        type = 1,
-                        name = getString(R.string.extensions),
-                        desc = getString(R.string.extensions_desc),
-                        icon = R.drawable.ic_extension,
-                        onClick = {
-                            startActivity(Intent(context, SettingsExtensionsActivity::class.java))
-                        },
-                        isActivity = true
-                    ),
                     /*
                     Settings(
                         type = 1,

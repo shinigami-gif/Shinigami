@@ -159,10 +159,6 @@
             android:name=".settings.SettingsCommonActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".settings.SettingsExtensionsActivity"
-            android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustPan"/>
-        <activity
             android:name=".settings.SettingsAddonActivity"
             android:parentActivityName=".MainActivity" />
         <activity
@@ -171,10 +167,6 @@
         <activity
             android:name=".settings.SettingsThemeActivity"
             android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.ExtensionsActivity"
-            android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".widgets.statistics.ProfileStatsConfigure"
             android:exported="true">
