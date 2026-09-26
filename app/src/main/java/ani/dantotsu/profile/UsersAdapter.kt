@@ -100,14 +100,7 @@ class UsersAdapter(private val user: MutableList<User>, private val grid: Boolea
                 b.followStatusChip.text = followText()
                 b.followStatusChip.setOnClickListener {
                     b.root.findViewTreeLifecycleOwner()?.lifecycleScope?.launch(Dispatchers.IO) {
-                        val res = Anilist.mutation.toggleFollow(user.id)
-                        if (res?.data?.toggleFollow != null) {
-                            withContext(Dispatchers.Main) {
-                                snackString(R.string.success)
-                                user.isFollowing = res.data.toggleFollow.isFollowing
-                                b.followStatusChip.text = followText()
-                            }
-                        }
+                        snackString("Follow is managed by Shinigami profile")
                     }
                 }
             }
