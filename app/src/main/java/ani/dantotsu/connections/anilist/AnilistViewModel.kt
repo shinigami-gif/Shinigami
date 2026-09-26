@@ -158,33 +158,12 @@ class AnilistHomeViewModel : ViewModel() {
     fun getHidden(): LiveData<ArrayList<Media>> = hidden
 
     suspend fun initHomePage(forceRefresh: Boolean = false) {
-        recommendationPage = 1
-        recommendationHasNextPage = true
-        recommendationLoading = false
-        if (!forceRefresh) {
-            val cachedRes = Anilist.query.loadHomePageCache()
-            if (cachedRes != null) {
-                postHomePageData(cachedRes)
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val freshRes = Anilist.query.initHomePage()
-                        if (freshRes.isNotEmpty()) {
-                            Anilist.query.saveHomePageCache(freshRes)
-                            withContext(Dispatchers.Main) {
-                                postHomePageData(freshRes)
-                            }
-                        }
-                    } catch (_: Exception) {
-                    }
-                }
-                return
-            }
+        val res = try {
+            Anilist.query.initHomePage()
+        } catch (_: Exception) {
+            emptyMap()
         }
-        val res = Anilist.query.initHomePage()
-        if (res.isNotEmpty()) {
-            Anilist.query.saveHomePageCache(res)
-            postHomePageData(res)
-        }
+        postHomePageData(res)
     }
 
     private fun postHomePageData(res: Map<String, ArrayList<Media>>) {
