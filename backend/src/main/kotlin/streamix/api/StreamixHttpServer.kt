@@ -96,6 +96,37 @@ class StreamixHttpServer(
             runSuspend(exchange) { auth.userService.me(user.id) }
         }
 
+        http.createContext(UserApiContract.UPDATE_ME) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            if (!method(exchange, "PUT")) return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val user = auth.auth.currentUser(token)
+                ?: return@createContext unauthorized(exchange)
+            val request = try {
+                gson.fromJson(
+                    exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                    UpdateProfileRequest::class.java
+                )
+            } catch (_: Throwable) {
+                null
+            } ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid profile request"))
+
+            if (request.username.trim().isBlank()) {
+                return@createContext respond(exchange, 400, mapOf("error" to "username is required"))
+            }
+
+            runSuspend(exchange) {
+                auth.userService.updateProfile(
+                    userId = user.id,
+                    username = request.username,
+                    displayName = request.displayName,
+                    bio = request.bio,
+                    avatarUrl = request.avatarUrl,
+                    bannerUrl = request.bannerUrl
+                )
+            }
+        }
+
         http.createContext(UserApiContract.SEARCH) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             if (!method(exchange, "GET")) return@createContext
