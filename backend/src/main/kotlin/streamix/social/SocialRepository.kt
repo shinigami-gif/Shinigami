@@ -18,6 +18,7 @@ interface SocialRepository {
     fun toggleActivitySubscription(activityId: String, userId: String): ActivityRef?
 
     fun comments(mediaId: Long, viewerId: String?, parentCommentId: String?, page: Int, perPage: Int): List<SocialComment>
+    fun commentReplies(commentId: String, viewerId: String?, page: Int, perPage: Int): List<SocialComment>
     fun createComment(mediaId: Long, authorId: String, content: String, parentCommentId: String?): SocialComment
     fun deleteComment(commentId: String, actorId: String): Boolean
     fun voteComment(commentId: String, userId: String, vote: Int?): SocialComment?
