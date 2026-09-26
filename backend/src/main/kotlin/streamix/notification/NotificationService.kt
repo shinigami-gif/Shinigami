@@ -8,7 +8,12 @@ class NotificationService(
     private val repository: NotificationRepository
 ) {
     fun list(userId: String, page: Int = 1, perPage: Int = 30): NotificationPage =
-        page(repository.list(userId, page, perPage), page, perPage)
+        NotificationPage(
+            items = repository.list(userId, page, perPage),
+            page = page.coerceAtLeast(1),
+            perPage = perPage.coerceIn(1, 100),
+            hasNextPage = repository.list(userId, page, perPage).size == perPage.coerceIn(1, 100)
+        )
 
     fun unreadCount(userId: String): Int =
         repository.unreadCount(userId)
