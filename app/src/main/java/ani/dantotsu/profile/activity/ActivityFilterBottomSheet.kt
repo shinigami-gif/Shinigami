@@ -38,7 +38,6 @@ class ActivityFilterBottomSheet : BottomSheetDialogFragment() {
                 R.id.filterAll -> ActivityFilterType.ALL
                 R.id.filterText -> ActivityFilterType.TEXT
                 R.id.filterAnimeProgress -> ActivityFilterType.ANIME_PROGRESS
-                R.id.filterMangaProgress -> ActivityFilterType.MANGA_PROGRESS
                 R.id.filterAllProgress -> ActivityFilterType.ALL_PROGRESS
                 R.id.filterMessages -> ActivityFilterType.MESSAGES
                 R.id.filterPinned -> ActivityFilterType.PINNED
@@ -58,7 +57,6 @@ class ActivityFilterBottomSheet : BottomSheetDialogFragment() {
             ActivityFilterType.ALL -> R.id.filterAll
             ActivityFilterType.TEXT -> R.id.filterText
             ActivityFilterType.ANIME_PROGRESS -> R.id.filterAnimeProgress
-            ActivityFilterType.MANGA_PROGRESS -> R.id.filterMangaProgress
             ActivityFilterType.ALL_PROGRESS -> R.id.filterAllProgress
             ActivityFilterType.MESSAGES -> R.id.filterMessages
             ActivityFilterType.PINNED -> R.id.filterPinned
@@ -88,7 +86,6 @@ enum class ActivityFilterType {
     ALL,
     TEXT,
     ANIME_PROGRESS,
-    MANGA_PROGRESS,
     ALL_PROGRESS,
     MESSAGES,
     PINNED,
