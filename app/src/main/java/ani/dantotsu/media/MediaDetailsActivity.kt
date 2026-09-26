@@ -202,8 +202,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         viewPager.setPageTransformer(ZoomOutPageTransformer())
 
 
-        val isDownload = intent.getBooleanExtra("download", false)
-        media.selected = model.loadSelected(media, isDownload)
+        media.selected = model.loadSelected(media)
 
         binding.mediaCoverImage.loadImage(media.cover)
         binding.mediaCoverImage.setOnLongClickListener {
@@ -454,7 +453,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                 selected = newIndex
                 binding.commentInputLayout.isVisible = selected == 2
                 viewPager.setCurrentItem(selected, true)
-                val sel = model.loadSelected(media, isDownload)
+                val sel = model.loadSelected(media)
                 sel.window = selected
                 model.saveSelected(media.id, sel)
             }
