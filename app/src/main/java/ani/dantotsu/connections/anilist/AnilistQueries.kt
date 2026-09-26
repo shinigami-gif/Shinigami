@@ -666,8 +666,7 @@ class AnilistQueries {
             ${if (page != null) ""","page":"$page"""" else ""}
             ${if (id != null) ""","id":"$id"""" else ""}
             ${if (type == "ANIME" && seasonYear != null) ""","seasonYear":"$seasonYear"""" else ""}
-            ${if (type == "MANGA" && startYear != null) ""","yearGreater":${startYear}0000,"yearLesser":${startYear + 1}0000""" else ""}
-            ${if (season != null) ""","season":"$season"""" else ""}
+                        ${if (season != null) ""","season":"$season"""" else ""}
             ${if (search != null) ""","search":"$search"""" else ""}
             ${if (source != null) ""","source":"$source"""" else ""}
             ${if (sort != null) ""","sort":"$sort"""" else ""}
@@ -706,7 +705,7 @@ class AnilistQueries {
         }
             }""".prepare()
         val response =
-            executeQuery<Query.Page>(aniMangaSearch(perPage), variables, true)?.data?.page
+            executeQuery<Query.Page>(searchAnimeQuery(perPage), variables, true)?.data?.page
         if (response?.media != null) {
             val responseArray = arrayListOf<Media>()
             response.media?.forEach { i ->
