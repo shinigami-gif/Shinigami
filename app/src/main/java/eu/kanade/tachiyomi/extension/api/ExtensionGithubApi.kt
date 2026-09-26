@@ -2,15 +2,11 @@ package eu.kanade.tachiyomi.extension.api
 
 import ani.dantotsu.asyncMap
 import ani.dantotsu.media.MediaType
-import ani.dantotsu.parsers.novel.AvailableNovelSources
-import ani.dantotsu.parsers.novel.NovelExtension
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.util.Logger
 import eu.kanade.tachiyomi.extension.anime.model.AnimeExtension
 import eu.kanade.tachiyomi.extension.anime.model.AvailableAnimeSources
-import eu.kanade.tachiyomi.extension.manga.model.AvailableMangaSources
-import eu.kanade.tachiyomi.extension.manga.model.MangaExtension
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -91,19 +87,6 @@ internal class ExtensionGithubApi {
             }
     }
 
-    private fun updateStoreUrl(oldUrl: String, newUrl: String, mediaType: MediaType) {
-        val prefName = when (mediaType) {
-            MediaType.ANIME -> PrefName.AnimeExtensionRepos
-            MediaType.MANGA -> PrefName.MangaExtensionRepos
-            MediaType.NOVEL -> PrefName.NovelExtensionRepos
-        }
-        val current = PrefManager.getVal<Set<String>>(prefName)
-        if (current.contains(oldUrl)) {
-            val updated = current.minus(oldUrl).plus(newUrl)
-            PrefManager.setVal(prefName, updated)
-        }
-    }
-
     private fun ByteArray.decompressIfGzipped(): ByteArray {
         if (this.size < 2) return this
         val isGzip = (this[0].toInt() and 0xFF == 0x1F) && (this[1].toInt() and 0xFF == 0x8B)
@@ -136,18 +119,7 @@ internal class ExtensionGithubApi {
                 "$cleanBase/index.min.json",
                 "$cleanBase/index.json"
             )
-            MediaType.MANGA -> listOf(
-                "$cleanBase/index.pb",
-                "$cleanBase/repo.json",
-                "$cleanBase/index.min.json",
-                "$cleanBase/index.json"
-            )
-            MediaType.NOVEL -> listOf(
-                "$cleanBase/index.json",
-                "$cleanBase/index.min.json",
-                "$cleanBase/repo.json",
-                "$cleanBase/index.pb"
-            )
+
         }
 
         for (endpoint in defaultEndpoints) {
@@ -180,7 +152,7 @@ internal class ExtensionGithubApi {
                     }.getOrNull()
 
                     if (!list.isNullOrEmpty()) {
-                        val hasDeprecation = (mediaType == MediaType.MANGA || mediaType == MediaType.ANIME) && list.any {
+                        val hasDeprecation = list.any {
                             it.pkg.contains("keiyoushi") || it.pkg.contains("animiru") ||
                             it.name.contains("Outdated App", ignoreCase = true) ||
                             it.name.contains("Update to Mihon", ignoreCase = true) ||
@@ -211,7 +183,6 @@ internal class ExtensionGithubApi {
                             }
                             val nextUrl = legacyRepo?.indexV2
                             if (nextUrl != null) {
-                                updateStoreUrl(originalUrl, nextUrl, mediaType)
                                 return fetchExtensions(nextUrl, mediaType, originalUrl)
                             }
                         }
@@ -434,247 +405,5 @@ internal class ExtensionGithubApi {
         }
     }
 
-    private fun List<ExtensionSourceJsonObject>.toMangaExtensionSources(): List<AvailableMangaSources> {
-        return this.map {
-            AvailableMangaSources(
-                id = it.id,
-                lang = it.lang,
-                name = it.name,
-                baseUrl = it.baseUrl,
-            )
-        }
-    }
 
-    private fun List<ExtensionJsonObject>.toMangaExtensions(repository: String): List<MangaExtension.Available> {
-        val cleanRepo = cleanRepoUrl(repository)
-        val badge = ani.dantotsu.parsers.ExtensionRepoMetaHelper.getRepoBadgeName(repository)
-        return this
-            .filter {
-                val libVersion = it.extractLibVersion()
-                libVersion >= ExtensionLoader.MANGA_LIB_VERSION_MIN && libVersion <= ExtensionLoader.MANGA_LIB_VERSION_MAX
-            }
-            .map {
-                MangaExtension.Available(
-                    name = it.name.removePrefix("Tachiyomi: ").removePrefix("Mihon: "),
-                    pkgName = it.pkg,
-                    versionName = it.version,
-                    versionCode = it.code,
-                    libVersion = it.extractLibVersion(),
-                    lang = it.lang,
-                    isNsfw = it.nsfw == 1,
-                    hasReadme = it.hasReadme == 1,
-                    hasChangelog = it.hasChangelog == 1,
-                    sources = it.sources?.toMangaExtensionSources().orEmpty(),
-                    apkName = it.apk,
-                    repository = repository,
-                    iconUrl = it.iconUrl ?: "$cleanRepo/icon/${it.pkg}.png",
-                    repoName = badge,
-                )
-            }
-    }
-
-    suspend fun findMangaExtensions(): List<MangaExtension.Available> {
-        return withIOContext {
-            val extensions: ArrayList<MangaExtension.Available> = arrayListOf()
-            val repos = PrefManager.getVal<Set<String>>(PrefName.MangaExtensionRepos).toMutableList()
-
-            repos.asyncMap {
-                try {
-                    var repoExtensions = fetchExtensions(it, MediaType.MANGA)
-                    if (repoExtensions.isEmpty()) {
-                        val fallback = fallbackRepoUrl(it)
-                        if (fallback != null) {
-                            repoExtensions = fetchExtensions(fallback, MediaType.MANGA)
-                        }
-                    }
-                    extensions.addAll(repoExtensions.toMangaExtensions(it))
-                } catch (e: Throwable) {
-                    Logger.log("Failed to get manga extensions")
-                    Logger.log(e)
-                }
-            }
-            extensions
-        }
-    }
-
-    fun getMangaApkUrl(extension: MangaExtension.Available): String {
-        return if (extension.apkName.startsWith("http")) {
-            extension.apkName
-        } else {
-            "${cleanRepoUrl(extension.repository)}/apk/${extension.apkName.removePrefix("/")}"
-        }
-    }
-
-    suspend fun findNovelExtensions(): List<NovelExtension.Available> {
-        return withIOContext {
-            val extensions: ArrayList<NovelExtension.Available> = arrayListOf()
-            val repos = PrefManager.getVal<Set<String>>(PrefName.NovelExtensionRepos).toMutableList()
-
-            repos.asyncMap {
-                try {
-                    var repoExtensions = fetchExtensions(it, MediaType.NOVEL)
-                    if (repoExtensions.isEmpty()) {
-                        val fallback = fallbackRepoUrl(it)
-                        if (fallback != null) {
-                            repoExtensions = fetchExtensions(fallback, MediaType.NOVEL)
-                        }
-                    }
-                    extensions.addAll(repoExtensions.toNovelExtensions(it))
-                } catch (e: Throwable) {
-                    Logger.log("Failed to get novel extensions")
-                    Logger.log(e)
-                }
-            }
-            extensions
-        }
-    }
-
-    private fun List<ExtensionJsonObject>.toNovelExtensions(repository: String): List<NovelExtension.Available> {
-        val cleanRepo = cleanRepoUrl(repository)
-        val badge = ani.dantotsu.parsers.ExtensionRepoMetaHelper.getRepoBadgeName(repository)
-        return filter { !it.apk.isNullOrBlank() && !it.pkg.isNullOrBlank() && it.apk.endsWith(".apk", ignoreCase = true) }
-            .mapNotNull { extension ->
-                val sources = extension.sources?.map { source ->
-                    ExtensionSourceJsonObject(
-                        source.id,
-                        source.lang,
-                        source.name,
-                        source.baseUrl,
-                    )
-                }
-                val iconUrl = extension.iconUrl ?: "$cleanRepo/icon/${extension.pkg}.png"
-                NovelExtension.Available(
-                    extension.name,
-                    extension.pkg,
-                    extension.apk,
-                    extension.code,
-                    repository,
-                    sources?.toNovelSources() ?: emptyList(),
-                    iconUrl,
-                    repoName = badge,
-                )
-            }
-    }
-
-    private fun List<ExtensionSourceJsonObject>.toNovelSources(): List<AvailableNovelSources> {
-        return map { source ->
-            AvailableNovelSources(
-                source.id,
-                source.lang,
-                source.name,
-                source.baseUrl,
-            )
-        }
-    }
-
-    fun getNovelApkUrl(extension: NovelExtension.Available): String {
-        return if (extension.versionName.startsWith("http")) {
-            extension.versionName
-        } else {
-            "${cleanRepoUrl(extension.repository)}/apk/${extension.pkgName.removePrefix("/")}.apk"
-        }
-    }
-
-    private fun fallbackRepoUrl(repoUrl: String): String? {
-        var fallbackRepoUrl = "https://gcore.jsdelivr.net/gh/"
-        val strippedRepoUrl = cleanRepoUrl(repoUrl)
-            .removePrefix("https://")
-            .removePrefix("http://")
-        val repoUrlParts = strippedRepoUrl.split("/")
-        if (repoUrlParts.size < 3) {
-            return null
-        }
-        val repoOwner = repoUrlParts[1]
-        val repoName = repoUrlParts[2]
-        fallbackRepoUrl += "$repoOwner/$repoName"
-        val repoBranch = if (repoUrlParts.size > 3) {
-            repoUrlParts[3]
-        } else {
-            "main"
-        }
-        fallbackRepoUrl += "@$repoBranch"
-        return fallbackRepoUrl
-    }
-}
-
-object LongOrStringSerializer : KSerializer<Long> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LongOrString", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Long) = encoder.encodeLong(value)
-    override fun deserialize(decoder: Decoder): Long {
-        val jsonDecoder = decoder as? JsonDecoder ?: return try {
-            decoder.decodeLong()
-        } catch (e: Throwable) {
-            decoder.decodeString().toLongOrNull() ?: 0L
-        }
-        val element = jsonDecoder.decodeJsonElement()
-        return if (element is JsonPrimitive) {
-            element.longOrNull ?: element.content.toLongOrNull() ?: 0L
-        } else {
-            0L
-        }
-    }
-}
-
-object IntOrStringSerializer : KSerializer<Int> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("IntOrString", PrimitiveKind.INT)
-    override fun serialize(encoder: Encoder, value: Int) = encoder.encodeInt(value)
-    override fun deserialize(decoder: Decoder): Int {
-        val jsonDecoder = decoder as? JsonDecoder ?: return try {
-            decoder.decodeInt()
-        } catch (e: Throwable) {
-            decoder.decodeString().toIntOrNull() ?: 0
-        }
-        val element = jsonDecoder.decodeJsonElement()
-        return if (element is JsonPrimitive) {
-            element.intOrNull ?: element.content.toIntOrNull() ?: 0
-        } else {
-            0
-        }
-    }
-}
-
-@Serializable
-private data class ExtensionJsonObject(
-    val name: String = "",
-    val pkg: String = "",
-    val apk: String = "",
-    val lang: String = "all",
-    @Serializable(with = LongOrStringSerializer::class)
-    val code: Long = 0,
-    val version: String = "1.0",
-    @Serializable(with = IntOrStringSerializer::class)
-    val nsfw: Int = 0,
-    @Serializable(with = IntOrStringSerializer::class)
-    val hasReadme: Int = 0,
-    @Serializable(with = IntOrStringSerializer::class)
-    val hasChangelog: Int = 0,
-    val sources: List<ExtensionSourceJsonObject>? = null,
-    @JsonNames("icon", "iconUrl")
-    val iconUrl: String? = null,
-    val extensionLib: String? = null,
-)
-
-@Serializable
-private data class ExtensionSourceJsonObject(
-    @Serializable(with = LongOrStringSerializer::class)
-    val id: Long = 0L,
-    val lang: String = "",
-    val name: String = "",
-    val baseUrl: String = "",
-)
-
-private fun ExtensionJsonObject.extractLibVersion(): Double {
-    extensionLib?.toDoubleOrNull()?.let { return it }
-    val parts = version.split('.')
-    return if (parts.size >= 2) {
-        val major = parts[0].toDoubleOrNull() ?: 1.0
-        if (major >= 10.0) {
-            major
-        } else {
-            val majorMinor = "${parts[0]}.${parts[1]}"
-            majorMinor.toDoubleOrNull() ?: major
-        }
-    } else {
-        version.toDoubleOrNull() ?: 1.0
-    }
 }
