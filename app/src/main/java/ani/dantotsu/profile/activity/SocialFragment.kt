@@ -54,8 +54,9 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
         override fun run() {
             val cards = listOf(binding.socialGlobalChatCard, binding.socialAnimeChatCard, binding.socialLeaderboardCard)
             cards.forEachIndexed { index, card ->
-                card.strokeColor = if (index == quickActionIndex) getThemeColor(androidx.appcompat.R.attr.colorPrimary)
-                else getThemeColor(com.google.android.material.R.attr.colorOutline)
+                val context = binding.root.context
+                card.strokeColor = if (index == quickActionIndex) context.getThemeColor(androidx.appcompat.R.attr.colorPrimary)
+                else context.getThemeColor(com.google.android.material.R.attr.colorOutline)
             }
             quickActionIndex = (quickActionIndex + 1) % cards.size
             handler.postDelayed(this, 4000)
@@ -65,7 +66,7 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = ActivitySocialBinding.bind(view)
-        ThemeManager(requireContext()).applyTheme()
+        ThemeManager(requireActivity()).applyTheme()
         initActivity(requireActivity())
         binding.socialNavbar.navbarContainer.visibility = View.GONE
         binding.socialHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = statusBarHeight }
