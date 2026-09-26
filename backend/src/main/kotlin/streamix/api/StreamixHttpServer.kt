@@ -139,6 +139,30 @@ class StreamixHttpServer(
             runSuspend(exchange) { auth.userService.search(query, page, perPage) }
         }
 
+        http.createContext("/api/v1/users/me/library/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val user = auth.auth.currentUser(token)
+                ?: return@createContext unauthorized(exchange)
+            val mediaId = exchange.requestURI.path
+                .removePrefix("/api/v1/users/me/library/")
+                .toLongOrNull()
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid mediaId"))
+
+            when (exchange.requestMethod.uppercase()) {
+                "GET" -> {
+                    val state = auth.libraryService.find(user.id, mediaId)
+                        ?: return@createContext respond(exchange, 404, mapOf("error" to "library item not found"))
+                    respond(exchange, 200, state)
+                }
+                "DELETE" -> {
+                    auth.libraryService.delete(user.id, mediaId)
+                    respond(exchange, 200, mapOf("status" to "deleted"))
+                }
+                else -> method(exchange, "GET")
+            }
+        }
+
         http.createContext(UserLibraryApiContract.LISTS) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             if (!method(exchange, "GET")) return@createContext
