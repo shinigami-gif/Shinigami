@@ -17,8 +17,7 @@ import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.R
-import ani.dantotsu.connections.comments.Comment
-import ani.dantotsu.connections.comments.CommentsAPI
+import ani.dantotsu.connections.shinigami.ShinigamiComment
 import ani.dantotsu.copyToClipboard
 import ani.dantotsu.databinding.ItemCommentsBinding
 import ani.dantotsu.getAppString
@@ -47,7 +46,7 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 class CommentItem(
-    val comment: Comment,
+    val comment: ShinigamiComment,
     private val markwon: Markwon,
     val parentSection: Section,
     private val commentsFragment: CommentsFragment,
@@ -57,7 +56,7 @@ class CommentItem(
     BindableItem<ItemCommentsBinding>() {
     lateinit var binding: ItemCommentsBinding
     val adapter = GroupieAdapter()
-    private var subCommentIds: MutableList<Int> = mutableListOf()
+    private var subCommentIds: MutableList<String> = mutableListOf()
     val repliesSection = Section()
     private var isEditing = false
     var isReplying = false
@@ -95,8 +94,8 @@ class CommentItem(
             commentRepliesList.layoutManager =
                 LinearLayoutManager(commentsFragment.activity)
             commentRepliesList.adapter = adapter
-            val isUserComment = CommentsAPI.userId == comment.userId
-            val levelColor = getAvatarColor(comment.totalVotes, backgroundColor)
+            val isUserComment = commentsFragment.currentUserId() == comment.author.id
+            val levelColor = getAvatarColor(comment.upvotes - comment.downvotes, backgroundColor)
             markwon.setMarkdown(commentText, comment.content)
             applyTimestampHighlighting(commentText)
             commentEdit.visibility = if (isUserComment) View.VISIBLE else View.GONE
@@ -154,7 +153,7 @@ class CommentItem(
                 ContextCompat.startActivity(
                     commentsFragment.activity,
                     Intent(commentsFragment.activity, ProfileActivity::class.java)
-                        .putExtra("userId", comment.userId.toInt()),
+                        .putExtra("userId", comment.author.id),
                     null
                 )
             }
@@ -162,7 +161,7 @@ class CommentItem(
                 ContextCompat.startActivity(
                     commentsFragment.activity,
                     Intent(commentsFragment.activity, ProfileActivity::class.java)
-                        .putExtra("userId", comment.userId.toInt()),
+                        .putExtra("userId", comment.author.id.toInt()),
                     null
                 )
             }
@@ -177,50 +176,32 @@ class CommentItem(
             }
             commentReply.setOnClickListener {
                 replying(!isReplying)
-                commentsFragment.replyTo(item, comment.username)
+                commentsFragment.replyTo(item, comment.author.username)
                 commentsFragment.replyCallback(item)
             }
-            modBadge.visibility = if (comment.isMod == true) View.VISIBLE else View.GONE
+            modBadge.visibility = if (comment.author.isModerator) View.VISIBLE else View.GONE
             adminBadge.visibility =
-                if (comment.isAdmin == true) View.VISIBLE else View.GONE
+                if (comment.author.isAdmin) View.VISIBLE else View.GONE
             commentInfo.setOnClickListener {
                 val popup = PopupMenu(commentsFragment.requireContext(), commentInfo)
                 popup.menuInflater.inflate(R.menu.profile_details_menu, popup.menu)
-                popup.menu.findItem(R.id.commentDelete)?.isVisible =
-                    isUserComment || CommentsAPI.isAdmin || CommentsAPI.isMod
-                popup.menu.findItem(R.id.commentBanUser)?.isVisible =
-                    (CommentsAPI.isAdmin || CommentsAPI.isMod) && !isUserComment
+                popup.menu.findItem(R.id.commentDelete)?.isVisible = isUserComment
+                popup.menu.findItem(R.id.commentBanUser)?.isVisible = false
                 popup.menu.findItem(R.id.commentReport)?.isVisible = !isUserComment
-                popup.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.itemId) {
                         R.id.commentReport -> {
-                            dialogBuilder(
-                                getAppString(R.string.report_comment),
-                                getAppString(R.string.report_comment_confirm)
-                            ) {
+                            dialogBuilder(getAppString(R.string.report_comment), getAppString(R.string.report_comment_confirm)) {
                                 CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-                                    val success = CommentsAPI.reportComment(
-                                        comment.commentId,
-                                        comment.username,
-                                        commentsFragment.mediaName,
-                                        comment.userId
-                                    )
-                                    if (success) {
-                                        snackString(R.string.comment_reported)
-                                    }
+                                    if (commentsFragment.reportComment(comment)) snackString(R.string.comment_reported)
                                 }
                             }
                             true
                         }
-
                         R.id.commentDelete -> {
-                            dialogBuilder(
-                                getAppString(R.string.delete_comment),
-                                getAppString(R.string.delete_comment_confirm)
-                            ) {
+                            dialogBuilder(getAppString(R.string.delete_comment), getAppString(R.string.delete_comment_confirm)) {
                                 CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-                                    val success = CommentsAPI.deleteComment(comment.commentId)
-                                    if (success) {
+                                    if (commentsFragment.deleteComment(comment.id)) {
                                         snackString(R.string.comment_deleted)
                                         parentSection.remove(this@CommentItem)
                                     }
@@ -228,25 +209,7 @@ class CommentItem(
                             }
                             true
                         }
-
-                        R.id.commentBanUser -> {
-                            dialogBuilder(
-                                getAppString(R.string.ban_user),
-                                getAppString(R.string.ban_user_confirm)
-                            ) {
-                                CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-                                    val success = CommentsAPI.banUser(comment.userId)
-                                    if (success) {
-                                        snackString(R.string.user_banned)
-                                    }
-                                }
-                            }
-                            true
-                        }
-
-                        else -> {
-                            false
-                        }
+                        else -> false
                     }
                 }
                 popup.show()
@@ -258,7 +221,7 @@ class CommentItem(
                 val previousVoteType = comment.userVoteType
                 val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
                 scope.launch {
-                    val success = CommentsAPI.vote(comment.commentId, voteType)
+                    val success = commentsFragment.voteComment(comment.id, voteType)
                     if (success) {
                         comment.userVoteType = voteType
 
@@ -276,7 +239,7 @@ class CommentItem(
                 val previousVoteType = comment.userVoteType
                 val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
                 scope.launch {
-                    val success = CommentsAPI.vote(comment.commentId, voteType)
+                    val success = /*legacy CommentsAPI removed*/.vote(comment.id, voteType)
                     if (success) {
                         comment.userVoteType = voteType
                         if (previousVoteType == 1) {
@@ -290,14 +253,14 @@ class CommentItem(
             commentTotalVotes.text = (comment.upvotes - comment.downvotes).toString()
             commentUserAvatar.openImage(
                 commentsFragment.activity.getString(R.string.avatar, comment.username),
-                comment.profilePictureUrl ?: ""
+                comment.author.avatarUrl ?: ""
             )
             comment.profilePictureUrl?.let { commentUserAvatar.loadImage(it) }
             commentUserName.text = comment.username
             val userColor = "[${levelColor.second}]"
             commentUserLevel.text = userColor
             commentUserLevel.setTextColor(levelColor.first)
-            commentUserTime.text = formatTimestamp(comment.timestamp)
+            commentUserTime.text = formatTimestamp(comment.createdAt)
         }
     }
 
@@ -338,7 +301,7 @@ class CommentItem(
         this.isEditing = isEditing
     }
 
-    fun registerSubComment(id: Int) {
+    fun registerSubComment(id: String) {
         subCommentIds.add(id)
     }
 
@@ -346,7 +309,7 @@ class CommentItem(
         subCommentIds.forEach { id ->
             @Suppress("UNCHECKED_CAST")
             val parentComments = parentSection.groups as? List<CommentItem> ?: emptyList()
-            val commentToRemove = parentComments.find { it.comment.commentId == id }
+            val commentToRemove = parentComments.find { it.comment.id == id }
             commentToRemove?.let {
                 it.removeSubCommentIds()
                 parentSection.remove(it)
