@@ -17,7 +17,6 @@ object AnimeSources : WatchSources() {
         fromExtensions: StateFlow<List<AnimeExtension.Installed>>,
         extensionManager: eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager? = null
     ) {
-        extensionManager?.awaitInitialized()
         pinnedAnimeSources =
             PrefManager.getNullableVal<List<String>>(PrefName.AnimeSourcesOrder, null)
                 ?: emptyList()
