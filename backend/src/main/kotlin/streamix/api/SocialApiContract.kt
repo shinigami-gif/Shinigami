@@ -8,6 +8,7 @@ package streamix.api
  * identity and state are Shinigami-owned.
  */
 object SocialApiContract {
+    const val REPORTS = "/api/v1/social/reports"
     const val FEED = "/api/v1/social/feed"
     const val ACTIVITIES = "/api/v1/social/activities"
     const val ACTIVITY = "/api/v1/social/activities/{activityId}"
