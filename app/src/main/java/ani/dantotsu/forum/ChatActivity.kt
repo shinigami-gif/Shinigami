@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -81,9 +82,11 @@ class ChatActivity : AppCompatActivity() {
         inputBar.addView(sendButton)
         addContentView(
             inputBar,
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            CoordinatorLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.BOTTOM }
         )
-        inputBar.translationY = -navBarHeight.toFloat()
         sendButton.setOnClickListener { sendMessage() }
 
         binding.forumSwipeRefresh.setOnRefreshListener { loadMessages() }
