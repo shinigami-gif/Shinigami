@@ -7,7 +7,6 @@ import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
-import ani.dantotsu.addons.download.DownloadAddonManager
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.core.preference.AndroidPreferenceStore
@@ -36,7 +35,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { NetworkHelper(app) }
         addSingletonFactory { get<NetworkHelper>().client }
         addSingletonFactory { AnimeExtensionManager(app, get()) }
-        addSingletonFactory { DownloadAddonManager(app) }
 
         addSingletonFactory<AnimeSourceManager> { AndroidAnimeSourceManager(app, get()) }
 
