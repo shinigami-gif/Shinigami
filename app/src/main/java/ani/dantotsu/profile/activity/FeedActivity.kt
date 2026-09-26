@@ -129,7 +129,7 @@ class FeedActivity : AppCompatActivity() {
 
             val users = activities.map {
                 SocialLeaderboardUser(
-                    it.author.id,
+                    it.author.id.toIntOrNull() ?: -1,
                     it.author.displayName ?: it.author.username,
                     it.author.avatarUrl,
                     (it.likeCount * 10) + (it.replyCount * 20) + 100
