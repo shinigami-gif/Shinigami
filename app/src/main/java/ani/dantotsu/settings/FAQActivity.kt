@@ -66,11 +66,6 @@ class FAQActivity : AppCompatActivity() {
                 currContext()?.getString(R.string.answer_7) ?: ""
             ),
             Triple(
-                R.drawable.ic_round_magnet_24,
-                currContext()?.getString(R.string.question_19) ?: "",
-                currContext()?.getString(R.string.answer_19) ?: ""
-            ),
-            Triple(
                 R.drawable.ic_round_lock_open_24,
                 currContext()?.getString(R.string.question_9) ?: "",
                 currContext()?.getString(R.string.answer_9) ?: ""
