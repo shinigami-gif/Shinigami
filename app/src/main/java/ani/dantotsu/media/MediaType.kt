@@ -31,26 +31,3 @@ enum class MediaType : Type {
     }
 }
 
-enum class AddonType : Type {
-    TORRENT,
-    DOWNLOAD;
-
-    override fun asText(): String {
-        return when (this) {
-            TORRENT -> "Torrent"
-            DOWNLOAD -> "Download"
-        }
-    }
-
-    companion object {
-        fun fromText(string: String): AddonType? {
-            return when (string) {
-                "Torrent" -> TORRENT
-                "Download" -> DOWNLOAD
-                else -> {
-                    null
-                }
-            }
-        }
-    }
-}
