@@ -551,8 +551,7 @@ class CommentsFragment : Fragment() {
         val model: MediaDetailsViewModel by activityViewModels()
         val currentMedia = model.getMedia().value ?: return
 
-        {
-            val ep = currentMedia.anime?.episodes?.getEpisode(targetTag)
+        val ep = currentMedia.anime?.episodes?.getEpisode(targetTag)
             if (ep != null) {
                 val cleanEp = MediaNameAdapter.findEpisodeNumber(targetTag)?.let {
                     if (it % 1 == 0f) it.toInt().toString() else it.toString()
@@ -566,17 +565,13 @@ class CommentsFragment : Fragment() {
             } else {
                 snackString("Episode $targetTag not found for this provider")
             }
-        } else {
-            onTagClicked(targetTag)
-        }
     }
 
     fun onTagClicked(tag: String) {
         val model: MediaDetailsViewModel by activityViewModels()
         val currentMedia = model.getMedia().value ?: return
 
-        {
-            val ep = currentMedia.anime?.episodes?.getEpisode(tag)
+        val ep = currentMedia.anime?.episodes?.getEpisode(tag)
             if (ep != null) {
                 model.onEpisodeClick(currentMedia, tag, childFragmentManager, true)
             } else {
@@ -1061,41 +1056,38 @@ class CommentsFragment : Fragment() {
                 if (interactionState == InteractionState.REPLY) commentWithInteraction?.comment?.id else null,
                 tag
             )
-        }
-        run {
-            if (interactionState == InteractionState.REPLY) {
-                if (commentWithInteraction == null) return@let
-                val section =
-                    if (commentWithInteraction!!.commentDepth + 1 > commentWithInteraction!!.MAX_DEPTH) commentWithInteraction?.parentSection else commentWithInteraction?.repliesSection
-                val depth =
-                    if (commentWithInteraction!!.commentDepth + 1 > commentWithInteraction!!.MAX_DEPTH) commentWithInteraction!!.commentDepth else commentWithInteraction!!.commentDepth + 1
-                if (depth >= commentWithInteraction!!.MAX_DEPTH) commentWithInteraction!!.registerSubComment(
-                    it.id
+        } ?: return
+
+        if (interactionState == InteractionState.REPLY) {
+            val interaction = commentWithInteraction ?: return
+            val section =
+                if (interaction.commentDepth + 1 > interaction.MAX_DEPTH) interaction.parentSection else interaction.repliesSection
+            val depth =
+                if (interaction.commentDepth + 1 > interaction.MAX_DEPTH) interaction.commentDepth else interaction.commentDepth + 1
+            if (depth >= interaction.MAX_DEPTH) interaction.registerSubComment(success.id)
+            section?.add(
+                if (interaction.commentDepth + 1 > interaction.MAX_DEPTH) 0 else section.itemCount,
+                CommentItem(
+                    success,
+                    buildMarkwon(activity, fragment = this@CommentsFragment),
+                    section,
+                    this@CommentsFragment,
+                    backgroundColor,
+                    depth
                 )
-                section?.add(
-                    if (commentWithInteraction!!.commentDepth + 1 > commentWithInteraction!!.MAX_DEPTH) 0 else section.itemCount,
-                    CommentItem(
-                        it,
-                        buildMarkwon(activity, fragment = this@CommentsFragment),
-                        section,
-                        this@CommentsFragment,
-                        backgroundColor,
-                        depth
-                    )
+            )
+        } else {
+            section.add(
+                0,
+                CommentItem(
+                    success,
+                    buildMarkwon(activity, fragment = this@CommentsFragment),
+                    section,
+                    this@CommentsFragment,
+                    backgroundColor,
+                    0
                 )
-            } else {
-                section.add(
-                    0,
-                    CommentItem(
-                        it,
-                        buildMarkwon(activity, fragment = this@CommentsFragment),
-                        section,
-                        this@CommentsFragment,
-                        backgroundColor,
-                        0
-                    )
-                )
-            }
+            )
         }
     }
 }
