@@ -743,7 +743,7 @@ class StreamixHttpServer(
                 when {
                     parts.size == 1 && exchange.requestMethod.equals("GET", true) ->
                         respond(exchange, 200, auth.adminService.user(actor.id, targetId))
-                    parts.size == 1 && exchange.requestMethod.equals("PUT", true) -> {
+                    parts.size == 2 && parts[1] == "role" && exchange.requestMethod.equals("PUT", true) -> {
                         val request = gson.fromJson(readBody(exchange), AdminRoleRequest::class.java)
                         respond(exchange, 200, auth.adminService.setRole(actor.id, targetId, request.role))
                     }
