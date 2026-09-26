@@ -78,21 +78,9 @@ class UrlMedia : Activity() {
                     startMainActivity(this)
                 }
             }
-            "manga", "read" -> {
-                val id = idStr?.toIntOrNull() ?: uri.getQueryParameter("id")?.toIntOrNull()
-                if (id != null && id > 0) {
-                    loadMedia = id
-                    startMainActivity(
-                        this,
-                        createMediaBundle(id, isMAL, continueMedia, "MANGA")
-                    )
-                } else {
-                    startMainActivity(this)
-                }
-            }
             "media", "open" -> {
                 val id = idStr?.toIntOrNull() ?: uri.getQueryParameter("id")?.toIntOrNull()
-                val type = (uri.getQueryParameter("type") ?: "ANIME").uppercase()
+                val type = "ANIME"
                 if (id != null && id > 0) {
                     loadMedia = id
                     startMainActivity(
