@@ -93,31 +93,6 @@ class EpisodeAdapter(
         return type
     }
 
-    override fun onBindViewHolder(
-        holder: RecyclerView.ViewHolder,
-        position: Int,
-        payloads: MutableList<Any>
-    ) {
-        if (payloads.isEmpty()) {
-            super.onBindViewHolder(holder, position, payloads)
-            return
-        }
-        if (position !in arr.indices) return
-        val ep = arr[position]
-        val listHolder = holder as? EpisodeListViewHolder ?: return
-
-        when {
-            payloads.contains(PAYLOAD_PROGRESS) -> {
-                listHolder.bindProgressText(ep.downloadProgress)
-            }
-            payloads.contains(PAYLOAD_DOWNLOAD_STATE) -> {
-                // Icon / downloaded / failed — still skip Glide + setAnimation
-                listHolder.bind(ep.number, ep.downloadProgress, ep.desc)
-            }
-            else -> super.onBindViewHolder(holder, position, payloads)
-        }
-    }
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val ep = arr[position]
         val title = if (!ep.title.isNullOrEmpty() && ep.title != "null") {
