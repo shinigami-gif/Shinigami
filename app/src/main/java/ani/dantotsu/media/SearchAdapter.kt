@@ -61,7 +61,7 @@ class SearchAdapter(private val activity: SearchActivity, private val type: Sear
         val imm: InputMethodManager =
             activity.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE) as InputMethodManager
 
-        if (activity.searchType != SearchType.MANGA && activity.searchType != SearchType.ANIME) {
+        if (activity.searchType != SearchType.ANIME) {
             throw IllegalArgumentException("Invalid search type (wrong adapter)")
         }
 
