@@ -445,7 +445,6 @@ internal object ExtensionLoader {
             else -> "all"
         }
 
-        val savedRepo = ani.dantotsu.parsers.ExtensionRepoMetaHelper.getInstalledExtensionRepo(pkgName)
         val extension = AnimeExtension.Installed(
             name = extName,
             pkgName = pkgName,
@@ -460,8 +459,8 @@ internal object ExtensionLoader {
             pkgFactory = appInfo.metaData?.getString("$ANIME_PACKAGE$XX_METADATA_SOURCE_FACTORY"),
             isUnofficial = true,
             icon = context.getApplicationIcon(pkgName),
-            repository = savedRepo?.first,
-            repoName = savedRepo?.second,
+            repository = null,
+            repoName = null,
         )
         return AnimeLoadResult.Success(extension)
     }
