@@ -200,7 +200,6 @@
     <string name="player_settings">Player Settings</string>
     <string name="recentlyListOnly">Only show my content in \"Recently Updated\"</string>
     <string name="noSdFound">No SD card was Found.</string>
-    <string name="reader_settings">Reader Settings</string>
     <string name="default_source">Default Source</string>
     <string name="show_yt">Youtube Link</string>
     <string name="default_ep_view">Default Episode Layout</string>
@@ -369,7 +368,6 @@
     <string name="general">General</string>
     <string name="show_system_bars">Show Status &amp; Navigation Bars</string>
     <string name="auto_detect_webtoon">Auto Detect Webtoon</string>
-    <string name="auto_detect_webtoon_info">If the Manga is not from Japan, the reader will default to Webtoon Reader Settings</string>
     <string name="default_settings">Default Settings</string>
     <string name="horizontal_scroll_bar">Horizontal Scroll Bar</string>
     <string name="dual_page">Dual Page</string>
@@ -652,19 +650,6 @@
     <string name="episodes_total_of">"Total of "</string>
     <string name="chapters_total_of">"Total of "</string>
     <string name="no_description_available">"No Description Available"</string>
-
-    <string-array name="manga_directions">
-        <item>Top to Bottom</item>
-        <item>Right to Left</item>
-        <item>Bottom to Top</item>
-        <item>Left to Right</item>
-    </string-array>
-
-    <string-array name="manga_layouts">
-        <item>Paged</item>
-        <item>Continuous Paged</item>
-        <item>Continuous</item>
-    </string-array>
 
     <string name="selected">Selected</string>
     <string name="found">Found</string>
@@ -1018,7 +1003,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="force_legacy_installer_desc">Use the legacy installer to install extensions (For older android phones)</string>
     <string name="skip_loading_extension_icons_desc">Don\'t load icons of extensions on the extension page</string>
     <string name="NSFWExtention_desc">Enable 18+ extensions from search (May remove some useful extensions)</string>
-    <string name="reader_settings_desc">All the Reader related settings</string>
     <string name="include_list_desc">Include list items in Manga explore page</string>
     <string name="anilist_notification_filters_desc">Choose category to Ignore</string>
     <string name="anilist_notifications_checking_time_desc">Set the frequency you want the app to check for Anilist notifications</string>
