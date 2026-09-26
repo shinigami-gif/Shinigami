@@ -98,7 +98,7 @@ class ExtensionInstallService : Service() {
                 .putExtra(EXTRA_INSTALLER, installer)
             if (type is MediaType) {
                 intent.putExtra(EXTRA_EXTENSION_TYPE, type)
-
+            }
             return intent
         }
     }
