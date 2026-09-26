@@ -34,6 +34,26 @@ class ShinigamiBackendClient(
             )
         }
 
+    suspend fun updateProfile(
+        token: String,
+        username: String,
+        bio: String?
+    ): ShinigamiSession = withContext(Dispatchers.IO) {
+        val payload = gson.toJson(
+            mapOf(
+                "username" to username,
+                "bio" to bio
+            )
+        )
+        execute(
+            Request.Builder()
+                .url("$baseUrl/api/v1/users/me/profile")
+                .header("Authorization", "Bearer $token")
+                .put(payload.toRequestBody("application/json; charset=utf-8".toMediaType()))
+                .build()
+        )
+    }
+
     suspend fun logout(token: String) = withContext(Dispatchers.IO) {
         val response = http.newCall(
             Request.Builder()
