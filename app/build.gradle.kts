@@ -141,13 +141,6 @@ android {
     packaging {
         jniLibs {
             useLegacyPackaging = true
-            pickFirsts.add("**/libavcodec.so")
-            pickFirsts.add("**/libavdevice.so")
-            pickFirsts.add("**/libavfilter.so")
-            pickFirsts.add("**/libavformat.so")
-            pickFirsts.add("**/libavutil.so")
-            pickFirsts.add("**/libswresample.so")
-            pickFirsts.add("**/libswscale.so")
         }
     }
 
@@ -174,9 +167,6 @@ configurations.all {
 
 dependencies {
     implementation(project(":backend"))
-    // ffmpeg-kit (must precede media3 so complete native binaries with av_log_default_callback are chosen by pickFirsts)
-    implementation(libs.ffmpeg.kit)
-
     // Media3 & decoders
     implementation(libs.bundles.media3)
     implementation(libs.bundles.subtitles)
