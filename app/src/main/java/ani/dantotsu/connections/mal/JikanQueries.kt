@@ -98,16 +98,6 @@ class JikanQueries {
         }
     }
 
-    suspend fun getTopManga(
-        filter: String = "publishing",
-        page: Int = 1,
-        limit: Int = 15,
-    ): JikanSearchResponse? {
-        return tryWithSuspend {
-            fetchWithFallback<JikanSearchResponse>("/top/manga?filter=$filter&page=$page&limit=$limit")
-        }
-    }
-
     suspend fun getSeasonNow(
         page: Int = 1,
         limit: Int = 15,
@@ -160,21 +150,9 @@ class JikanQueries {
         }
     }
 
-    suspend fun getMangaById(malId: Int): JikanMediaData? {
-        return tryWithSuspend {
-            fetchWithFallback<JikanSingleResponse>("/manga/$malId/full")?.data
-        }
-    }
-
     suspend fun getAnimeCharacters(malId: Int): List<JikanAnimeCharacter> {
         return tryWithSuspend {
             fetchWithFallback<JikanAnimeCharactersResponse>("/anime/$malId/characters")?.data
-        } ?: emptyList()
-    }
-
-    suspend fun getMangaCharacters(malId: Int): List<JikanAnimeCharacter> {
-        return tryWithSuspend {
-            fetchWithFallback<JikanAnimeCharactersResponse>("/manga/$malId/characters")?.data
         } ?: emptyList()
     }
 
@@ -187,12 +165,6 @@ class JikanQueries {
     suspend fun getAnimeReviews(malId: Int, page: Int = 1): List<JikanReview> {
         return tryWithSuspend {
             fetchWithFallback<JikanReviewResponse>("/anime/$malId/reviews?page=$page&preliminary=true&spoilers=false")?.data
-        } ?: emptyList()
-    }
-
-    suspend fun getMangaReviews(malId: Int, page: Int = 1): List<JikanReview> {
-        return tryWithSuspend {
-            fetchWithFallback<JikanReviewResponse>("/manga/$malId/reviews?page=$page&preliminary=true&spoilers=false")?.data
         } ?: emptyList()
     }
 
@@ -241,10 +213,9 @@ class JikanQueries {
         }
     }
 
-    suspend fun getRecommendations(isAnime: Boolean, malId: Int): List<JikanRecommendation> {
-        val type = if (isAnime) "anime" else "manga"
+    suspend fun getRecommendations(malId: Int): List<JikanRecommendation> {
         return tryWithSuspend {
-            fetchWithFallback<JikanRecommendationsResponse>("/$type/$malId/recommendations")?.data
+            fetchWithFallback<JikanRecommendationsResponse>("/anime/$malId/recommendations")?.data
         } ?: emptyList()
     }
 }
