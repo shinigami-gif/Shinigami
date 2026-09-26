@@ -176,28 +176,9 @@
 
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/itemDownload"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                app:srcCompat="@drawable/ic_download_24"
-                app:tint="?attr/colorOnBackground"
-                tools:ignore="ContentDescription" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/itemDownloadStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:fontFamily="@font/poppins_bold"
-            android:maxLines="5"
-            android:padding="16dp"
-            android:text=""
-            android:visibility="gone"
-            app:lineHeight="15sp" />
 
         <TextView
             android:id="@+id/itemEpisodeDesc"
