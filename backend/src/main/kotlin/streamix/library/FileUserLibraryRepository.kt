@@ -33,7 +33,7 @@ class FileUserLibraryRepository(
             .sortedByDescending { it.updatedAt.orEmpty() }
             .drop((safePage - 1) * safeSize)
             .take(safeSize)
-            .map(StoredEntry::toPublic)
+            .map(StoredEntry::asPublic)
             .toList()
     }
 
