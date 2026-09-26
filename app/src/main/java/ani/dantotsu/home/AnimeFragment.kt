@@ -163,7 +163,7 @@ class AnimeFragment : Fragment() {
         animePageAdapter.onIncludeListClick = { checked ->
             oldIncludeList = !checked
             loading = true
-            model.aniMangaSearchResults.results.clear()
+            model.animeSearchResults.results.clear()
             popularAdaptor.notifyDataSetChanged()
             scope.launch(Dispatchers.IO) {
                 model.loadPopular("ANIME", sort = Anilist.sortBy[1], onList = checked)
@@ -173,17 +173,17 @@ class AnimeFragment : Fragment() {
         model.getPopular().observe(viewLifecycleOwner) {
             if (it != null) {
                 if (oldIncludeList == (it.onList != false)) {
-                    val prev = model.aniMangaSearchResults.results.size
-                    model.aniMangaSearchResults.results.addAll(it.results)
+                    val prev = model.animeSearchResults.results.size
+                    model.animeSearchResults.results.addAll(it.results)
                     popularAdaptor.notifyItemRangeInserted(prev, it.results.size)
                 } else {
-                    model.aniMangaSearchResults.results.addAll(it.results)
+                    model.animeSearchResults.results.addAll(it.results)
                     popularAdaptor.notifyDataSetChanged()
                     oldIncludeList = it.onList ?: true
                 }
-                model.aniMangaSearchResults.onList = it.onList
-                model.aniMangaSearchResults.hasNextPage = it.hasNextPage
-                model.aniMangaSearchResults.page = it.page
+                model.animeSearchResults.onList = it.onList
+                model.animeSearchResults.hasNextPage = it.hasNextPage
+                model.animeSearchResults.page = it.page
                 if (it.hasNextPage)
                     progressAdaptor.bar?.visibility = View.VISIBLE
                 else {
@@ -200,10 +200,10 @@ class AnimeFragment : Fragment() {
             RecyclerView.OnScrollListener() {
             override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
                 if (!v.canScrollVertically(1)) {
-                    if (model.aniMangaSearchResults.hasNextPage && model.aniMangaSearchResults.results.isNotEmpty() && !loading) {
+                    if (model.animeSearchResults.hasNextPage && model.animeSearchResults.results.isNotEmpty() && !loading) {
                         loading = true
                         scope.launch(Dispatchers.IO) {
-                            model.loadNextPage(model.aniMangaSearchResults)
+                            model.loadNextPage(model.animeSearchResults)
                         }
                     }
                 }
@@ -311,7 +311,7 @@ class AnimeFragment : Fragment() {
                     model.loaded = true
                     if (_binding?.animeRefresh?.isRefreshing == true) {
                         withContext(Dispatchers.Main) {
-                            model.aniMangaSearchResults.results.clear()
+                            model.animeSearchResults.results.clear()
                             popularAdaptor.notifyDataSetChanged()
                         }
                     }
