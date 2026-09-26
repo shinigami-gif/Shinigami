@@ -42,7 +42,7 @@ data class User(
     // The users favourites
     @SerialName("favourites") var favourites: Favourites? = null,
 
-    // The users anime & manga list statistics
+    // The user's anime list statistics
     @SerialName("statistics") var statistics: UserStatisticTypes? = null,
 
     // The number of unread notifications the user has
@@ -115,8 +115,7 @@ data class UserAvatar(
 
 @Serializable
 data class UserStatisticTypes(
-    @SerialName("anime") var anime: UserStatistics? = null,
-    @SerialName("manga") var manga: UserStatistics? = null
+    @SerialName("anime") var anime: UserStatistics? = null
 ) : java.io.Serializable
 
 @Serializable
@@ -169,8 +168,6 @@ data class UserStatistics(
     @SerialName("standardDeviation") var standardDeviation: Float?,
     @SerialName("minutesWatched") var minutesWatched: Int?,
     @SerialName("episodesWatched") var episodesWatched: Int?,
-    @SerialName("chaptersRead") var chaptersRead: Int?,
-    @SerialName("volumesRead") var volumesRead: Int?,
     //    @SerialName("formats") var formats: List<UserFormatStatistic>?,
     //    @SerialName("statuses") var statuses: List<UserStatusStatistic>?,
     //    @SerialName("scores") var scores: List<UserScoreStatistic>?,
@@ -189,9 +186,6 @@ data class UserStatistics(
 data class Favourites(
     // Favourite anime
     @SerialName("anime") var anime: MediaConnection?,
-
-    // Favourite manga
-    @SerialName("manga") var manga: MediaConnection?,
 
     // Favourite characters
     @SerialName("characters") var characters: CharacterConnection?,
@@ -214,8 +208,6 @@ data class MediaListOptions(
     // The user's anime list options
     @SerialName("animeList") var animeList: MediaListTypeOptions?,
 
-    // The user's manga list options
-    @SerialName("mangaList") var mangaList: MediaListTypeOptions?,
 )
 
 @Serializable
