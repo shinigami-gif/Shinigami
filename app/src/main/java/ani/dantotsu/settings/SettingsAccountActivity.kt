@@ -349,19 +349,6 @@ class SettingsAccountActivity : AppCompatActivity() {
                     isVisible = Discord.token != null
                 ),
                 Settings(
-                    type = 1,
-                    name = getString(R.string.anilist_settings),
-                    desc = getString(R.string.alsettings_desc),
-                    icon = R.drawable.ic_anilist,
-                    onClick = {
-                        lifecycleScope.launch {
-                            Anilist.query.getUserData()
-                            startActivity(Intent(context, AnilistSettingsActivity::class.java))
-                        }
-                    },
-                    isActivity = true
-                ),
-                Settings(
                     type = 2,
                     name = getString(R.string.comments_button),
                     desc = getString(R.string.comments_button_desc),
