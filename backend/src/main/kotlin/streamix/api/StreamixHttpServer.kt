@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer
 import streamix.auth.AuthRuntime
 import streamix.auth.ExternalIdentityVerifier
 import streamix.runtime.StreamixService
+import streamix.api.SocialApiContract
 import java.net.InetSocketAddress
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -229,6 +230,36 @@ class StreamixHttpServer(
             runSuspend(exchange) { auth.libraryService.list(user.id, page, perPage) }
         }
 
+        http.createContext(SocialApiContract.FEED) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            if (!method(exchange, "GET")) return@createContext
+            val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+            val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
+            respond(exchange, 200, auth.socialService.feed(viewer.id, page, perPage))
+        }
+
+        http.createContext(SocialApiContract.ACTIVITIES) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            when {
+                exchange.requestMethod.equals("GET", true) -> {
+                    val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
+                    respond(exchange, 200, auth.socialService.activities(viewer.id, page, perPage))
+                }
+                exchange.requestMethod.equals("POST", true) -> {
+                    val body = gson.fromJson(exchange.requestBody.reader(), CreateActivityRequest::class.java)
+                        ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid request"))
+                    respond(exchange, 201, auth.social.createActivity(viewer.id, body.type, body.text, body.mediaId, body.mediaTitle))
+                }
+                else -> method(exchange, "GET")
+            }
+        }
+
+        http.createContext(SocialApiContract.ACTIVITY_REPLIES.replace("{activityId}", "")) { exchange -> }
         http.createContext(BackendApiContract.SEARCH) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val query = query(exchange, "q")?.trim().orEmpty()
