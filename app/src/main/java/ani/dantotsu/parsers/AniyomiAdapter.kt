@@ -3,9 +3,6 @@ package ani.dantotsu.parsers
 import android.content.Context
 import ani.dantotsu.FileUrl
 import ani.dantotsu.currContext
-import ani.dantotsu.media.MediaNameAdapter
-import ani.dantotsu.media.manga.ImageData
-import ani.dantotsu.media.manga.MangaCache
 import ani.dantotsu.snackString
 import ani.dantotsu.util.Logger
 import eu.kanade.tachiyomi.animesource.AnimeCatalogueSource
@@ -21,19 +18,9 @@ import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import eu.kanade.tachiyomi.animesource.online.ParsedAnimeHttpSource
 import eu.kanade.tachiyomi.extension.anime.model.AnimeExtension
-import eu.kanade.tachiyomi.extension.manga.model.MangaExtension
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareBypassException
-import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.source.MangaSource
 import eu.kanade.tachiyomi.source.anime.getPreferenceKey
-import eu.kanade.tachiyomi.source.model.MangasPage
-import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.copyFrom
-import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.util.lang.awaitSingle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -46,10 +33,8 @@ import okhttp3.Request
 import org.json.JSONObject
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.UnsupportedEncodingException
 import java.net.MalformedURLException
 import java.net.URL
-import java.net.URLDecoder
 import java.util.Locale
 
 class DynamicAnimeParser(extension: AnimeExtension.Installed) : AnimeParser() {
@@ -499,239 +484,6 @@ class DynamicAnimeParser(extension: AnimeExtension.Installed) : AnimeParser() {
             FileUrl(targetUrl, headersMap),
             null,
             video
-        )
-    }
-}
-
-class DynamicMangaParser(extension: MangaExtension.Installed) : MangaParser() {
-    private val mangaCache by lazy {
-        try {
-            Injekt.get<MangaCache>()
-        } catch (_: Throwable) {
-            MangaCache()
-        }
-    }
-    val extension: MangaExtension.Installed
-    var sourceLanguage = 0
-        set(value) {
-            field = if (extension.sources.isNotEmpty()) {
-                value.coerceIn(0, extension.sources.size - 1)
-            } else {
-                0
-            }
-        }
-
-    init {
-        this.extension = extension
-    }
-
-    override val name = extension.name
-    override val saveName = extension.name
-    override val hostUrl =
-        (extension.sources.firstOrNull() as? HttpSource)?.baseUrl ?: extension.sources.firstOrNull()?.name ?: ""
-    override val isNSFW = extension.isNsfw
-    override val icon = extension.icon
-
-    override suspend fun loadChapters(
-        mangaLink: String,
-        extra: Map<String, String>?,
-        sManga: SManga
-    ): List<MangaChapter> {
-        val source = (extension.sources.getOrNull(sourceLanguage)
-            ?: extension.sources.firstOrNull()) as? MangaSource ?: return emptyList()
-
-        return try {
-            val (networkManga, res) = try {
-                val update = runCatching { source.getMangaUpdate(sManga, emptyList(), fetchDetails = true, fetchChapters = true) }.getOrNull()
-                if (update != null && (update.chapters.isNotEmpty() || update.manga.title.isNotBlank())) {
-                    Pair(update.manga, update.chapters)
-                } else {
-                    val details = runCatching { source.getMangaDetails(sManga) }.getOrNull()
-                    val chapters = runCatching { source.getChapterList(sManga) }.getOrDefault(emptyList())
-                    Pair(details, chapters)
-                }
-            } catch (e: Exception) {
-                Pair(null, emptyList<eu.kanade.tachiyomi.source.model.SChapter>())
-            }
-
-            if (networkManga != null) {
-                sManga.copyFrom(networkManga)
-            }
-            val reversedRes = res.reversed()
-            val chapterList = reversedRes.map { sChapterToMangaChapter(it) }
-            chapterList
-        } catch (e: Exception) {
-            Logger.log("loadChapters Exception: $e")
-            emptyList()
-        }
-    }
-
-
-    override suspend fun loadImages(chapterLink: String, sChapter: SChapter): List<MangaImage> {
-        val source = (extension.sources.getOrNull(sourceLanguage)
-            ?: extension.sources.firstOrNull()) as? HttpSource ?: return emptyList()
-        val imageDataList: MutableList<ImageData> = mutableListOf()
-        val ret = coroutineScope {
-            try {
-                Logger.log("source.name " + source.name)
-                val res = source.getPageList(sChapter)
-                val reIndexedPages =
-                    res.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, page.uri) }
-
-                val semaphore = Semaphore(5)
-                val deferreds = reIndexedPages.map { page ->
-                    async(Dispatchers.IO) {
-                        semaphore.withPermit {
-                            val imageUrl = if (page.imageUrl.isNullOrBlank()) {
-                                runCatching { source.getImageUrl(page) }.getOrNull() ?: page.imageUrl
-                            } else {
-                                page.imageUrl
-                            }
-                            val resolvedPage = if (imageUrl != page.imageUrl) {
-                                Page(page.index, page.url, imageUrl, page.uri)
-                            } else {
-                                page
-                            }
-                            mangaCache.put(resolvedPage.imageUrl ?: "", ImageData(resolvedPage, source))
-                            imageDataList += ImageData(resolvedPage, source)
-                            Logger.log("put page: ${resolvedPage.imageUrl}")
-                            pageToMangaImage(resolvedPage)
-                        }
-                    }
-                }
-
-                deferreds.awaitAll()
-
-            } catch (e: Exception) {
-                Logger.log("loadImages Exception: $e")
-                snackString("Failed to load images: $e")
-                emptyList()
-            }
-        }
-        return ret
-    }
-
-    suspend fun imageList(sChapter: SChapter): List<ImageData> {
-        val source = (extension.sources.getOrNull(sourceLanguage)
-            ?: extension.sources.firstOrNull()) as? HttpSource ?: return emptyList()
-
-        return coroutineScope {
-            try {
-                Logger.log("source.name " + source.name)
-                val res = source.getPageList(sChapter)
-                val reIndexedPages =
-                    res.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, page.uri) }
-
-                val semaphore = Semaphore(5)
-                val deferreds = reIndexedPages.map { page ->
-                    async(Dispatchers.IO) {
-                        semaphore.withPermit {
-                            val imageUrl = if (page.imageUrl.isNullOrBlank()) {
-                                runCatching { source.getImageUrl(page) }.getOrNull() ?: page.imageUrl
-                            } else {
-                                page.imageUrl
-                            }
-                            val resolvedPage = if (imageUrl != page.imageUrl) {
-                                Page(page.index, page.url, imageUrl, page.uri)
-                            } else {
-                                page
-                            }
-                            ImageData(resolvedPage, source)
-                        }
-                    }
-                }
-
-                deferreds.awaitAll()
-            } catch (e: Exception) {
-                Logger.log("loadImages Exception: $e")
-                snackString("Failed to load images: $e")
-                emptyList()
-            }
-        }
-    }
-
-    override suspend fun search(query: String): List<ShowResponse> {
-        val source = (extension.sources.getOrNull(sourceLanguage)
-            ?: extension.sources.firstOrNull()) as? MangaSource ?: return emptyList()
-
-        return try {
-            val res = try {
-                source.getSearchManga(1, query, source.getFilterList())
-            } catch (e: Throwable) {
-                if (source is CatalogueSource) {
-                    source.fetchSearchManga(1, query, source.getFilterList()).awaitSingle()
-                } else {
-                    throw e
-                }
-            }
-            Logger.log("res observable: $res")
-            convertMangasPageToShowResponse(res)
-        } catch (e: CloudflareBypassException) {
-            Logger.log("Exception in search: $e")
-            withContext(Dispatchers.Main) {
-                snackString("Failed to bypass Cloudflare")
-            }
-            emptyList()
-        } catch (e: Exception) {
-            Logger.log("General exception in search: $e")
-            emptyList()
-        }
-    }
-
-
-    private fun convertMangasPageToShowResponse(mangasPage: MangasPage): List<ShowResponse> {
-        return mangasPage.mangas.map { sManga ->
-            // Extract required fields from sManga
-            val name = sManga.title
-            val link = sManga.url
-            val coverUrl = sManga.thumbnail_url ?: ""
-
-            // Create a new ShowResponse
-            ShowResponse(name, link, coverUrl, sManga)
-        }
-    }
-
-    private fun pageToMangaImage(page: Page): MangaImage {
-        var headersMap = mapOf<String, String>()
-        var url = ""
-
-        page.imageUrl?.let {
-            val splitUrl = it.split("&")
-            url = it
-
-            headersMap = splitUrl.mapNotNull { part ->
-                val idx = part.indexOf("=")
-                if (idx != -1) {
-                    try {
-                        val key = URLDecoder.decode(part.substring(0, idx), "UTF-8")
-                        val value = URLDecoder.decode(part.substring(idx + 1), "UTF-8")
-                        Pair(key, value)
-                    } catch (e: UnsupportedEncodingException) {
-                        null
-                    }
-                } else {
-                    null
-                }
-            }.toMap()
-        }
-
-        return MangaImage(
-            FileUrl(url, headersMap),
-            false,
-            page
-        )
-    }
-
-
-    private fun sChapterToMangaChapter(sChapter: SChapter): MangaChapter {
-        return MangaChapter(
-            sChapter.name,
-            sChapter.url,
-            sChapter.name,
-            null,
-            sChapter.scanlator?.trim()?.takeIf { it.isNotBlank() } ?: "Unknown",
-            sChapter,
-            sChapter.date_upload
         )
     }
 }
