@@ -60,7 +60,7 @@ internal class ExtensionGithubApi {
 
     private fun List<ExtensionJsonObject>.toAnimeExtensions(repository: String): List<AnimeExtension.Available> {
         val cleanRepo = cleanRepoUrl(repository)
-        val badge = ani.dantotsu.parsers.ExtensionRepoMetaHelper.getRepoBadgeName(repository)
+        val badge = repository.substringAfterLast('/').ifBlank { repository }
         return this
             .filter {
                 val libVersion = it.extractLibVersion()
@@ -173,13 +173,6 @@ internal class ExtensionGithubApi {
                                 json.decodeFromString<NetworkLegacyExtensionRepo>(bodyString)
                             }.getOrNull()
                             if (legacyRepo?.meta != null) {
-                                ani.dantotsu.parsers.ExtensionRepoMetaHelper.saveMeta(
-                                    originalUrl,
-                                    name = legacyRepo.meta.name,
-                                    shortName = legacyRepo.meta.shortName,
-                                    website = legacyRepo.meta.website,
-                                    discord = null
-                                )
                             }
                             val nextUrl = legacyRepo?.indexV2
                             if (nextUrl != null) {
@@ -197,13 +190,6 @@ internal class ExtensionGithubApi {
                                 json.decodeFromString<NetworkLegacyExtensionRepo>(bodyString)
                             }.getOrNull()
                             if (legacy?.meta != null) {
-                                ani.dantotsu.parsers.ExtensionRepoMetaHelper.saveMeta(
-                                    originalUrl,
-                                    name = legacy.meta.name,
-                                    shortName = legacy.meta.shortName,
-                                    website = legacy.meta.website,
-                                    discord = null
-                                )
                             }
                             continue
                         }
@@ -224,13 +210,6 @@ internal class ExtensionGithubApi {
                         }
 
                         if (animeStore != null) {
-                            ani.dantotsu.parsers.ExtensionRepoMetaHelper.saveMeta(
-                                originalUrl,
-                                name = animeStore.name,
-                                shortName = animeStore.badgeLabel,
-                                website = animeStore.contact.website,
-                                discord = animeStore.contact.discord
-                            )
 
                             val extensionsList = if (animeStore.extensionListUrl != null) {
                                 val listUrl = if (animeStore.extensionListUrl.startsWith("http")) {
@@ -301,13 +280,6 @@ internal class ExtensionGithubApi {
                     }
 
                     if (store != null) {
-                        ani.dantotsu.parsers.ExtensionRepoMetaHelper.saveMeta(
-                            originalUrl,
-                            name = store.name,
-                            shortName = store.badgeLabel,
-                            website = store.contact.website,
-                            discord = store.contact.discord
-                        )
                         val resolvedList: NetworkExtensionStore.ExtensionList? = if (store.extensionListUrl != null) {
                             val listUrl = if (store.extensionListUrl.startsWith("http")) {
                                 store.extensionListUrl
@@ -381,10 +353,9 @@ internal class ExtensionGithubApi {
                 try {
                     var repoExtensions = fetchExtensions(it, MediaType.ANIME)
                     if (repoExtensions.isEmpty()) {
-                        val fallback = fallbackRepoUrl(it)
-                        if (fallback != null) {
-                            repoExtensions = fetchExtensions(fallback, MediaType.ANIME)
-                        }
+                        // Repository URLs are already normalized by the current store format.
+                        // Keep the old fallback hook out of the anime-only runtime.
+
                     }
                     extensions.addAll(repoExtensions.toAnimeExtensions(it))
                 } catch (e: Throwable) {
