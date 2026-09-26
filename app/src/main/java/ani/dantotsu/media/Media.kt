@@ -3,6 +3,8 @@ package ani.dantotsu.media
 import android.graphics.Bitmap
 import ani.dantotsu.App
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiLibraryClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.database.AnimeStateDatabase
 import ani.dantotsu.database.AnimeStateRepository
 import ani.dantotsu.connections.anilist.api.FuzzyDate
@@ -265,23 +267,21 @@ fun Media?.deleteFromList(
                     } catch (_: Exception) { /* MAL delete failed; AniList sync still queued */ }
                     onSuccess()
                 } else {
-                    val _id = id ?: Anilist.query.userMediaDetails(media).userListId
-                    _id?.let { listId ->
-                        try {
-                            Anilist.mutation.deleteList(listId)
-                            AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).delete(media.id)
-                            MAL.query.deleteList(media.anime != null, media.idMAL)
+                    try {
+                        val context = App.instance ?: error("Application context is unavailable")
+                        val token = ShinigamiSessionStore(context).getToken()
+                            ?: return@withContext onNotFound()
+                        ShinigamiLibraryClient().deleteFromLibrary(token, media.id.toLong())
+                        AnimeStateRepository(AnimeStateDatabase.get(context)).delete(media.id)
 
-                            val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
-                            PrefManager.setCustomVal(
-                                "removeList", removeList.minus(media.id.toString())
-                            )
-
-                            onSuccess()
-                        } catch (e: Exception) {
-                            onError(e)
-                        }
-                    } ?: onNotFound()
+                        val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
+                        PrefManager.setCustomVal(
+                            "removeList", removeList.minus(media.id.toString())
+                        )
+                        onSuccess()
+                    } catch (e: Exception) {
+                        onError(e)
+                    }
                 }
             }
         }
