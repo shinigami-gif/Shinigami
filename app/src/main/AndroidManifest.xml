@@ -122,7 +122,6 @@
         <activity
             android:name=".util.ActivityMarkdownCreator"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-        <activity android:name=".parsers.ParserTestActivity" />
        <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|layoutDirection"
