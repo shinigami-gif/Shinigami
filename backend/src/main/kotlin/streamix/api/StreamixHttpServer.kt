@@ -22,6 +22,12 @@ data class CreateReplyRequest(val text: String)
 data class CreateCommentRequest(val mediaId: Long, val content: String, val parentCommentId: String? = null)
 data class UpdateCommentRequest(val content: String)
 data class VoteCommentRequest(val vote: Int?)
+data class CreateSocialReportRequest(
+    val targetUserId: String? = null,
+    val targetContentId: String? = null,
+    val type: ReportType,
+    val description: String
+)
 data class CreateForumThreadRequest(val title: String, val body: String, val mediaIds: List<Long> = emptyList())
 data class CreateForumCommentRequest(val content: String, val parentCommentId: String? = null)
 data class AdminUserActionRequest(
@@ -57,6 +63,40 @@ class StreamixHttpServer(
         check(server == null) { "HTTP server is already started" }
         val http = HttpServer.create(InetSocketAddress(host, port), 0)
         http.executor = Executors.newCachedThreadPool()
+
+        http.createContext(SocialApiContract.REPORTS) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val reporter = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            if (!exchange.requestMethod.equals("POST", true)) return@createContext method(exchange, "POST")
+
+            val request = runCatching {
+                gson.fromJson(bodyText(), CreateSocialReportRequest::class.java)
+            }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid report request"))
+
+            if (request.targetUserId.isNullOrBlank() && request.targetContentId.isNullOrBlank()) {
+                return@createContext respond(exchange, 400, mapOf("error" to "targetUserId or targetContentId is required"))
+            }
+            if (request.description.isBlank()) {
+                return@createContext respond(exchange, 400, mapOf("error" to "description is required"))
+            }
+
+            if (request.targetUserId != null && auth.users.findById(request.targetUserId) == null) {
+                return@createContext respond(exchange, 404, mapOf("error" to "target user not found"))
+            }
+
+            val report = AdminReport(
+                id = java.util.UUID.randomUUID().toString(),
+                reporterId = reporter.id,
+                targetUserId = request.targetUserId?.trim(),
+                targetContentId = request.targetContentId?.trim(),
+                type = request.type,
+                description = request.description.trim(),
+                status = ReportStatus.PENDING,
+                createdAt = java.time.Instant.now().toString()
+            )
+            respond(exchange, 201, auth.reports.create(report))
+        }
 
         http.createContext(BackendApiContract.HEALTH) { exchange ->
             respond(exchange, 200, mapOf("status" to "ok"))
