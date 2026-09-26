@@ -9,19 +9,6 @@
     <string name="track_memory_leaks">Detect Memory Leaks</string>
     <string name="track_memory_leaks_desc">Silently monitor memory leaks in background and append diagnostics to the log file</string>
     <string name="daily_leaks_summary">There were %1$d memory leaks detected today. Share the log file with developers to fix them.</string>
-    <string name="play_magnet_or_torrent">Play Torrent / Magnet</string>
-    <string name="play_magnet_or_torrent_desc">Directly stream torrents and magnet links without downloading the full file</string>
-    <string name="enter_magnet_link">Enter Magnet URL or Torrent link</string>
-    <string name="torrent_link_anilist_hint">Link to AniList/MAL entry for tracking (optional)</string>
-    <string name="torrent_link_button">Link</string>
-    <string name="torrent_unlink_button">Unlink</string>
-    <string name="torrent_link_search_title">Link Torrent to Anime</string>
-    <string name="torrent_link_search_hint">Search AniList…</string>
-    <string name="torrent_linked_to">Linked: %1$s</string>
-    <string name="torrent_link_success">Linked! Progress will sync to AniList/MAL.</string>
-    <string name="torrent_no_results">No results found.</string>
-    <string name="play_via_torrent_magnet">Play via Torrent / Magnet</string>
-
     <string name="repo" translatable="false">rebelonion/Dantotsu</string>
     <string name="preference_file_key" translatable="false">dantotsuprefs</string>
 
@@ -188,10 +175,6 @@
         Nothing came up from this source.\n
         Let\'s look elsewhere.
     </string>
-    <string name="download_not_found">
-        Your downloads are feeling a bit lonely…\n
-        Try downloading something.
-    </string>
     <string name="not_supported">%1$s is not supported!</string>
     <string name="server_selector">Select Server</string>
     <string name="auto_select_server">Auto Selecting Server</string>
@@ -210,15 +193,12 @@
 
     <string name="anilist_settings">Anilist Settings</string>
     <string name="extension_settings">Extensions</string>
-    <string name="downloads">Downloads</string>
     <string name="offline_mode">Offline Mode</string>
     <string name="settings">Settings</string>
     <string name="extensions">Extensions</string>
     <string name="extension_updates_available">Extension updates available</string>
     <string name="player_settings">Player Settings</string>
     <string name="recentlyListOnly">Only show my content in \"Recently Updated\"</string>
-    <string name="download_manager_select">Download Manager</string>
-    <string name="downloadInSd">Download in SD card</string>
     <string name="noSdFound">No SD card was Found.</string>
     <string name="reader_settings">Reader Settings</string>
     <string name="default_source">Default Source</string>
@@ -716,10 +696,6 @@
 
     <string name="question_6">Why are my stats not updating?</string>
     <string name="answer_6">This is because it updates every 48 hours automatically (by Anilist). If you really need to update your stats, you can force update your stats after going to this [link](https://anilist.co/settings/lists).</string>
-
-    <string name="question_7">How to download Anime?</string>
-    <string name="answer_7">There are two methods of downloading. Internal and external. If you download internally, then it can be viewed within the app and tracking will work normally for it. The other option is to use external downloader. It requires a download manager to download and a separate video player to watch. External downloads cannot be viewed within the Dantotsu app.\n\n•To download internally:\n\n1. Tap the download button.\n2. For the first time, it will ask you to set a download location. All your downloads will be stored there.\n3. Pick the server and the video quality.\n4. Profit.\n\n•To download externally:\n\n 1. Download 1DM or ADM from Google Play Store.\n2. Enter the app, give storage access and set your preferences (downloading speed, downloading path etc(optional))\n3. Now go to \`Dantotsu > Settings > Common > Download Managers\` and choose the download manager you just set up.\n4. Go to your desired episode and press on the download icon of any server. There may be a popup to set your preferences again, just press on "Download" and it will be saved in the directed path.\n\nNote: External downloads are also possible without a manager but it\'s not recommended.\n\nNerd Note: Internally downloaded episodes are stored in \`{your set location}/Dantotsu/Anime/*`\nYou can change your download location in settings but your previous downloaded episodes will not show up in the app anymore.</string>
-
     <string name="question_9">How to enable NSFW content?</string>
     <string name="answer_9">You can enable NSFW content by enabling 18+ contents from this [link](https://anilist.co/settings/media). You also have to enable NSFW extensions in \`Settings > Extensions > NSFW extensions\` </string>
 
@@ -749,8 +725,6 @@
 
     <string name="question_18">I can\'t login to Anilist.</string>
     <string name="answer_18">The reason this happens is probably because you\'re not using the default browser.\n\n>You have to set Chrome as your default browser to login to Anilist.\n\n>It takes a few seconds for the login button to display changes.\n\nIf it doesn\'t work then you could possibly be IP banned from Anilist or your ISP banned Anilist themselves. We believe that this is highly unlikely so open [Anilist](https://anilist.co) in your browser to see if that\`s the case.</string>
-
-    <string name="question_19">What is torrent? How do I use it?</string>
     <string name="answer_19" formatted="false">Torrent or formally known as BitTorrent is an internet communication protocol for peer\-to\-peer file sharing. A torrent network doesn\'t use a centralised server to host files. It shares files in a decentralised manner. A torrent network has two types of peers. Seeders &amp; Leachers.\n\n• Seeders : These are peers who completed downloading and has the full file. And now they are sharing this file to other peers which is called seeding. A torrent cannot work without at least one seeder. The more seeder a torrent has, the better.\n\n• Leachers : These are peers who are currently downloading the file. If they currently have 40&#37; downloaded then they will share the 40&#37; to any other peers who requests it.\n\nUnlike a centralised server, torrents have no bandwidth limit. You can get your files from hundreds of seeders at the highest possible speed your internet can offer. But many ISP throttle torrent to slow them down because it\'s demanding on their infrastructure. Use a VPN to circumvent this.\n\n• How to use torrents :\n\n1. Install the Torrent Add-on from \`Dantotsu &gt; Settings &gt; Add-ons &gt; Torrent Add-on.\` \n2. Get a source that provides torrents.\n3. USE A VPN. Using VPN while torrenting only has upsides. Without a VPN your IP address will be exposed, your ISP will throttle your network and you could possibly be fined if you live in a country first world country. DO NOT USE IT WITHOUT A VPN IF YOU DON\'T KNOW WHAT YOU\'RE DOING.\n4. Now use that source to start torrenting.</string>
 
     <string name="subscribed_notification">Subscribed! Receiving notifications, when new episodes are released on %1$s.</string>
@@ -814,9 +788,6 @@
     <string name="oled_theme_variant">OLED theme variant</string>
     <string name="use_system_font">Use device font</string>
     <string name="use_system_font_desc">Use the system font instead of the app\'s default font</string>
-    <string name="download_wifi_only">Download on Wi-Fi Only</string>
-    <string name="download_wifi_only_desc">Only download when connected to Wi-Fi to save mobile data</string>
-    <string name="download_wifi_only_warning">Wi-Fi only is enabled. Connect to Wi-Fi to download.</string>
     <string name="installed_anime">Installed Anime</string>
     <string name="available_anime">Available Anime</string>
     <string name="installed_manga">Installed Manga</string>
@@ -832,9 +803,6 @@
     <string name="upcoming_anime">Upcoming Anime</string>
     <string name="airing_image">Airing Image</string>
     <string name="anime_downloads">animeDownloads</string>
-    <string name="purge_anime_downloads">Delete all Anime downloads</string>
-    <string name="purge_manga_downloads">Delete all Manga Downloads</string>
-    <string name="purge_novel_downloads">Delete all Novel Downloads</string>
     <string name="requires_android_12">Requires Android 12+</string>
     <string name="share_username_in_crash_reports">Share username</string>
     <string name="pinned_sources">Pinned Sources</string>
@@ -930,8 +898,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
 
     <string name="you_cursed">youwu have been cuwsed :pwayge:</string>
     <string name="cursed_yt" translatable="false">https://www.youtube.com/watch?v=dQw4w9WgXcQ</string>
-    <string name="purge_confirm">Are you sure you want to purge all %1$s downloads?</string>
-
     <string name="delete_fail_reason">Failed to delete because of… %1$s</string>
     <string name="delete_fail">Failed to delete</string>
     <string name="hide_replies">Hide replies</string>
@@ -1003,18 +969,9 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="liked_by">Liked By</string>
     <string name="adult_only_content">Adult only content</string>
     <string name="dir_error">Your path could not be set</string>
-    <string name="dir_access">Downloads access</string>
-    <string name="dir_access_msg">Please choose a directory to save your downloads</string>
-    <string name="change_download_location">Change Download Location</string>
-    <string name="download_location_msg">Are you sure you want to change the download location?\nOld downloads may no longer be accessible.</string>
-    <string name="rebuild_download_index">Rebuild Download Index</string>
-    <string name="rebuild_download_index_desc">Restore downloads that exist on disk but are missing from the list</string>
-    <string name="rebuild_download_index_msg">Scan the downloads folder and re-add anything missing from the list.\n\nUse this after reinstalling or switching builds, when your files are still on disk but no longer show up. Nothing is deleted.</string>
-    <string name="rebuild_download_index_done">Recovered %1$d download(s)</string>
     <string name="report">Report</string>
     <string name="ban">Ban</string>
     <string name="voice_actors">Voice Actors</string>
-    <string name="download_permission_required">Permission is required to download</string>
     <string name="media">Media</string>
     <string name="users">Users</string>
     <string name="social">Social</string>
@@ -1047,16 +1004,12 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="devs_desc">Dantotsu\'s very own unpaid labours </string>
     <string name="forks_desc">More like Dantotsu</string>
     <string name="disclaimer_desc">Something to keep in mind</string>
-    <string name="enable_torrent_desc">This will run a torrent server in the background</string>
     <string name="player_settings_desc">All the player related settings</string>
-    <string name="purge_anime_downloads_desc">Delete all downloaded Anime</string>
     <string name="prefer_dub_desc">Select Dub media by default</string>
     <string name="show_yt_desc">Show YouTube links for supported media</string>
     <string name="include_list_anime_desc">Include list items in Anime explore page</string>
     <string name="ui_settings_desc">All the UI related settings</string>
-    <string name="download_manager_select_desc">Default manager to download Anime</string>
     <string name="backup_restore_desc">Your preferred settings everywhere</string>
-    <string name="change_download_location_desc">Change the location where all the downloaded stuff goes</string>
     <string name="always_continue_content_desc">Continue where you left off</string>
     <string name="search_source_list_desc">Auto-select the next server if the previous server doesn\'t have the media</string>
     <string name="recentlyListOnly_desc">Show only your list items in the recent tab</string>
@@ -1069,8 +1022,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="skip_loading_extension_icons_desc">Don\'t load icons of extensions on the extension page</string>
     <string name="NSFWExtention_desc">Enable 18+ extensions from search (May remove some useful extensions)</string>
     <string name="reader_settings_desc">All the Reader related settings</string>
-    <string name="purge_manga_downloads_desc">Delete all downloaded Manga</string>
-    <string name="purge_novel_downloads_desc">Delete all downloaded Novels</string>
     <string name="include_list_desc">Include list items in Manga explore page</string>
     <string name="anilist_notification_filters_desc">Choose category to Ignore</string>
     <string name="anilist_notifications_checking_time_desc">Set the frequency you want the app to check for Anilist notifications</string>
@@ -1085,17 +1036,10 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="color_picker_desc">Choose a color</string>
     <string name="hide_private">Hide private Media from home screen</string>
     <string name="hide_private_desc">Long click "Continue Watching" to access</string>
-    <string name="torrent_addon">Torrent Add-on</string>
-    <string name="enable_torrent">Enable Torrent</string>
-    <string name="anime_downloader_addon">Anime Downloader Add-on</string>
-    <string name="install_torrent_addon">Install Torrent Add-on</string>
     <string name="loaded_successfully">Loaded Successfully</string>
     <string name="not_installed">Not Installed</string>
-    <string name="torrent_extension_not_supported">Torrent Add-on not supported on this device</string>
     <string name="update_addon">Add-on update available</string>
     <string name="install_addon">Install Add-on</string>
-    <string name="download_addon_not_found">Add-on not found</string>
-
     <string name="image">Image</string>
     <string name="clear_history">Clear History</string>
     <string name="failed_ext_install_conflict">Failed to install extension due to conflict</string>
@@ -1115,11 +1059,7 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="hide_in_home_screen">Hide in Home Screen</string>
     <string name="hidden">Hidden</string>
     <string name="no_hidden_items">No Hidden Items</string>
-    <string name="download_addon_not_installed">Download Add-on not installed</string>
     <string name="would_you_like_to_install">Would you like to install it?</string>
-    <string name="torrent_addon_not_available">Torrent Add-on not available</string>
-    <string name="download_subtitle">Download Subtitle</string>
-    <string name="download_audio_tracks">Download Audio Tracks</string>
     <string name="no_video_selected">No video selected</string>
     <string name="no_subtitles_available">No subtitles available</string>
     <string name="vote_out_of_total">(%1$s out of %2$s liked this review)</string>
@@ -1255,38 +1195,8 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="data_saver_image_format_info">When disabled, images are converted to WebP format. When enabled, images are converted to JPEG</string>
 
     <!-- Torrent Settings -->
-    <string name="torrent_settings">Torrent Settings</string>
-    <string name="torrent_settings_desc">Configure built-in torrent engine settings</string>
-    <string name="torrent_encryption">Strict Encryption</string>
-    <string name="torrent_encryption_desc">Force encryption for all outgoing/incoming peer connections</string>
-    <string name="torrent_wifi_only">WiFi Only</string>
-    <string name="torrent_wifi_only_desc">Only stream and download torrents when connected to WiFi</string>
-    <string name="torrent_download_speed">Download Speed Limit</string>
-    <string name="torrent_download_speed_desc">Limit maximum download rate in KB/s (0 = unlimited)</string>
-    <string name="torrent_upload_speed">Upload Speed Limit</string>
-    <string name="torrent_upload_speed_desc">Limit maximum upload rate in KB/s (0 = unlimited)</string>
-    <string name="torrent_max_connections">Max Connections Limit</string>
-    <string name="torrent_max_connections_desc">Limit maximum number of active peer connections</string>
-    <string name="torrent_battery_saving">Battery Saving</string>
-    <string name="torrent_battery_saving_desc">Pause torrent service when battery is low or not charging</string>
-    <string name="torrent_port">Incoming Port</string>
-    <string name="torrent_port_desc">Set a custom port for incoming peer connections (0 = random/auto)</string>
-    <string name="torrent_disable_utp">Disable UDP (uTP)</string>
-    <string name="torrent_disable_utp_desc">Disable UDP socket connections to save CPU and reduce heating. Forces TCP-only connections.</string>
-
     <string name="ext_installer_shizuku_stopped">Shizuku is not running or has stopped.</string>
-
-    <string name="download_queue">Downloads</string>
-    <string name="download_queue_desc">Manage your downloaded content and queue</string>
     <string name="clear_queue">Clear Queue</string>
-    <string name="clear_queue_confirm">Are you sure you want to clear the download queue?</string>
-    <string name="no_active_downloads">No active downloads</string>
-    <string name="auto_delete_downloads">Auto Delete Watched/Read Stuff</string>
-    <string name="auto_delete_downloads_desc">Automatically clean up downloaded anime or manga once you’ve watched or read it</string>
-    <string name="download_insights_header">Downloaded Content</string>
-    <string name="download_queue_header">Queue</string>
-    <string name="clear_media_confirm">Are you sure you want to delete all downloaded content for %1$s?</string>
-
     <string name="search_settings">Search settings</string>
     <string name="search_settings_hint">Search settings by name, description, or category…</string>
     <string name="no_settings_found">No matching settings found</string>
@@ -1334,18 +1244,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="time">Time</string>
     <string name="status_sub_off">Subtitles: Off</string>
     <string name="cloudflare_protection_toast">Cloudflare protection detected. Please bypass Cloudflare via WebView.</string>
-
-    <string name="torrent_folder_hint">Folder / Season</string>
-    <string name="torrent_folder_all">All Folders</string>
-    <string name="torrent_unlinked">Unlinked</string>
-    <string name="torrent_enter_url_or_magnet">Please enter a magnet link or torrent URL</string>
-    <string name="torrent_pasted_clipboard">Pasted torrent from clipboard</string>
-    <string name="torrent_link_season_hint">Link %1$s to AniList entry</string>
-    <string name="torrent_link_season_button">Link Season</string>
-    <string name="torrent_unlink_season_button">Unlink Season</string>
-    <string name="torrent_unlink_all_button">Unlink All</string>
-    <string name="torrent_seasons_linked">%1$d seasons linked</string>
-    <string name="torrent_select_season_to_link">Select a season above to manage links</string>
     <string name="screenshot">Screenshot</string>
     <string name="screenshot_saved">Screenshot saved to Pictures/Dantotsu</string>
     <string name="video_not_ready">Video not ready</string>
@@ -1404,18 +1302,9 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="transition_no_previous">There\'s no previous chapter</string>
 
     <!-- Download Resolution & Server Priority -->
-    <string name="preferred_download_resolutions">Preferred Download Resolutions</string>
-    <string name="preferred_download_resolutions_desc">Priority list of video resolutions for downloads. If a resolution is missing, the next one is picked automatically.</string>
     <string name="auto_select_server_title">Auto Server Selection</string>
     <string name="auto_select_server_desc">Automatically select the highest quality server without waiting for choice</string>
-    <string name="custom_extension_resolution_priority">Download Resolution Priority</string>
-
     <!-- Smart Download -->
-    <string name="smart_download_anime">Smart Download (Next Episode)</string>
-    <string name="smart_download_anime_desc">Automatically download the next episode while watching a downloaded one</string>
-    <string name="smart_download_manga">Smart Download (Next Chapter)</string>
-    <string name="smart_download_manga_desc">Automatically download the next chapter while reading a downloaded one</string>
-
     <!-- Spoiler Tags -->
     <string name="hide_spoiler_tags">Hide Spoiler Tags</string>
     <string name="hide_spoiler_tags_desc">Mask spoiler tags on anime and manga details until tapped</string>
@@ -1448,9 +1337,4 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="backup_now_desc">Export app settings and preferences</string>
     <string name="restore_backup">Restore Backup</string>
     <string name="restore_backup_desc">Import app settings from a backup file</string>
-    <string name="change_download_directory">Change Download Directory</string>
-    <string name="change_download_directory_desc">Choose a directory to store Dantotsu downloads</string>
-    <string name="change_download_directory_confirm">Are you sure you want to change the download directory? Existing downloads will remain in the old directory.</string>
-    <string name="purge_downloads">Purge All Downloads</string>
-    <string name="purge_downloads_desc">Delete all downloaded anime, manga, and novel files to free up storage</string>
 </resources>
