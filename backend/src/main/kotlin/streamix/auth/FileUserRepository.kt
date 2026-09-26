@@ -16,9 +16,8 @@ private data class StoredUser(
     val bio: String?,
     val avatarUrl: String?,
     val bannerUrl: String?,
-    val isFollowing: Boolean,
-    val isFollower: Boolean,
-    val isBlocked: Boolean,
+    val followingUserIds: Set<String> = emptySet(),
+    val blockedUserIds: Set<String> = emptySet(),
     val isAdmin: Boolean,
     val isModerator: Boolean,
     val createdAt: String?,
@@ -89,9 +88,8 @@ class FileUserRepository(
             bio = null,
             avatarUrl = null,
             bannerUrl = null,
-            isFollowing = false,
-            isFollower = false,
-            isBlocked = false,
+            followingUserIds = emptySet(),
+            blockedUserIds = emptySet(),
             isAdmin = false,
             isModerator = false,
             createdAt = Instant.now().toString(),
@@ -117,9 +115,8 @@ class FileUserRepository(
             bio = user.bio,
             avatarUrl = user.avatarUrl,
             bannerUrl = user.bannerUrl,
-            isFollowing = user.isFollowing,
-            isFollower = user.isFollower,
-            isBlocked = user.isBlocked,
+            followingUserIds = user.followingUserIds,
+            blockedUserIds = user.blockedUserIds,
             isAdmin = user.isAdmin,
             isModerator = user.isModerator
         )
@@ -133,20 +130,26 @@ class FileUserRepository(
         val current = users.firstOrNull { it.id == userId } ?: error("user not found")
         users.firstOrNull { it.id == targetUserId } ?: error("target user not found")
         val updated = current.copy(
-            isFollowing = following ?: current.isFollowing,
-            isBlocked = blocked ?: current.isBlocked
+            followingUserIds = following?.let {
+                if (it) current.followingUserIds + targetUserId else current.followingUserIds - targetUserId
+            } ?: current.followingUserIds,
+            blockedUserIds = blocked?.let {
+                if (it) current.blockedUserIds + targetUserId else current.blockedUserIds - targetUserId
+            } ?: current.blockedUserIds
         )
         write(users.map { if (it.id == userId) updated else it })
         updated.toPublic()
     }
 
-    override fun relationship(userId: String, targetUserId: String): UserRelationship {
-        val user = read().firstOrNull { it.id == userId } ?: error("user not found")
-        return UserRelationship(
+    override fun relationship(userId: String, targetUserId: String): UserRelationship = synchronized(lock) {
+        val users = read()
+        val current = users.firstOrNull { it.id == userId } ?: error("user not found")
+        val target = users.firstOrNull { it.id == targetUserId } ?: error("target user not found")
+        UserRelationship(
             userId = targetUserId,
-            following = user.isFollowing && user.id == targetUserId,
-            follower = false,
-            blocked = user.isBlocked && user.id == targetUserId
+            following = targetUserId in current.followingUserIds,
+            follower = userId in target.followingUserIds,
+            blocked = targetUserId in current.blockedUserIds
         )
     }
 
@@ -178,9 +181,9 @@ class FileUserRepository(
         bio = bio,
         avatarUrl = avatarUrl,
         bannerUrl = bannerUrl,
-        isFollowing = isFollowing,
-        isFollower = isFollower,
-        isBlocked = isBlocked,
+        isFollowing = false,
+        isFollower = false,
+        isBlocked = false,
         isAdmin = isAdmin,
         isModerator = isModerator,
         createdAt = createdAt
