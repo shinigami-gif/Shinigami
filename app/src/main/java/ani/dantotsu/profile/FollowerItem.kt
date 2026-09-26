@@ -73,15 +73,7 @@ class FollowerItem(
         button.setOnClickListener {
 
            scope.launch(Dispatchers.IO) {
-                val res = Anilist.mutation.toggleFollow(user.id)
-                if (res?.data?.toggleFollow != null) {
-                    withContext(Dispatchers.Main) {
-                        snackString(R.string.success)
-
-                        user.isFollowing = res.data.toggleFollow.isFollowing
-                        button.text = followText()
-                    }
-                }
+                snackString("Follow is managed by Shinigami profile")
             }
         }
     }
