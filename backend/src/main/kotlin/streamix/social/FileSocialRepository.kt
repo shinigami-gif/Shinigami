@@ -4,9 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import streamix.api.ActivityRef
 import streamix.api.ActivityReplyRef
-import streamix.api.ForumCommentRef
-import streamix.api.ForumThreadRef
-import streamix.api.NotificationRef
 import streamix.api.ShinigamiUser
 import streamix.api.SocialComment
 import streamix.auth.UserRepository
@@ -50,19 +47,6 @@ private data class StoredComment(
     val updatedAt: String? = null
 )
 
-private data class StoredThread(
-    val id: String,
-    val title: String,
-    val body: String,
-    val authorId: String,
-    val mediaIds: List<Long>,
-    val createdAt: String,
-    val updatedAt: String? = null,
-    val likedBy: Set<String> = emptySet(),
-    val subscribedBy: Set<String> = emptySet()
-)
-
-private data class StoredForumComment(
     val id: String,
     val threadId: String,
     val authorId: String,
@@ -79,7 +63,6 @@ private data class StoredNotification(
     val type: String,
     val actorId: String?,
     val activityId: String?,
-    val threadId: String?,
     val commentId: String?,
     val mediaId: Long?,
     val message: String?,
@@ -196,56 +179,6 @@ class FileSocialRepository(
         commentToApi(updated, userId)
     }
 
-    override fun forumThreads(query: String?, page: Int, perPage: Int, viewerId: String?): List<ForumThreadRef> = synchronized(lock) {
-        val normalized = query?.trim()?.lowercase().orEmpty()
-        paginate(
-            read<StoredThread>("forum-threads.json")
-                .filter { normalized.isBlank() || it.title.lowercase().contains(normalized) || it.body.lowercase().contains(normalized) }
-                .sortedByDescending { it.createdAt },
-            page, perPage
-        ).mapNotNull { threadToApi(it, viewerId) }
-    }
-
-    override fun forumThread(threadId: String, viewerId: String?): ForumThreadRef? = synchronized(lock) {
-        read<StoredThread>("forum-threads.json").firstOrNull { it.id == threadId }?.let { threadToApi(it, viewerId) }
-    }
-
-    override fun createForumThread(authorId: String, title: String, body: String, mediaIds: List<Long>): ForumThreadRef = synchronized(lock) {
-        require(users.findById(authorId) != null) { "author not found" }
-        val stored = StoredThread(UUID.randomUUID().toString(), title.trim(), body, authorId, mediaIds.distinct(), Instant.now().toString())
-        write("forum-threads.json", read<StoredThread>("forum-threads.json") + stored)
-        threadToApi(stored, authorId)!!
-    }
-
-    override fun deleteForumThread(threadId: String, actorId: String): Boolean = synchronized(lock) {
-        val items = read<StoredThread>("forum-threads.json")
-        val item = items.firstOrNull { it.id == threadId } ?: return false
-        if (item.authorId != actorId) return false
-        write("forum-threads.json", items.filterNot { it.id == threadId })
-        true
-    }
-
-    override fun forumComments(threadId: String, viewerId: String?, page: Int, perPage: Int): List<ForumCommentRef> = synchronized(lock) {
-        paginate(read<StoredForumComment>("forum-comments.json").filter { it.threadId == threadId }.sortedBy { it.createdAt }, page, perPage)
-            .mapNotNull { forumCommentToApi(it, viewerId) }
-    }
-
-    override fun createForumComment(threadId: String, authorId: String, content: String, parentCommentId: String?): ForumCommentRef = synchronized(lock) {
-        require(forumThread(threadId, authorId) != null) { "thread not found" }
-        val stored = StoredForumComment(UUID.randomUUID().toString(), threadId, authorId, content.trim(), parentCommentId, Instant.now().toString())
-        write("forum-comments.json", read<StoredForumComment>("forum-comments.json") + stored)
-        forumCommentToApi(stored, authorId)!!
-    }
-
-    override fun toggleThreadLike(threadId: String, userId: String): ForumThreadRef? = synchronized(lock) {
-        mutateThread(threadId) { it.copy(likedBy = toggle(it.likedBy, userId)) }?.let { threadToApi(it, userId) }
-    }
-
-    override fun toggleThreadSubscription(threadId: String, userId: String): ForumThreadRef? = synchronized(lock) {
-        mutateThread(threadId) { it.copy(subscribedBy = toggle(it.subscribedBy, userId)) }?.let { threadToApi(it, userId) }
-    }
-
-    override fun notifications(userId: String, page: Int, perPage: Int): List<NotificationRef> = synchronized(lock) {
         paginate(read<StoredNotification>("notifications.json").filter { it.userId == userId }.sortedByDescending { it.createdAt }, page, perPage)
             .mapNotNull { notificationToApi(it) }
     }
@@ -301,15 +234,6 @@ class FileSocialRepository(
         return updated
     }
 
-    private fun mutateThread(id: String, transform: (StoredThread) -> StoredThread): StoredThread? {
-        val items = read<StoredThread>("forum-threads.json")
-        val current = items.firstOrNull { it.id == id } ?: return null
-        val updated = transform(current)
-        write("forum-threads.json", items.map { if (it.id == id) updated else it })
-        return updated
-    }
-
-    private fun toggle(current: Set<String>, userId: String) =
         if (userId in current) current - userId else current + userId
 
     private inline fun <reified T> read(name: String): List<T> {
