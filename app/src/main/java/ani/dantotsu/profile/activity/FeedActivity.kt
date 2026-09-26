@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.MainActivity
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.ActivitySocialBinding
 import ani.dantotsu.initActivity
 import ani.dantotsu.getThemeColor
@@ -119,48 +120,33 @@ class FeedActivity : AppCompatActivity() {
 
     private fun loadSocialData() {
         lifecycleScope.launch {
-            val activities = withContext(Dispatchers.IO) {
-                Anilist.query.getFeed(userId = null, global = true, page = 1, activityId = null)
-                    ?.data?.page?.activities
-                    .orEmpty()
-                    .filter { Anilist.adult || it.media?.isAdult != true }
-                    .take(24)
-            }
+            val token = ShinigamiSessionStore(this@FeedActivity).getToken() ?: return@launch
+            val activities = runCatching {
+                withContext(Dispatchers.IO) {
+                    ShinigamiSocialClient().feed(token, page = 1, perPage = 24).items
+                }
+            }.getOrElse { emptyList() }
 
-            val users = activities.mapNotNull {
-                val user = it.user ?: it.messenger ?: return@mapNotNull null
+            val users = activities.map {
                 SocialLeaderboardUser(
-                    user.id,
-                    user.name ?: "User",
-                    user.avatar?.medium,
-                    ((it.likeCount ?: 0) * 10) + ((it.replyCount ?: 0) * 20) + 100
+                    it.author.id,
+                    it.author.displayName ?: it.author.username,
+                    it.author.avatarUrl,
+                    (it.likeCount * 10) + (it.replyCount * 20) + 100
                 )
             }.distinctBy { it.id }.take(12)
 
-            val leaderboardPages = listOf(
-                "Community", "Anime Fans", "Watch Together", "Social"
-            ).mapIndexed { page, title ->
-                SocialLeaderboardPage(
-                    title,
-                    users.map { it.copy(points = it.points + (12 - page) * 15) }
-                )
-            }
+            val leaderboardPages = listOf("Community", "Anime Fans", "Watch Together", "Social")
+                .mapIndexed { page, title ->
+                    SocialLeaderboardPage(title, users.map { it.copy(points = it.points + (12 - page) * 15) })
+                }
 
             binding.socialFeaturePager.adapter = SocialFeatureAdapter(
-                listOf(
-                    SocialFeature(
-                        "Watch Together",
-                        "Create a room, invite friends, and enjoy anime together.",
-                        activities.firstOrNull()?.media?.bannerImage
-                            ?: activities.firstOrNull()?.media?.coverImage?.large
-                    )
-                )
+                listOf(SocialFeature("Watch Together", "Create a room, invite friends, and enjoy anime together."))
             )
             binding.socialLeaderboardPager.adapter = SocialLeaderboardAdapter(leaderboardPages)
 
-            val activityItems = activities
-                .filter { it.typename == "ListActivity" || it.typename == "TextActivity" }
-                .take(3)
+            val activityItems = activities.take(3)
             binding.socialActivityList.layoutManager = LinearLayoutManager(this@FeedActivity)
             binding.socialActivityList.adapter = SocialActivityAdapter(activityItems)
 
@@ -170,9 +156,7 @@ class FeedActivity : AppCompatActivity() {
             binding.socialFriendsList.adapter = SocialFriendAdapter(friendUsers)
             binding.socialFriendsTitle.text = "Active Friends   • " + friendUsers.size + " online"
 
-            val messages = activities
-                .filter { it.typename == "MessageActivity" || it.typename == "TextActivity" }
-                .take(3)
+            val messages = activities.filter { it.type == "MESSAGE" || !it.text.isNullOrBlank() }.take(3)
             binding.socialMessagesList.layoutManager = LinearLayoutManager(this@FeedActivity)
             binding.socialMessagesList.adapter = SocialMessageAdapter(messages)
 
@@ -215,7 +199,7 @@ class FeedActivity : AppCompatActivity() {
                             startActivity(
                                 Intent(this@FeedActivity, ListActivity::class.java)
                                     .putExtra("anime", true)
-                                    .putExtra("userId", Anilist.userid)
+                                    .putExtra("userId", ShinigamiSessionStore(this@FeedActivity).getUserId())
                             )
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                             finish()
