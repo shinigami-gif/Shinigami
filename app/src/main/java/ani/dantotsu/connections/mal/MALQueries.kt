@@ -52,17 +52,6 @@ class MALQueries {
         }
     }
 
-    suspend fun searchManga(query: String, limit: Int = 25, offset: Int = 0): MalRankingResponse? {
-        val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        return tryWithSuspend {
-            executeRequest {
-                client.get(
-                    "$apiUrl/manga?q=$encodedQuery&limit=$limit&offset=$offset&fields=$rankingFields",
-                    clientIdHeader
-                )
-            }.parsed<MalRankingResponse>()
-        }
-    }
 
     suspend fun getAnimeRanking(
         rankingType: String = "all",
@@ -104,11 +93,6 @@ class MALQueries {
         }.parsed<MalAnimeNode>()
     }
 
-    suspend fun getMangaDetails(malId: Int): MalAnimeNode? = tryWithSuspend {
-        executeRequest {
-            client.get("$apiUrl/manga/$malId?fields=$detailFields", clientIdHeader)
-        }.parsed<MalAnimeNode>()
-    }
 
     suspend fun getSeasonalAnime(
         year: Int,
