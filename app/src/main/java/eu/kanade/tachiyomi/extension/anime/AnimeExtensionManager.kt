@@ -222,11 +222,6 @@ class AnimeExtensionManager(
                         repoName = newRepoName,
                     )
                     changed = true
-                    ani.dantotsu.parsers.ExtensionRepoMetaHelper.saveInstalledExtensionRepo(
-                        pkgName,
-                        newRepo,
-                        newRepoName
-                    )
                 }
             }
         }
