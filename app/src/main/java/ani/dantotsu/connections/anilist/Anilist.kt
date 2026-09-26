@@ -289,7 +289,6 @@ object Anilist {
         PrefManager.setVal(PrefName.UnreadUserNotifications, 0)
         PrefManager.setVal(PrefName.UnreadMediaNotifications, 0)
         PrefManager.setVal(PrefName.UnreadSubscriptionNotifications, 0)
-        PrefManager.setVal(PrefName.UnreadCommentNotifications, 0)
 
     }
 
