@@ -386,7 +386,7 @@ class MediaDetailsViewModel : ViewModel() {
             ani.dantotsu.connections.anilist.api.Query.Review(
                 id = review.malId,
                 mediaId = malId,
-                mediaType = if (isAnime) "ANIME" else "MANGA",
+                mediaType = "ANIME",
                 summary = summary,
                 body = reviewText,
                 rating = review.reactions?.overall ?: 0,
