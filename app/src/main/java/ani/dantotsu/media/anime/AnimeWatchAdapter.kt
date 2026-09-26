@@ -37,7 +37,6 @@ import ani.dantotsu.others.LanguageMapper
 import ani.dantotsu.others.webview.CookieCatcher
 import ani.dantotsu.parsers.AnimeSources
 import ani.dantotsu.parsers.DynamicAnimeParser
-import ani.dantotsu.parsers.OfflineAnimeParser
 import ani.dantotsu.parsers.WatchSources
 import ani.dantotsu.px
 import ani.dantotsu.settings.FAQActivity
@@ -632,7 +631,6 @@ class AnimeWatchAdapter(
 
                 val sourceFound = media.anime.episodes!!.isNotEmpty()
                 val isDownloadedSource =
-                    watchSources[media.selected!!.sourceIndex] is OfflineAnimeParser
 
                 if (isDownloadedSource) {
                     binding.sourceNotFound.text = if (sourceFound) {
