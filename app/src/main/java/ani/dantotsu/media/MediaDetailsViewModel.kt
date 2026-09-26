@@ -463,10 +463,8 @@ class MediaDetailsViewModel : ViewModel() {
                         }
                         if (resolvedFmt != null) {
                             rel.format = resolvedFmt
-                            val rawRelation = rel.relation?.substringBefore("
-") ?: ""
-                            if (rawRelation.isNotEmpty()) rel.relation = "$rawRelation
-$resolvedFmt"
+                            val rawRelation = rel.relation?.substringBefore("\n") ?: ""
+                            if (rawRelation.isNotEmpty()) rel.relation = "$rawRelation\n$resolvedFmt"
                         }
                     } catch (_: Exception) {}
                 }
