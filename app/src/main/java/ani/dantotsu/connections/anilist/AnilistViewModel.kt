@@ -14,7 +14,9 @@ import ani.dantotsu.media.Character
 import ani.dantotsu.media.Studio
 import ani.dantotsu.media.Author
 import ani.dantotsu.others.AppUpdater
-import ani.dantotsu.profile.User
+import ani.dantotsu.connections.shinigami.ShinigamiActivity
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.snackString
@@ -116,20 +118,38 @@ class AnilistHomeViewModel : ViewModel() {
 
     fun getMissingSequels(): LiveData<ArrayList<Media>> = missingSequels
 
-    private val userStatus: MutableLiveData<ArrayList<User>?> =
+    private val userStatus: MutableLiveData<ArrayList<ani.dantotsu.home.status.StatusUser>?> =
         MutableLiveData(null)
 
-    fun getUserStatus(): LiveData<ArrayList<User>?> = userStatus
+    fun getUserStatus(): LiveData<ArrayList<ani.dantotsu.home.status.StatusUser>?> = userStatus
     suspend fun initUserStatus(forceRefresh: Boolean = false) {
         if (forceRefresh || userStatus.value == null) {
             userStatus.postValue(null)
         }
-        val res = try {
-            Anilist.query.getUserStatus(forceRefresh)
-        } catch (_: Exception) {
-            null
+        val token = ShinigamiSessionStore(App.instance!!).getToken()
+        val activities = if (!token.isNullOrBlank()) {
+            try {
+                ShinigamiSocialClient().activities(token, 1).items
+            } catch (_: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
         }
-        userStatus.postValue(res ?: arrayListOf())
+        val grouped = activities
+            .groupBy { it.author.id }
+            .values
+            .map { userActivities ->
+                val author = userActivities.first().author
+                ani.dantotsu.home.status.StatusUser(
+                    id = author.id,
+                    name = author.displayName ?: author.username,
+                    avatarUrl = author.avatarUrl,
+                    activities = userActivities.sortedBy { it.createdAt }
+                )
+            }
+            .sortedByDescending { it.activities.maxOfOrNull { activity -> activity.createdAt } ?: "" }
+        userStatus.postValue(ArrayList(grouped))
     }
 
     private val hidden: MutableLiveData<ArrayList<Media>> =
