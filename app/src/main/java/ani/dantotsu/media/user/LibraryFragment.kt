@@ -66,7 +66,7 @@ class LibraryFragment : Fragment(R.layout.activity_list) {
         val live = Refresh.activity.getOrPut(hashCode()) { MutableLiveData(true) }
         live.observe(viewLifecycleOwner) {
             if (it) viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.IO) { model.loadLists(true, ani.dantotsu.connections.anilist.Anilist.userid ?: 0) }
+                withContext(Dispatchers.IO) { model.loadLists(true) }
                 live.postValue(false)
             }
         }
