@@ -250,39 +250,6 @@
             android:launchMode="singleTask"
             android:supportsPictureInPicture="true"
             tools:targetApi="n" />        <activity
-            android:name=".connections.mal.Login"
-            android:configChanges="orientation|screenSize|layoutDirection"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTask">
-            <intent-filter android:label="Myanimelist Login for Dantotsu">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="mal"
-                    android:scheme="dantotsu" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".connections.discord.Login"
-            android:configChanges="orientation|screenSize|layoutDirection"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTask">
-            <intent-filter android:label="Discord Login for Dantotsu">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="dantotsu" />
-                <data android:host="discord" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".others.webview.CookieCatcher"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:excludeFromRecents="true"
@@ -297,50 +264,6 @@
                 <data android:scheme="dantotsu" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:host="discord.dantotsu.com" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".connections.anilist.UrlMedia"
-            android:configChanges="orientation|screenSize|layoutDirection"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTask">
-            <intent-filter android:label="Open in Dantotsu">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="anime"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="watch"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="media"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="open"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="user"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="u"
-                    android:scheme="dantotsu" />
-                <data
-                    android:host="profile"
-                    android:scheme="dantotsu" />
-            </intent-filter>
-            <intent-filter android:label="Open in Dantotsu">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:host="dantotsu.app" />
                 <data android:host="www.dantotsu.app" />
@@ -354,7 +277,6 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:host="anilist.co" />
-                <data android:host="myanimelist.net" />
                 <data android:pathPrefix="/manga" />
             </intent-filter>
             <intent-filter android:label="@string/watch_on_dantotsu">
@@ -366,7 +288,6 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:host="anilist.co" />
-                <data android:host="myanimelist.net" />
                 <data android:pathPrefix="/anime" />
             </intent-filter>
             <intent-filter android:label="@string/view_profile_in_dantotsu">
