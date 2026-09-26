@@ -243,7 +243,6 @@ fun Media?.deleteFromList(
     onError: suspend (e: Exception) -> Unit,
     onNotFound: suspend () -> Unit
 ) {
-    val id = this?.userListId
     val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
     scope.launch {
         withContext(Dispatchers.IO) {
