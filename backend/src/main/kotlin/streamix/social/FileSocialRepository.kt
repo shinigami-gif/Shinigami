@@ -47,16 +47,6 @@ private data class StoredComment(
     val updatedAt: String? = null
 )
 
-    val id: String,
-    val threadId: String,
-    val authorId: String,
-    val content: String,
-    val parentCommentId: String?,
-    val createdAt: String,
-    val updatedAt: String? = null,
-    val likedBy: Set<String> = emptySet()
-)
-
 private data class StoredNotification(
     val id: String,
     val userId: String,
@@ -210,20 +200,9 @@ class FileSocialRepository(
         return SocialComment(item.id, author, item.mediaId, item.parentCommentId, item.content, item.upvotesBy.size, item.downvotesBy.size, vote, replies, item.deleted, item.createdAt, item.updatedAt)
     }
 
-    private fun threadToApi(item: StoredThread, viewerId: String?): ForumThreadRef? {
-        val author = users.findById(item.authorId) ?: return null
-        val replies = read<StoredForumComment>("forum-comments.json").count { it.threadId == item.id }
-        return ForumThreadRef(item.id, item.title, item.body, author, replies, 0, item.likedBy.size, viewerId in item.likedBy, viewerId in item.subscribedBy, false, false, item.mediaIds, item.createdAt, item.updatedAt)
-    }
-
-    private fun forumCommentToApi(item: StoredForumComment, viewerId: String?): ForumCommentRef? {
-        val author = users.findById(item.authorId) ?: return null
-        return ForumCommentRef(item.id, item.threadId, author, item.content, item.parentCommentId, item.likedBy.size, viewerId in item.likedBy, false, item.createdAt, item.updatedAt)
-    }
-
     private fun notificationToApi(item: StoredNotification): NotificationRef? {
         val actor = item.actorId?.let(users::findById)
-        return NotificationRef(item.id, item.type, actor, item.activityId, item.threadId, item.commentId, item.mediaId, item.message, item.read, item.createdAt)
+        return NotificationRef(item.id, item.type, actor, item.activityId, item.commentId, item.mediaId, item.message, item.read, item.createdAt)
     }
 
     private fun mutateActivity(id: String, transform: (StoredActivity) -> StoredActivity): StoredActivity? {
