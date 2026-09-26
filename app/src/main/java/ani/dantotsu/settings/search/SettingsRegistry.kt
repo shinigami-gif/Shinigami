@@ -352,17 +352,6 @@ object SettingsRegistry {
         )
         list.add(
             SearchableSetting(
-                title = context.getString(R.string.manga_add_repository),
-                desc = context.getString(R.string.manga_add_repository_desc),
-                icon = R.drawable.ic_github,
-                category = context.getString(R.string.extensions),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.extensions)}",
-                targetActivity = SettingsExtensionsActivity::class.java,
-                highlightKey = context.getString(R.string.manga_add_repository)
-            )
-        )
-        list.add(
-            SearchableSetting(
                 title = context.getString(R.string.proxy),
                 desc = context.getString(R.string.proxy_desc),
                 icon = R.drawable.swap_horizontal_circle_24,
