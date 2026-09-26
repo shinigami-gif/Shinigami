@@ -168,11 +168,6 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
             }
         }
 
-        binding.settingsExtensionSettings.setSafeOnClickListener {
-            startActivity(Intent(activity, ExtensionsActivity::class.java))
-            dismiss()
-        }
-
         binding.settingsSettings.setSafeOnClickListener {
             startActivity(Intent(activity, SettingsActivity::class.java))
             dismiss()
