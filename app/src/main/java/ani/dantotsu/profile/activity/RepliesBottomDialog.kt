@@ -149,6 +149,8 @@ class RepliesBottomDialog : BottomSheetDialogFragment() {
     }
 
     companion object {
+        fun newInstance(activityId: Int): RepliesBottomDialog = newInstance(activityId.toString())
+
         fun newInstance(activityId: String): RepliesBottomDialog {
             return RepliesBottomDialog().apply {
                 arguments = Bundle().apply {
