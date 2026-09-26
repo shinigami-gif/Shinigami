@@ -12,7 +12,6 @@ import ani.dantotsu.settings.SettingsAboutActivity
 import ani.dantotsu.settings.SettingsAccountActivity
 import ani.dantotsu.settings.SettingsAnimeActivity
 import ani.dantotsu.settings.SettingsCommonActivity
-import ani.dantotsu.settings.SettingsExtensionsActivity
 import ani.dantotsu.settings.SettingsNotificationActivity
 import ani.dantotsu.settings.SettingsThemeActivity
 import ani.dantotsu.settings.UserInterfaceSettingsActivity
@@ -338,41 +337,6 @@ object SettingsRegistry {
             )
         )
 
-        // 7. Extensions Settings
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.anime_add_repository),
-                desc = context.getString(R.string.anime_add_repository_desc),
-                icon = R.drawable.ic_github,
-                category = context.getString(R.string.extensions),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.extensions)}",
-                targetActivity = SettingsExtensionsActivity::class.java,
-                highlightKey = context.getString(R.string.anime_add_repository)
-            )
-        )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.proxy),
-                desc = context.getString(R.string.proxy_desc),
-                icon = R.drawable.swap_horizontal_circle_24,
-                category = context.getString(R.string.extensions),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.extensions)}",
-                targetActivity = SettingsExtensionsActivity::class.java,
-                highlightKey = context.getString(R.string.proxy)
-            )
-        )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.NSFWExtention),
-                desc = context.getString(R.string.NSFWExtention_desc),
-                icon = R.drawable.ic_round_nsfw_24,
-                category = context.getString(R.string.extensions),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.extensions)}",
-                targetActivity = SettingsExtensionsActivity::class.java,
-                highlightKey = context.getString(R.string.NSFWExtention)
-            )
-        )
-
         // 9. Notifications Settings
         list.add(
             SearchableSetting(
@@ -398,18 +362,6 @@ object SettingsRegistry {
         )
 
         // 10. Accounts & Anilist Settings
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.enable_rpc),
-                desc = context.getString(R.string.enable_rpc_desc),
-                icon = R.drawable.interests_24,
-                category = context.getString(R.string.accounts),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.accounts)}",
-                targetActivity = SettingsAccountActivity::class.java,
-                highlightKey = context.getString(R.string.enable_rpc),
-                isVisible = (Discord.token != null)
-            )
-        )
         list.add(
             SearchableSetting(
                 title = context.getString(R.string.anilist_settings),
