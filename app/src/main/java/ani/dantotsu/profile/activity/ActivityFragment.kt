@@ -141,7 +141,6 @@ class ActivityFragment : Fragment() {
             ActivityFilterType.ALL -> getString(R.string.nothing_here)
             ActivityFilterType.TEXT -> getString(R.string.no_text_activities)
             ActivityFilterType.ANIME_PROGRESS -> getString(R.string.no_anime_progress)
-            ActivityFilterType.MANGA_PROGRESS -> getString(R.string.no_manga_progress)
             ActivityFilterType.ALL_PROGRESS -> getString(R.string.no_all_progress)
             ActivityFilterType.MESSAGES -> getString(R.string.no_messages)
             ActivityFilterType.PINNED -> getString(R.string.no_pinned_activities)
@@ -206,8 +205,7 @@ class ActivityFragment : Fragment() {
         ActivityFilterType.ALL -> allActivities
         ActivityFilterType.TEXT -> allActivities.filter { it.type == "TEXT" }
         ActivityFilterType.ANIME_PROGRESS -> allActivities.filter { it.type == "ANIME_LIST" }
-        ActivityFilterType.MANGA_PROGRESS -> allActivities.filter { it.type == "MANGA_LIST" }
-        ActivityFilterType.ALL_PROGRESS -> allActivities.filter { it.type == "ANIME_LIST" || it.type == "MANGA_LIST" }
+        ActivityFilterType.ALL_PROGRESS -> allActivities.filter { it.type == "ANIME_LIST" }
         ActivityFilterType.MESSAGES -> allActivities.filter { it.type == "MESSAGE" }
         ActivityFilterType.PINNED -> emptyList()
         ActivityFilterType.SUBSCRIBED -> allActivities.filter { it.isSubscribed }
