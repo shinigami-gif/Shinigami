@@ -174,6 +174,17 @@ class FileSocialRepository(
         true
     }
 
+    override fun editComment(commentId: String, actorId: String, content: String): SocialComment? = synchronized(lock) {
+        val normalized = content.trim()
+        require(normalized.isNotBlank()) { "content is required" }
+        val items = read<StoredComment>("comments.json")
+        val item = items.firstOrNull { it.id == commentId && !it.deleted } ?: return null
+        if (item.authorId != actorId) return null
+        val updated = item.copy(content = normalized, updatedAt = Instant.now().toString())
+        write("comments.json", items.map { if (it.id == commentId) updated else it })
+        commentToApi(updated, actorId)
+    }
+
     override fun voteComment(commentId: String, userId: String, vote: Int?): SocialComment? = synchronized(lock) {
         val items = read<StoredComment>("comments.json")
         val item = items.firstOrNull { it.id == commentId } ?: return null
