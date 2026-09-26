@@ -41,7 +41,6 @@ import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.toast
 import ani.dantotsu.util.Logger
-import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory
 import io.github.peerless2012.ass.media.kt.withAssSupport
 import okhttp3.OkHttpClient
 import java.io.ByteArrayInputStream
@@ -348,20 +347,9 @@ class DantotsuPlayerManager(
             DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF
         }
 
-        val nextRenderersFactory = NextRenderersFactory(activity)
+        val renderersFactory = DefaultRenderersFactory(activity)
             .setEnableDecoderFallback(true)
             .setExtensionRendererMode(decoder)
-
-        subtitleManager.initAssHandler()
-        val handler = subtitleManager.assHandler!!
-        Logger.log("Libass: Calling nextRenderersFactory.withAssSupport()")
-        val renderersFactory = if (forceDefaultRenderers) {
-            DefaultRenderersFactory(activity)
-                .setEnableDecoderFallback(true)
-                .withAssSupport(handler)
-        } else {
-            nextRenderersFactory.withAssSupport(handler)
-        }
 
         val mediaSourceFactory = activeMediaSourceFactory ?: DefaultMediaSourceFactory(activity)
             .setSubtitleParserFactory(subtitleManager.createSubtitleParserFactory())
