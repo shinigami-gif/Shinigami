@@ -46,7 +46,7 @@ class ShinigamiBackendClient(
             )
         }
 
-    suspend fun updateProfile(token: String, username: String, bio: String?): ShinigamiSession =
+    suspend fun updateProfile(token: String, username: String, bio: String?): ShinigamiUser =
         withContext(Dispatchers.IO) {
             val payload = gson.toJson(mapOf("username" to username, "bio" to bio))
             execute(
@@ -146,7 +146,7 @@ class ShinigamiBackendClient(
         }
     }
 
-    private fun executeUser(request: Request): ShinigamiUser {
+    private fun executeUserProfile(request: Request): ShinigamiUserProfile {\n        val response = http.newCall(request).execute()\n        response.use {\n            val body = it.body?.string().orEmpty()\n            if (!it.isSuccessful) throw IllegalStateException("Backend profile request failed: HTTP " + it.code)\n            return gson.fromJson(body, ShinigamiUserProfile::class.java)\n                ?: throw IllegalStateException("Backend returned an empty profile")\n        }\n    }\n\n    private fun executeUser(request: Request): ShinigamiUser {
         val response = http.newCall(request).execute()
         response.use {
             val body = it.body?.string().orEmpty()
