@@ -13,6 +13,9 @@ import ani.dantotsu.MainActivity
 import ani.dantotsu.R
 import ani.dantotsu.Refresh
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.BottomSheetSettingsBinding
 import ani.dantotsu.download.anime.OfflineAnimeFragment
@@ -37,6 +40,9 @@ import ani.dantotsu.startMainActivity
 import ani.dantotsu.openLinkInCustomTab
 import ani.dantotsu.util.customAlertDialog
 import eu.kanade.tachiyomi.util.system.getSerializableCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsDialogFragment : BottomSheetDialogFragment() {
     private var _binding: BottomSheetSettingsBinding? = null
@@ -64,42 +70,67 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
         window?.navigationBarColor =
             requireContext().getThemeColor(com.google.android.material.R.attr.colorSurface)
         val isRescueModeEarly: Boolean = PrefManager.getVal(PrefName.RescueMode)
-        val notificationIcon = if (!isRescueModeEarly && Anilist.unreadNotificationCount > 0) {
-            R.drawable.ic_round_notifications_active_24
-        } else {
-            R.drawable.ic_round_notifications_none_24
-        }
+        val sessionStore = ShinigamiSessionStore(requireContext())
+        val sessionToken = sessionStore.getToken()
+        val notificationIcon = R.drawable.ic_round_notifications_none_24
         binding.settingsNotification.setImageResource(notificationIcon)
         if (isRescueModeEarly) binding.settingsNotification.visibility = View.GONE
 
-        if (Anilist.token != null) {
+        if (!sessionToken.isNullOrBlank()) {
             binding.settingsLogin.setText(R.string.logout)
             binding.settingsLogin.setOnClickListener {
                 requireContext().customAlertDialog().apply {
                     setTitle(R.string.logout)
                     setMessage(R.string.logout_confirm)
                     setPosButton(R.string.yes) {
-                        Anilist.removeSavedToken()
-                        startMainActivity(requireActivity())
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            runCatching { ShinigamiBackendClient().logout(sessionToken) }
+                            sessionStore.clear()
+                            withContext(Dispatchers.Main) { startMainActivity(requireActivity()) }
+                        }
                     }
                     setNegButton(R.string.no)
                     show()
                 }
             }
             val isRescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-            binding.settingsUsername.text = if (isRescueMode) MAL.username ?: "MAL User" else Anilist.username
-            binding.settingsUserAvatar.loadImage(if (isRescueMode) MAL.avatar else Anilist.avatar)
+            if (isRescueMode) {
+                binding.settingsUsername.text = MAL.username ?: "MAL User"
+                binding.settingsUserAvatar.loadImage(MAL.avatar)
+            } else {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val profile = runCatching { ShinigamiBackendClient().getMe(sessionToken) }.getOrNull()
+                    withContext(Dispatchers.Main) {
+                        binding.settingsUsername.text = profile?.user?.username ?: "Shinigami"
+                        binding.settingsUserAvatar.loadImage(profile?.user?.avatarUrl)
+                    }
+                }
+            }
         } else {
             binding.settingsUsername.visibility = View.GONE
             binding.settingsLogin.setText(R.string.login)
             binding.settingsLogin.setOnClickListener {
                 dismiss()
-                Anilist.loginIntent(requireActivity())
+                dismiss()
             }
         }
         val isRescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-        binding.settingsNotificationCount.isVisible = !isRescueMode && Anilist.unreadNotificationCount > 0
-        binding.settingsNotificationCount.text = Anilist.unreadNotificationCount.toString()
+        if (!isRescueMode && !sessionToken.isNullOrBlank()) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val count = runCatching { ShinigamiNotificationClient().unreadCount(sessionToken) }.getOrDefault(0)
+                withContext(Dispatchers.Main) {
+                    binding.settingsNotificationCount.isVisible = count > 0
+                    binding.settingsNotificationCount.text = count.toString()
+                    binding.settingsNotification.setImageResource(
+                        if (count > 0) R.drawable.ic_round_notifications_active_24
+                        else R.drawable.ic_round_notifications_none_24
+                    )
+                }
+            }
+        } else {
+            binding.settingsNotificationCount.isVisible = false
+            binding.settingsNotificationCount.text = "0"
+        }
         if (isRescueMode) {
             binding.settingsActivity.visibility = View.GONE
         }
@@ -115,7 +146,7 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
             }
             ContextCompat.startActivity(
                 requireContext(), Intent(requireContext(), ProfileActivity::class.java)
-                    .putExtra("userId", Anilist.userid), null
+                    .putExtra("userId", sessionStore.getUserId()), null
             )
         }
 
@@ -215,7 +246,7 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
                             val intent = Intent(currentActivity, MainActivity::class.java)
                             intent.putExtra(
                                 "FRAGMENT_CLASS_NAME",
-                                if (Anilist.token != null) HomeFragment::class.java.name else LoginFragment::class.java.name
+                                if (!ShinigamiSessionStore(currentActivity).getToken().isNullOrBlank()) HomeFragment::class.java.name else LoginFragment::class.java.name
                             )
                             startActivity(intent)
                         }
