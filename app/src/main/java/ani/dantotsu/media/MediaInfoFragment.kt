@@ -42,7 +42,6 @@ import ani.dantotsu.isOnline
 import ani.dantotsu.loadImage
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.setBaseline
-import ani.dantotsu.profile.User
 import ani.dantotsu.px
 import ani.dantotsu.setSafeOnClickListener
 import ani.dantotsu.settings.saving.PrefManager
@@ -385,43 +384,6 @@ class MediaInfoFragment : Fragment() {
                         bind.itemChipGroup.addView(chip)
                     }
                     parent.addView(bind.root)
-                }
-                if (!media.users.isNullOrEmpty() && !offline) {
-                    val users: ArrayList<User> = media.users ?: arrayListOf()
-                    val currentUserId = Anilist.userid
-                    if (Anilist.token != null && currentUserId != null && media.userStatus != null) {
-                        users.add(
-                            0,
-                            User(
-                                id = currentUserId,
-                                name = getString(R.string.you),
-                                pfp = Anilist.avatar,
-                                banner = "",
-                                status = media.userStatus,
-                                score = media.userScore.toFloat(),
-                                progress = media.userProgress,
-                                totalEpisodes = media.anime?.totalEpisodes
-                                    ?: media.manga?.totalChapters,
-                                nextAiringEpisode = media.anime?.nextAiringEpisode
-                            )
-                        )
-                    }
-                    ItemTitleRecyclerBinding.inflate(
-                        LayoutInflater.from(context),
-                        parent,
-                        false
-                    ).apply {
-                        itemTitle.visibility = View.GONE
-                        itemRecycler.adapter =
-                            MediaSocialAdapter(users, type, requireActivity())
-                        itemRecycler.layoutManager = LinearLayoutManager(
-                            requireContext(),
-                            LinearLayoutManager.HORIZONTAL,
-                            false
-                        )
-                        root.tag = "dynamic_view"
-                        parent.addView(root)
-                    }
                 }
                 if (media.trailer != null && !offline) {
                     @Suppress("DEPRECATION")
