@@ -482,55 +482,6 @@ class AnilistQueries {
         return media
     }
 
-    fun userMediaDetails(media: Media): Media {
-        val query =
-            """{Media(id:${media.id}){id mediaListEntry{id status progress progressVolumes private repeat customLists updatedAt startedAt{year month day}completedAt{year month day}}isFavourite idMal}}"""
-        runBlocking {
-            val anilist = async {
-                var response = executeQuery<Query.Media>(query, force = true, show = true)
-                if (response != null) {
-                    fun parse() {
-                        val fetchedMedia = response?.data?.media ?: return
-                        media.isFav = fetchedMedia.isFavourite ?: false
-
-                        if (fetchedMedia.mediaListEntry != null) {
-                            fetchedMedia.mediaListEntry?.apply {
-                                media.userProgress = progress
-                                media.userProgressVolumes = progressVolumes
-                                media.isListPrivate = private ?: false
-                                media.userListId = id
-                                media.userStatus = status?.toString()
-                                media.inCustomListsOf = customLists?.toMutableMap()
-                                media.userRepeat = repeat ?: 0
-                                media.userUpdatedAt = updatedAt?.toString()?.toLong()?.times(1000)
-                                media.userCompletedAt = completedAt ?: FuzzyDate()
-                                media.userStartedAt = startedAt ?: FuzzyDate()
-                            }
-                        } else {
-                            media.isListPrivate = false
-                            media.userStatus = null
-                            media.userListId = null
-                            media.userProgress = null
-                            media.userProgressVolumes = null
-                            media.userRepeat = 0
-                            media.userUpdatedAt = null
-                            media.userCompletedAt = FuzzyDate()
-                            media.userStartedAt = FuzzyDate()
-                        }
-                    }
-
-                    if (response.data?.media != null) parse()
-                    else {
-                        response = executeQuery(query, force = true, useToken = false)
-                        if (response?.data?.media != null) parse()
-                    }
-                }
-            }
-            awaitAll(anilist)
-        }
-        return media
-    }
-
     private suspend fun favMedia(anime: Boolean, id: Int? = Anilist.userid): ArrayList<Media> {
         var hasNextPage = true
         var page = 0
@@ -626,24 +577,6 @@ class AnilistQueries {
             if (media.mediaListEntry == null) Media(media) else null
         } ?: emptyList()
         return ArrayList(mediaList)
-    }
-
-    private fun loadUserStatusCache(): ArrayList<User>? {
-        val cached = PrefManager.getNullableCustomVal(
-            "user_status_cache",
-            null,
-            UserStatusCache::class.java
-        ) ?: return null
-        val cacheExpired = System.currentTimeMillis() - cached.cachedAt > 15 * 60 * 1000L
-        if (cacheExpired) return null
-        return ArrayList(cached.users)
-    }
-
-    private fun saveUserStatusCache(users: ArrayList<User>) {
-        PrefManager.setCustomVal(
-            "user_status_cache",
-            UserStatusCache(users, System.currentTimeMillis())
-        )
     }
 
     private fun continueMediaQuery(type: String, status: String): String {
@@ -1682,41 +1615,8 @@ Page(page:$page,perPage:50) {
         )
     }
 
-    suspend fun getUserProfile(username: String): Query.UserProfileResponse? {
-        val id = getUserId(username) ?: return null
-        return getUserProfile(id)
-    }
-
     private fun userFavMediaQuery(anime: Boolean, id: Int): String {
         return """User(id:${id}){id favourites{${if (anime) "anime" else "manga"}(page:1){$standardPageInformation edges{favouriteOrder node{id idMal isAdult mediaListEntry{ progress private score(format:POINT_100) status } chapters isFavourite format episodes nextAiringEpisode{episode}meanScore isFavourite format startDate{year month day} title{english romaji userPreferred}type status(version:2)bannerImage coverImage{large}}}}}}"""
-    }
-
-    suspend fun initProfilePage(id: Int): Query.ProfilePageMedia? {
-        return executeQuery<Query.ProfilePageMedia>(
-            """{
-            favoriteAnime:${userFavMediaQuery(true, id)}
-            favoriteManga:${userFavMediaQuery(false, id)}
-            }""".prepare(), force = true
-        )
-    }
-
-
-    suspend fun getUpcomingAnime(id: String): List<Media> {
-        val res = executeQuery<Query.MediaListCollection>(
-            """{MediaListCollection(userId:$id,type:ANIME){lists{name entries{media{id,type, isFavourite,title{userPreferred,romaji}coverImage{medium}nextAiringEpisode{episode,timeUntilAiring}}}}}}""",
-            force = true
-        )
-        val list = mutableListOf<Media>()
-        res?.data?.mediaListCollection?.lists?.forEach { listEntry ->
-            listEntry.entries?.forEach { entry ->
-                entry.media?.nextAiringEpisode?.timeUntilAiring?.let {
-                    list.add(Media(entry.media!!))
-                }
-            }
-        }
-        return list.sortedBy { it.timeUntilAiring }
-            .distinctBy { it.id }
-            .filter { it.timeUntilAiring != null }
     }
 
     suspend fun getMediaCharacters(mediaId: Int, page: Int = 1): Query.Media? {
