@@ -178,6 +178,7 @@ class MediaAdaptor(
                                 " | ${if (media.anime.nextAiringEpisode != null) (media.anime.nextAiringEpisode.toString() + " | " + (media.anime.totalEpisodes ?: "~").toString()) else (media.anime.totalEpisodes ?: "~").toString()}"
                         
                     }
+                        }
                     b.itemCompactProgressContainer.visibility = if (fav) View.GONE else View.VISIBLE
                 }
             }
@@ -210,6 +211,7 @@ class MediaAdaptor(
                             if (media.anime.nextAiringEpisode != null) (media.anime.nextAiringEpisode.toString() + " / " + (media.anime.totalEpisodes
                                 ?: "??").toString()) else (media.anime.totalEpisodes
                                 ?: "??").toString()
+                        }
                     
                     if (position == mediaList.size - 2 && viewPager != null) viewPager.post {
                         val start = mediaList.size
@@ -278,6 +280,7 @@ class MediaAdaptor(
                                 ?: "??").toString()
                     
                     @SuppressLint("NotifyDataSetChanged")
+                        }
                     if (position == mediaList.size - 2 && viewPager != null) viewPager.post {
                         val size = mediaList.size
                         mediaList.addAll(mediaList)
@@ -339,6 +342,7 @@ class MediaAdaptor(
                                 ?: "??").toString()
                     
                     @SuppressLint("NotifyDataSetChanged")
+                        }
                     if (position == mediaList.size - 2 && viewPager != null) viewPager.post {
                         val size = mediaList.size
                         mediaList.addAll(mediaList)
