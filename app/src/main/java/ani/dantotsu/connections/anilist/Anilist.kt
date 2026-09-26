@@ -305,9 +305,7 @@ object Anilist {
         PrefManager.setVal(PrefName.UnreadSubscriptionNotifications, 0)
         PrefManager.setVal(PrefName.UnreadCommentNotifications, 0)
         Anilist.unreadNotificationCount = 0
-        Anilist.query.invalidateHomePageCache()
-        Anilist.query.invalidateUserStatusCache()
-        //logout from comments api
+                //logout from comments api
         CommentsAPI.logout()
 
     }
