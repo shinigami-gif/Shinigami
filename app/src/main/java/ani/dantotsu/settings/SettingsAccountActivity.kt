@@ -101,23 +101,7 @@ class SettingsAccountActivity : AppCompatActivity() {
             val highlightKey =
                 intent.getStringExtra(ani.dantotsu.settings.search.SettingsSearchAdapter.EXTRA_HIGHLIGHT_KEY)
 
-            settingsRecyclerView.adapter = SettingsAdapter(
-                arrayListOf(
-                    Settings(
-                        type = 2,
-                        name = getString(R.string.comments_button),
-                        desc = getString(R.string.comments_button_desc),
-                        icon = R.drawable.ic_round_comment_24,
-                        isChecked = PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1,
-                        switch = { isChecked, _ ->
-                            PrefManager.setVal(PrefName.CommentsEnabled, if (isChecked) 1 else 2)
-                            reload()
-                        },
-                        isVisible = ShinigamiSessionStore(context).getToken() != null
-                    )
-                ),
-                highlightKey = highlightKey
-            )
+            settingsRecyclerView.adapter = SettingsAdapter(emptyList(), highlightKey = highlightKey)
 
             settingsRecyclerView.layoutManager =
                 LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
