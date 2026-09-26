@@ -11,7 +11,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.BottomSheetDialogFragment
-import ani.dantotsu.connections.anilist.api.ActivityReply
+import ani.dantotsu.connections.shinigami.ShinigamiActivityReply
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.BottomSheetRecyclerBinding
 import ani.dantotsu.profile.ProfileActivity
 import ani.dantotsu.snackString
@@ -25,8 +27,8 @@ class RepliesBottomDialog : BottomSheetDialogFragment() {
     private var _binding: BottomSheetRecyclerBinding? = null
     private val binding get() = _binding!!
     private val adapter: GroupieAdapter = GroupieAdapter()
-    private val replies: MutableList<ActivityReply> = mutableListOf()
-    private var activityId: Int = -1
+    private val replies: MutableList<ShinigamiActivityReply> = mutableListOf()
+    private var activityId: String = ""
     private var didNotifyClose = false
     var onDialogClosed: (() -> Unit)? = null
 
@@ -56,21 +58,22 @@ class RepliesBottomDialog : BottomSheetDialogFragment() {
                 null
             )
         }
-        activityId = requireArguments().getInt("activityId")
+        activityId = requireArguments().getString("activityId").orEmpty()
         var isSubscribed = false
-        binding.subscribeButton.isVisible = Anilist.token != null
+        binding.subscribeButton.isVisible = !ShinigamiSessionStore(context).getToken().isNullOrBlank()
         binding.subscribeButton.setOnClickListener {
-            val newSub = !isSubscribed
             lifecycleScope.launch(Dispatchers.IO) {
-                val success = Anilist.mutation.toggleActivitySubscription(activityId, newSub)
-                withContext(Dispatchers.Main) {
-                    if (success) {
-                        isSubscribed = newSub
+                try {
+                    val token = ShinigamiSessionStore(context).getToken()
+                    if (token.isNullOrBlank()) return@launch
+                    val updated = ShinigamiSocialClient().subscribeActivity(token, activityId)
+                    withContext(Dispatchers.Main) {
+                        isSubscribed = updated.isSubscribed
                         binding.subscribeButton.alpha = if (isSubscribed) 1.0f else 0.5f
                         snackString(if (isSubscribed) "Subscribed to activity" else "Unsubscribed from activity")
-                    } else {
-                        snackString("Failed to update subscription")
                     }
+                } catch (_: Exception) {
+                    withContext(Dispatchers.Main) { snackString("Failed to update subscription") }
                 }
             }
         }
@@ -81,22 +84,25 @@ class RepliesBottomDialog : BottomSheetDialogFragment() {
     }
 
     private suspend fun loadData() {
-        val response = Anilist.query.getReplies(activityId)
-        withContext(Dispatchers.Main) {
-            loading(false)
-            if (response != null) {
+        try {
+            val token = ShinigamiSessionStore(requireContext()).getToken()
+                ?: throw IllegalStateException("Login required")
+            val response = ShinigamiSocialClient().replies(token, activityId)
+            withContext(Dispatchers.Main) {
+                loading(false)
                 replies.clear()
-                replies.addAll(response.data.page.activityReplies)
+                replies.addAll(response.items)
                 adapter.update(
                     replies.map {
                         ActivityReplyItem(
                             it, activityId, requireActivity(), adapter,
-                        ) { i, _ ->
-                            onClick(i)
-                        }
+                        ) { i, _ -> onClick(i) }
                     }
                 )
-            } else {
+            }
+        } catch (_: Exception) {
+            withContext(Dispatchers.Main) {
+                loading(false)
                 snackString("Failed to load replies")
             }
         }
@@ -143,10 +149,10 @@ class RepliesBottomDialog : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(activityId: Int): RepliesBottomDialog {
+        fun newInstance(activityId: String): RepliesBottomDialog {
             return RepliesBottomDialog().apply {
                 arguments = Bundle().apply {
-                    putInt("activityId", activityId)
+                    putString("activityId", activityId)
                 }
             }
         }
