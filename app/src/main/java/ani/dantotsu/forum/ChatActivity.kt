@@ -34,6 +34,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var sendButton: com.google.android.material.button.MaterialButton
     private val adapter = MessageAdapter()
     private var mediaId: Long? = null
+    private var directUserId: String? = null
     private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +46,7 @@ class ChatActivity : AppCompatActivity() {
 
         val title = intent.getStringExtra("chat_title") ?: "Global Chat"
         mediaId = intent.getLongExtra("mediaId", -1L).takeIf { it > 0L }
+        directUserId = intent.getStringExtra("message_user_id")
         binding.forumTitle.text = title
         binding.forumSearch.visibility = View.GONE
         binding.forumCategoryChips.parent?.let { (it as? View)?.visibility = View.GONE }
@@ -100,11 +102,12 @@ class ChatActivity : AppCompatActivity() {
             try {
                 val token = ShinigamiSessionStore(this@ChatActivity).getToken()
                     ?: throw IllegalStateException("Not signed in")
-                val page = if (mediaId == null) {
-                    ShinigamiChatClient().global(token, 1, 100)
-                } else {
-                    ShinigamiChatClient().anime(token, mediaId!!, 1, 100)
+                val page = when {
+                    directUserId != null -> ShinigamiChatClient().messages(token, directUserId!!, 1, 100)
+                    mediaId == null -> ShinigamiChatClient().global(token, 1, 100)
+                    else -> ShinigamiChatClient().anime(token, mediaId!!, 1, 100)
                 }
+                if (directUserId != null) ShinigamiChatClient().markRead(token, directUserId!!)
                 withContext(Dispatchers.Main) {
                     adapter.submit(page.items)
                     binding.forumEmptyText.visibility = if (page.items.isEmpty()) View.VISIBLE else View.GONE
@@ -134,10 +137,10 @@ class ChatActivity : AppCompatActivity() {
             try {
                 val token = ShinigamiSessionStore(this@ChatActivity).getToken()
                     ?: throw IllegalStateException("Not signed in")
-                if (mediaId == null) {
-                    ShinigamiChatClient().sendGlobal(token, content)
-                } else {
-                    ShinigamiChatClient().sendAnime(token, mediaId!!, content)
+                when {
+                    directUserId != null -> ShinigamiChatClient().sendMessage(token, directUserId!!, content)
+                    mediaId == null -> ShinigamiChatClient().sendGlobal(token, content)
+                    else -> ShinigamiChatClient().sendAnime(token, mediaId!!, content)
                 }
                 withContext(Dispatchers.Main) {
                     messageInput.text?.clear()
