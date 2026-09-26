@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.BottomSheetDialogFragment
 import ani.dantotsu.R
 import ani.dantotsu.databinding.BottomSheetRecyclerBinding
+import ani.dantotsu.databinding.ItemSubscriptionBinding
+import ani.dantotsu.loadImage
 import ani.dantotsu.notifications.subscription.SubscriptionHelper
 import com.xwray.groupie.GroupieAdapter
+import com.xwray.groupie.viewbinding.BindableItem
 import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -66,14 +69,10 @@ class SubscriptionsBottomDialog : BottomSheetDialogFragment() {
         }
 
         visibleSubscriptions.forEach { (parserName, mediaList) ->
-            adapter.add(SubscriptionSource(
-                parserName,
-                mediaList,
-                adapter,
-                getParserIcon(parserName)
-            ) { group ->
-                adapter.remove(group)
-                groupedSubscriptions.remove(parserName)
+            adapter.add(SubscriptionSource(mediaList) { media ->
+                SubscriptionHelper.deleteSubscription(media.id)
+                groupedSubscriptions[parserName]?.remove(media)
+                updateAdapter()
             })
         }
     }
@@ -114,4 +113,21 @@ class SubscriptionsBottomDialog : BottomSheetDialogFragment() {
             return dialog
         }
     }
+}
+
+private class SubscriptionSource(
+    private val mediaList: List<SubscriptionHelper.Companion.SubscribeMedia>,
+    private val onDelete: (SubscriptionHelper.Companion.SubscribeMedia) -> Unit
+) : BindableItem<ItemSubscriptionBinding>() {
+    override fun bind(viewBinding: ItemSubscriptionBinding, position: Int) {
+        val media = mediaList[position]
+        viewBinding.subscriptionName.text = media.name
+        media.image?.let(viewBinding.subscriptionCover::loadImage)
+        viewBinding.deleteSubscription.setOnClickListener { onDelete(media) }
+    }
+
+    override fun getLayout(): Int = R.layout.item_subscription
+
+    override fun initializeViewBinding(view: View): ItemSubscriptionBinding =
+        ItemSubscriptionBinding.bind(view)
 }
