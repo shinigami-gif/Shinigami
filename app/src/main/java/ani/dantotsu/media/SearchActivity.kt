@@ -13,7 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import ani.dantotsu.connections.anilist.AniMangaSearchResults
+import ani.dantotsu.connections.anilist.AnimeSearchResults
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.anilist.AnilistSearch
 import ani.dantotsu.connections.anilist.AnilistSearch.SearchType
@@ -58,7 +58,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var concatAdapter: ConcatAdapter
     private lateinit var headerAdaptor: HeaderInterface
 
-    lateinit var aniMangaResult: AniMangaSearchResults
+    lateinit var animeSearchResult: AnimeSearchResults
     lateinit var characterResult: CharacterSearchResults
     lateinit var studioResult: StudioSearchResults
     lateinit var staffResult: StaffSearchResults
@@ -93,7 +93,7 @@ class SearchActivity : AppCompatActivity() {
 
                 if (model.notSet) {
                     model.notSet = false
-                    model.aniMangaSearchResults = AniMangaSearchResults(
+                    model.animeSearchResults = AnimeSearchResults(
                         intent.getStringExtra("type") ?: "ANIME",
                         isAdult = if (Anilist.adult) intent.getBooleanExtra(
                             "hentai",
@@ -117,11 +117,11 @@ class SearchActivity : AppCompatActivity() {
                     )
                 }
 
-                aniMangaResult = model.aniMangaSearchResults
+                animeSearchResult = model.animeSearchResults
                 mediaAdaptor =
                     MediaAdaptor(
                         style,
-                        model.aniMangaSearchResults.results,
+                        model.animeSearchResults.results,
                         this,
                         matchParent = true
                     )
@@ -249,9 +249,9 @@ class SearchActivity : AppCompatActivity() {
 
         when (searchType) {
             SearchType.ANIME -> {
-                model.getSearch<AniMangaSearchResults>(searchType).observe(this) {
+                model.getSearch<AnimeSearchResults>(searchType).observe(this) {
                     if (it != null) {
-                        model.aniMangaSearchResults.apply {
+                        model.animeSearchResults.apply {
                             onList = it.onList
                             isAdult = it.isAdult
                             perPage = it.perPage
@@ -272,9 +272,9 @@ class SearchActivity : AppCompatActivity() {
                             hasNextPage = it.hasNextPage
                         }
 
-                        val prev = model.aniMangaSearchResults.results.size
-                        val newResults = it.results.distinctBy { it.id }.filter { newItem -> model.aniMangaSearchResults.results.none { oldItem -> oldItem.id == newItem.id } }
-                        model.aniMangaSearchResults.results.addAll(newResults)
+                        val prev = model.animeSearchResults.results.size
+                        val newResults = it.results.distinctBy { it.id }.filter { newItem -> model.animeSearchResults.results.none { oldItem -> oldItem.id == newItem.id } }
+                        model.animeSearchResults.results.addAll(newResults)
                         mediaAdaptor.notifyItemRangeInserted(prev, newResults.size)
 
                         progressAdapter.bar?.isVisible = it.hasNextPage
@@ -350,8 +350,8 @@ class SearchActivity : AppCompatActivity() {
         loading = false
         when (searchType) {
             SearchType.ANIME -> {
-                mediaAdaptor.notifyItemRangeRemoved(0, model.aniMangaSearchResults.results.size)
-                model.aniMangaSearchResults.results.clear()
+                mediaAdaptor.notifyItemRangeRemoved(0, model.animeSearchResults.results.size)
+                model.animeSearchResults.results.clear()
             }
 
             SearchType.CHARACTER -> {
