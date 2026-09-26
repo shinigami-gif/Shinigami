@@ -248,25 +248,7 @@
             android:label="@string/video"
             android:launchMode="singleTask"
             android:supportsPictureInPicture="true"
-            tools:targetApi="n" />
-        <activity
-            android:name=".connections.anilist.Login"
-            android:configChanges="orientation|screenSize|layoutDirection"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:launchMode="singleTask">
-            <intent-filter android:label="Anilist Login for Dantotsu">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="anilist"
-                    android:scheme="dantotsu" />
-            </intent-filter>
-        </activity>
-        <activity
+            tools:targetApi="n" />        <activity
             android:name=".connections.mal.Login"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:excludeFromRecents="true"
