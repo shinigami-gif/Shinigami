@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import ani.dantotsu.loadImage
 import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.ActivityAccountBinding
