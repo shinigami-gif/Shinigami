@@ -12,8 +12,6 @@ enum class PrefName(val data: Pref) {
     //General
     SharedUserID(Pref(Location.General, Boolean::class, true)),
     OfflineView(Pref(Location.General, Int::class, 0)),
-    DownloadManager(Pref(Location.General, Int::class, 0)),
-    MaxParallelDownloads(Pref(Location.General, Int::class, 0)),
     NSFWExtension(Pref(Location.General, Boolean::class, true)),
     ContinueMedia(Pref(Location.General, Boolean::class, true)),
     SearchSources(Pref(Location.General, Boolean::class, false)),
@@ -58,7 +56,6 @@ enum class PrefName(val data: Pref) {
     EnableSocks5Proxy(Pref(Location.General, Boolean::class, false)),
     ProxyAuthEnabled(Pref(Location.General, Boolean::class, false)),
     AniMangaSearchDirect(Pref(Location.General, Boolean::class, true)),
-    DownloadWifiOnly(Pref(Location.General, Boolean::class, false)),
     AutoSelectResolutionPriority(Pref(Location.General, Boolean::class, true)),
     PreferredDownloadResolutions(
         Pref(
@@ -67,8 +64,6 @@ enum class PrefName(val data: Pref) {
             listOf("1080p", "720p", "480p", "360p", "240p", "144p")
         )
     ),
-    SmartDownloadAnime(Pref(Location.General, Boolean::class, false)),
-    SmartDownloadManga(Pref(Location.General, Boolean::class, false)),
     AutoBackupInterval(Pref(Location.General, Int::class, 0)),
     AutoBackupMaxCopies(Pref(Location.General, Int::class, 3)),
     LastAutoBackupTimestamp(Pref(Location.General, Long::class, 0L)),
@@ -167,7 +162,6 @@ enum class PrefName(val data: Pref) {
     UseInternalCast(Pref(Location.Player, Boolean::class, false)),
     Pip(Pref(Location.Player, Boolean::class, true)),
     RotationPlayer(Pref(Location.Player, Boolean::class, true)),
-    TorrentEnabled(Pref(Location.Player, Boolean::class, false)),
     UseAdditionalCodec(Pref(Location.Player, Boolean::class, false)),
     AutoSelectServer(Pref(Location.Player, Boolean::class, false)),
 
@@ -242,7 +236,6 @@ enum class PrefName(val data: Pref) {
     DiscordRPCShowIconManga(Pref(Location.Irrelevant, Boolean::class, true)),
     DiscordRPCDisableAdultMedia(Pref(Location.Irrelevant, Boolean::class, false)),
     DiscordShowButtons(Pref(Location.Irrelevant, Boolean::class, true)),
-    DownloadsKeys(Pref(Location.Irrelevant, String::class, "")),
     NovelLastExtCheck(Pref(Location.Irrelevant, Long::class, 0L)),
     ImageUrl(Pref(Location.Irrelevant, String::class, "")),
     AllowOpeningLinks(Pref(Location.Irrelevant, Boolean::class, false)),
@@ -268,7 +261,6 @@ enum class PrefName(val data: Pref) {
             listOf<SubscriptionStore>()
         )
     ),
-    DownloadsDir(Pref(Location.Irrelevant, String::class, "")),
     LocalDir(Pref(Location.Irrelevant, String::class, "")),
     OC(Pref(Location.Irrelevant, Boolean::class, false)),
     RefreshStatus(Pref(Location.Irrelevant, Boolean::class, false)),
@@ -289,12 +281,4 @@ enum class PrefName(val data: Pref) {
     Socks5ProxyPassword(Pref(Location.Protected, String::class, "")),
 
     // Torrent Settings
-    TorrentEncryption(Pref(Location.Player, Boolean::class, false)),
-    TorrentWifiOnly(Pref(Location.Player, Boolean::class, false)),
-    TorrentDownloadSpeedLimit(Pref(Location.Player, Int::class, 0)),
-    TorrentUploadSpeedLimit(Pref(Location.Player, Int::class, 0)),
-    TorrentMaxConnections(Pref(Location.Player, Int::class, 108)),
-    TorrentBatterySaving(Pref(Location.Player, Boolean::class, false)),
-    TorrentPort(Pref(Location.Player, Int::class, 0)),
-    TorrentDisableUtp(Pref(Location.Player, Boolean::class, false)),
 }
