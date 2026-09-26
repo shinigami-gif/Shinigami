@@ -23,13 +23,14 @@ class AdminService(
     fun dashboard(actorId: String): AdminDashboard {
         val actor = users.findById(actorId) ?: error("user not found")
         access.require(actor, AdminPermission.VIEW_DASHBOARD)
+        val total = users.count()
         val all = users.search("", 1, 100)
         val states = all.map { moderation.state(it.id) }
         return AdminDashboard(
-            totalUsers = all.size.toLong(),
-            activeUsers = states.count { it.status == ModerationStatus.ACTIVE }.toLong(),
-            suspendedUsers = states.count { it.status == ModerationStatus.SUSPENDED }.toLong(),
-            bannedUsers = states.count { it.status == ModerationStatus.BANNED }.toLong(),
+            totalUsers = total,
+            activeUsers = (total - moderationCount(ModerationStatus.SUSPENDED) - moderationCount(ModerationStatus.BANNED)).coerceAtLeast(0),
+            suspendedUsers = moderationCount(ModerationStatus.SUSPENDED),
+            bannedUsers = moderationCount(ModerationStatus.BANNED),
             pendingReports = reports.count(ReportStatus.PENDING),
             recentActions = audit.recent(20)
         )
@@ -119,16 +120,14 @@ class AdminService(
         return audit.recent(limit)
     }
 
-    private fun view(user: streamix.api.ShinigamiUser): AdminUserView {
+    private fun moderationCount(status: ModerationStatus): Long =\n        users.allIds().count { moderation.state(it).status == status }.toLong()\n\n    private fun view(user: streamix.api.ShinigamiUser): AdminUserView {
         val state = moderation.state(user.id)
         return AdminUserView(
             user = user,
             role = access.role(user),
             status = state.status,
             warningCount = state.warningCount,
-            reportCount = reports.list(1, 100).count {
-                it.targetUserId == user.id
-            }
+            reportCount = reports.countForUser(user.id).toInt()
         )
     }
 
