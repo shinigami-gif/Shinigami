@@ -1,6 +1,7 @@
 package streamix.auth
 
 import streamix.api.ShinigamiUser
+import streamix.api.UserRelationship
 
 /**
  * Durable user/account boundary.
@@ -21,4 +22,6 @@ interface UserRepository {
         email: String? = null
     ): ShinigamiUser
     fun update(user: ShinigamiUser): ShinigamiUser
+    fun setRelationship(userId: String, targetUserId: String, following: Boolean? = null, blocked: Boolean? = null): ShinigamiUser
+    fun relationship(userId: String, targetUserId: String): UserRelationship
 }
