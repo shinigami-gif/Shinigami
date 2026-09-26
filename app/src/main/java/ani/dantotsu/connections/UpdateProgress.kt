@@ -5,11 +5,8 @@ import ani.dantotsu.App
 import ani.dantotsu.database.AnimeStateDatabase
 import ani.dantotsu.database.AnimeStateRepository
 import ani.dantotsu.Refresh
-import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.currContext
 import ani.dantotsu.media.Media
-import ani.dantotsu.media.emptyMedia
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.toast
@@ -17,9 +14,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ani.dantotsu.download.DownloadsManager
-import ani.dantotsu.download.DownloadedType
 import ani.dantotsu.download.findValidName
 import ani.dantotsu.media.MediaType
+import ani.dantotsu.connections.shinigami.ShinigamiLibraryClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
