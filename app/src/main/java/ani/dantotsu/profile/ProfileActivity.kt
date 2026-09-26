@@ -254,8 +254,6 @@ class ProfileActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListene
 
                         profileAnimeCount.text = profile.stats.animeTotal.toString()
                         profileAnimeCountContainer.setOnClickListener(null)
-                        profileMangaCount.text = "—"
-                        profileMangaCountContainer.setOnClickListener(null)
 
                         profileCloseButton.setOnClickListener {
                             onBackPressedDispatcher.onBackPressed()
