@@ -44,6 +44,7 @@ ffmpeg-kit = { module = "com.antonkarpenko:ffmpeg-kit-https", version.ref = "ffm
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # AndroidX Core
@@ -179,7 +180,7 @@ androidx-baselineProfile = { id = "androidx.baselineprofile", version.ref = "and
 
 sqldelight = ["sqldelight-androidxDriver", "sqldelight-coroutines", "sqldelight-async", "sqldelight-androidxPaging"]
 
-firebase = ["firebase-analytics", "firebase-crashlytics"]
+firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-auth"]
 
 androidx = [
     "androidx-core",
