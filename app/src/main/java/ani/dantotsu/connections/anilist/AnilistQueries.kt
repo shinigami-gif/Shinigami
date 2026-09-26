@@ -896,7 +896,6 @@ class AnilistQueries {
     ): String {
         val includeList = when {
             type == "ANIME" && !getPreference(PrefName.IncludeAnimeList) -> "onList:false"
-            type == "MANGA" && !getPreference(PrefName.IncludeMangaList) -> "onList:false"
             else -> ""
         }
         val isAdult = if (getPreference(PrefName.AdultOnly)) "isAdult:true" else ""
