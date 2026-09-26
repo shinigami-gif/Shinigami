@@ -14,6 +14,8 @@ interface UserRepository {
     fun findByExternalIdentity(provider: String, subject: String): ShinigamiUser?
     fun findByUsername(username: String): ShinigamiUser?
     fun search(query: String, page: Int = 1, perPage: Int = 20): List<ShinigamiUser>
+    fun count(): Long
+    fun allIds(): List<String>
     fun create(
         username: String,
         externalProvider: String,
