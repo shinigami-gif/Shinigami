@@ -7,31 +7,35 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import ani.dantotsu.R
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import ani.dantotsu.connections.shinigami.ShinigamiChatClient
 import ani.dantotsu.connections.shinigami.ShinigamiChatMessage
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
-import ani.dantotsu.databinding.ActivityForumBinding
-import ani.dantotsu.initActivity
 import ani.dantotsu.getThemeColor
+import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChatActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityForumBinding
     private lateinit var messageInput: EditText
-    private lateinit var sendButton: com.google.android.material.button.MaterialButton
+    private lateinit var sendButton: MaterialButton
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var emptyText: TextView
+    private lateinit var progressBar: ProgressBar
     private val adapter = MessageAdapter()
     private var mediaId: Long? = null
     private var directUserId: String? = null
@@ -40,64 +44,89 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeManager(this).applyTheme()
-        binding = ActivityForumBinding.inflate(layoutInflater)
-        setContentView(binding.root)
         initActivity(this)
 
         val title = intent.getStringExtra("chat_title") ?: "Global Chat"
         mediaId = intent.getLongExtra("mediaId", -1L).takeIf { it > 0L }
         directUserId = intent.getStringExtra("message_user_id")
-        binding.forumTitle.text = title
-        binding.forumSearch.visibility = View.GONE
-        binding.forumCategoryChips.parent?.let { (it as? View)?.visibility = View.GONE }
-        binding.forumCreateThreadFab.visibility = View.GONE
-        binding.forumAppBar.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
-        binding.forumRecyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = navBarHeight + 72
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(getThemeColor(com.google.android.material.R.attr.colorSurface))
         }
 
-        binding.forumBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
-        binding.forumRecyclerView.adapter = adapter
-        binding.forumRecyclerView.layoutManager = LinearLayoutManager(this).apply {
-            stackFromEnd = true
+        val toolbar = MaterialToolbar(this).apply {
+            title = title
+            setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+            updateLayoutParams<LinearLayout.LayoutParams> {
+                height = (56 * resources.displayMetrics.density).toInt()
+                topMargin = statusBarHeight
+            }
         }
+        root.addView(toolbar)
+
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+        }
+
+        swipeRefresh = SwipeRefreshLayout(this)
+        recyclerView = RecyclerView(this).apply {
+            layoutManager = LinearLayoutManager(this@ChatActivity).apply { stackFromEnd = true }
+            adapter = this@ChatActivity.adapter
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+        swipeRefresh.addView(recyclerView)
+        content.addView(swipeRefresh, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f
+        ))
+
+        emptyText = TextView(this).apply {
+            gravity = Gravity.CENTER
+            visibility = View.GONE
+        }
+        progressBar = ProgressBar(this).apply {
+            visibility = View.GONE
+        }
+        content.addView(progressBar, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply { gravity = Gravity.CENTER })
+
+        root.addView(content)
 
         val inputBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(12, 8, 12, 8)
-            setBackgroundColor(getThemeColor(com.google.android.material.R.attr.colorSurface))
         }
         messageInput = EditText(this).apply {
             hint = "Write a message..."
             maxLines = 4
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         }
-        sendButton = com.google.android.material.button.MaterialButton(this).apply {
-            text = "Send"
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
-        inputBar.addView(messageInput)
+        inputBar.addView(messageInput, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        sendButton = MaterialButton(this).apply { text = "Send" }
         inputBar.addView(sendButton)
-        addContentView(
-            inputBar,
-            CoordinatorLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply { gravity = Gravity.BOTTOM }
-        )
-        sendButton.setOnClickListener { sendMessage() }
+        root.addView(inputBar)
 
-        binding.forumSwipeRefresh.setOnRefreshListener { loadMessages() }
+        setContentView(root)
+
+        swipeRefresh.setOnRefreshListener { loadMessages() }
+        sendButton.setOnClickListener { sendMessage() }
         loadMessages()
     }
 
     private fun loadMessages() {
         if (isLoading) return
         isLoading = true
+        progressBar.visibility = View.VISIBLE
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val token = ShinigamiSessionStore(this@ChatActivity).getToken()
@@ -110,19 +139,19 @@ class ChatActivity : AppCompatActivity() {
                 if (directUserId != null) ShinigamiChatClient().markRead(token, directUserId!!)
                 withContext(Dispatchers.Main) {
                     adapter.submit(page.items)
-                    binding.forumEmptyText.visibility = if (page.items.isEmpty()) View.VISIBLE else View.GONE
-                    binding.forumEmptyText.text = "No messages yet"
-                    binding.forumProgressBar.visibility = View.GONE
-                    binding.forumSwipeRefresh.isRefreshing = false
-                    binding.forumRecyclerView.scrollToPosition((page.items.size - 1).coerceAtLeast(0))
+                    emptyText.text = if (page.items.isEmpty()) "No messages yet" else ""
+                    emptyText.visibility = if (page.items.isEmpty()) View.VISIBLE else View.GONE
+                    progressBar.visibility = View.GONE
+                    swipeRefresh.isRefreshing = false
+                    if (page.items.isNotEmpty()) recyclerView.scrollToPosition(page.items.lastIndex)
                     isLoading = false
                 }
             } catch (error: Exception) {
                 withContext(Dispatchers.Main) {
-                    binding.forumProgressBar.visibility = View.GONE
-                    binding.forumSwipeRefresh.isRefreshing = false
-                    binding.forumEmptyText.text = error.message ?: "Failed to load messages"
-                    binding.forumEmptyText.visibility = View.VISIBLE
+                    progressBar.visibility = View.GONE
+                    swipeRefresh.isRefreshing = false
+                    emptyText.text = error.message ?: "Failed to load messages"
+                    emptyText.visibility = View.VISIBLE
                     isLoading = false
                 }
             }
@@ -150,8 +179,8 @@ class ChatActivity : AppCompatActivity() {
             } catch (error: Exception) {
                 withContext(Dispatchers.Main) {
                     sendButton.isEnabled = true
-                    binding.forumEmptyText.text = error.message ?: "Failed to send message"
-                    binding.forumEmptyText.visibility = View.VISIBLE
+                    emptyText.text = error.message ?: "Failed to send message"
+                    emptyText.visibility = View.VISIBLE
                 }
             }
         }
@@ -159,12 +188,10 @@ class ChatActivity : AppCompatActivity() {
 
     private class MessageAdapter : RecyclerView.Adapter<MessageHolder>() {
         private var items: List<ShinigamiChatMessage> = emptyList()
-
         fun submit(value: List<ShinigamiChatMessage>) {
             items = value
             notifyDataSetChanged()
         }
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageHolder {
             val root = LinearLayout(parent.context).apply {
                 orientation = LinearLayout.VERTICAL
@@ -172,21 +199,18 @@ class ChatActivity : AppCompatActivity() {
             }
             return MessageHolder(root)
         }
-
         override fun onBindViewHolder(holder: MessageHolder, position: Int) {
             val item = items[position]
             holder.name.text = item.sender.displayName?.takeIf { it.isNotBlank() } ?: item.sender.username
             holder.name.setTypeface(null, Typeface.BOLD)
             holder.message.text = item.content
         }
-
         override fun getItemCount(): Int = items.size
     }
 
     private class MessageHolder(root: View) : RecyclerView.ViewHolder(root) {
         val name = TextView(root.context)
         val message = TextView(root.context)
-
         init {
             (root as LinearLayout).addView(name)
             root.addView(message)
