@@ -195,3 +195,33 @@ data class NetworkLegacyExtension(
         val baseUrl: String,
     )
 }
+
+
+@Serializable
+data class ExtensionJsonObject(
+    val name: String = "",
+    val pkg: String = "",
+    val apk: String = "",
+    val lang: String = "",
+    val code: Long = 0,
+    val version: String = "",
+    val nsfw: Int = 0,
+    val hasReadme: Int = 0,
+    val hasChangelog: Int = 0,
+    val sources: List<ExtensionSourceJsonObject>? = null,
+    val iconUrl: String? = null,
+    val extensionLib: String? = null,
+) {
+    fun extractLibVersion(): Double =
+        extensionLib?.toDoubleOrNull()
+            ?: version.substringBefore('.').toDoubleOrNull()
+            ?: 0.0
+}
+
+@Serializable
+data class ExtensionSourceJsonObject(
+    val id: Long = 0,
+    val lang: String = "",
+    val name: String = "",
+    val baseUrl: String = "",
+)
