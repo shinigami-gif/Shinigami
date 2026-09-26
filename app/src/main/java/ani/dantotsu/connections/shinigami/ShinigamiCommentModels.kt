@@ -5,14 +5,15 @@ data class ShinigamiComment(
     val author: ShinigamiUser,
     val mediaId: Long,
     val parentCommentId: String? = null,
-    val content: String,
+    var content: String,
+    val tag: Int? = null,
     val upvotes: Int = 0,
     val downvotes: Int = 0,
     val userVote: Int? = null,
     val replyCount: Int = 0,
     val deleted: Boolean = false,
     val createdAt: String,
-    val updatedAt: String? = null
+    var updatedAt: String? = null
 )
 
 data class ShinigamiCommentPage(
