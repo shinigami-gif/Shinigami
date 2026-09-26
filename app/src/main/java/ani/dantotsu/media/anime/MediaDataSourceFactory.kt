@@ -43,13 +43,7 @@ object MediaDataSourceFactory {
         context: Context,
         headers: Map<String, String>,
         okHttpClient: OkHttpClient,
-        isLocalhost: Boolean = false,
     ): HttpDataSource.Factory {
-        if (isLocalhost) {
-            Logger.log("DataSource: localhost stream — using OkHttp (HTTP/2, QUIC bypassed)")
-            return buildOkHttpFactory(okHttpClient, headers)
-        }
-
         // Tier 1 — GMS Cronet (absent on F-Droid; caught safely)
         tryCronetProvider(context, headers)?.let { return it }
 
