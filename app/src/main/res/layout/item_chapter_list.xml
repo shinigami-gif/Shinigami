@@ -103,7 +103,7 @@
                 android:maxLines="1"
                 android:textSize="12dp"
                 tools:ignore="SpUsage"
-                tools:text="Manga"
+                tools:text="Anime"
                 tools:visibility="visible" />
         </LinearLayout>
 
