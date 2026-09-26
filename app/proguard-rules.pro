@@ -149,9 +149,4 @@
 -keep class com.github.aachartmodel.** { *; }
 -dontwarn com.github.aachartmodel.**
 
-#############################################
-# FFmpegKit (com.antonkarpenko)
-#############################################
--keep class com.antonkarpenko.ffmpegkit.** { *; }
--dontwarn com.antonkarpenko.ffmpegkit.**
 
