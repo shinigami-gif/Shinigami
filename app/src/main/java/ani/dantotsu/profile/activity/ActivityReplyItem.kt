@@ -8,8 +8,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
 import ani.dantotsu.buildMarkwon
-import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.anilist.api.ActivityReply
+import ani.dantotsu.connections.shinigami.ShinigamiActivityReply
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.ItemActivityReplyBinding
 import ani.dantotsu.loadImage
 import ani.dantotsu.profile.User
@@ -27,8 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ActivityReplyItem(
-    private val reply: ActivityReply,
-    private val parentId: Int,
+    private val reply: ShinigamiActivityReply,
+    private val parentId: String,
     private val fragActivity: FragmentActivity,
     private val parentAdapter: GroupieAdapter,
     private val clickCallback: (Int, type: String) -> Unit,
@@ -39,44 +40,25 @@ class ActivityReplyItem(
         binding = viewBinding
         val context = binding.root.context
         val scope = fragActivity.lifecycleScope
-        binding.activityUserAvatar.loadImage(reply.user.avatar?.medium)
-        binding.activityUserName.text = reply.user.name
+        binding.activityUserAvatar.loadImage(reply.author.avatarUrl)
+        binding.activityUserName.text = reply.author.displayName ?: reply.author.username
         binding.activityTime.text = ActivityItemBuilder.getDateTime(reply.createdAt)
         binding.activityLikeCount.text = reply.likeCount.toString()
         val likeColor = ContextCompat.getColor(context, R.color.yt_red)
-        val notLikeColor = ContextCompat.getColor(context, R.color.bg_opp)
-        binding.activityLike.setColorFilter(if (reply.isLiked) likeColor else notLikeColor)
-        val markwon = buildMarkwon(context)
-        markwon.setMarkdown(binding.activityContent, getBasicAniHTML(reply.text))
-
-        val userList = arrayListOf<User>()
-        reply.likes?.forEach { i ->
-            userList.add(User(i.id, i.name.toString(), i.avatar?.medium, i.bannerImage, isFollowing = i.isFollowing, isFollower = i.isFollower))
-        }
-        binding.activityLikeContainer.setOnLongClickListener {
-            UsersDialogFragment().apply {
-                userList(userList)
-                show(fragActivity.supportFragmentManager, "dialog")
-            }
-            true
-        }
+        val normalColor = ContextCompat.getColor(context, R.color.bg_opp)
+        binding.activityLike.setColorFilter(if (reply.isLiked) likeColor else normalColor)
+        buildMarkwon(context).setMarkdown(binding.activityContent, getBasicAniHTML(reply.text))
         binding.activityLikeContainer.setOnClickListener {
             scope.launch {
-                val res = Anilist.mutation.toggleLike(reply.id, "ACTIVITY_REPLY")
-                withContext(Dispatchers.Main) {
-                    if (res != null) {
-                        if (reply.isLiked) {
-                            reply.likeCount = reply.likeCount.minus(1)
-                        } else {
-                            reply.likeCount = reply.likeCount.plus(1)
-                        }
-                        binding.activityLikeCount.text = (reply.likeCount).toString()
-                        reply.isLiked = !reply.isLiked
-                        binding.activityLike.setColorFilter(if (reply.isLiked) likeColor else notLikeColor)
-
-                    } else {
-                        snackString("Failed to like activity")
-                    }
+                try {
+                    val token = ShinigamiSessionStore(context).getToken() ?: return@launch
+                    val updated = ShinigamiSocialClient().likeActivity(token, reply.id)
+                    reply.likeCount = updated.likeCount
+                    reply.isLiked = updated.isLiked
+                    binding.activityLikeCount.text = updated.likeCount.toString()
+                    binding.activityLike.setColorFilter(if (updated.isLiked) likeColor else normalColor)
+                } catch (_: Exception) {
+                    snackString("Failed to like activity reply")
                 }
             }
         }
@@ -86,50 +68,17 @@ class ActivityReplyItem(
                 Intent(context, ActivityMarkdownCreator::class.java)
                     .putExtra("type", "replyActivity")
                     .putExtra("parentId", parentId)
-                    .putExtra("other", "@${reply.user.name} "),
+                    .putExtra("other", "@\${reply.author.username} "),
                 null
             )
         }
-        binding.activityEdit.isVisible = reply.userId == Anilist.userid
-        binding.activityEdit.setOnClickListener {
-            ContextCompat.startActivity(
-                context,
-                Intent(context, ActivityMarkdownCreator::class.java)
-                    .putExtra("type", "replyActivity")
-                    .putExtra("parentId", parentId)
-                    .putExtra("other", reply.text)
-                    .putExtra("edit", reply.id),
-                null
-            )
-        }
-        binding.activityDelete.isVisible = reply.userId == Anilist.userid
-        binding.activityDelete.setOnClickListener {
-            binding.root.context.customAlertDialog().apply {
-                setTitle(R.string.delete)
-                setMessage(binding.root.context.getString(R.string.delete_reply_confirm))
-                setPosButton(R.string.delete) {
-                    scope.launch {
-                        val res = Anilist.mutation.deleteActivityReply(reply.id)
-                        withContext(Dispatchers.Main) {
-                            if (res) {
-                                snackString("Deleted")
-                                parentAdapter.remove(this@ActivityReplyItem)
-                            } else {
-                                snackString("Failed to delete")
-                            }
-                        }
-                    }
-                }
-                setNegButton(R.string.cancel)
-                show()
-            }
-        }
-
+        binding.activityEdit.isVisible = false
+        binding.activityDelete.isVisible = false
         binding.activityAvatarContainer.setOnClickListener {
-            clickCallback(reply.userId, "USER")
+            clickCallback(reply.author.id.toIntOrNull() ?: -1, "USER")
         }
         binding.activityUserName.setOnClickListener {
-            clickCallback(reply.userId, "USER")
+            clickCallback(reply.author.id.toIntOrNull() ?: -1, "USER")
         }
     }
 
