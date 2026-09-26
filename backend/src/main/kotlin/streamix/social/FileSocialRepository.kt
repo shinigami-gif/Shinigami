@@ -152,6 +152,13 @@ class FileSocialRepository(
             .mapNotNull { comment -> commentToApi(comment, viewerId) }
     }
 
+    override fun commentReplies(commentId: String, viewerId: String?, page: Int, perPage: Int): List<SocialComment> = synchronized(lock) {
+        val items = read<StoredComment>("comments.json")
+        val parent = items.firstOrNull { it.id == commentId && !it.deleted } ?: return@synchronized emptyList()
+        paginate(items.filter { it.mediaId == parent.mediaId && it.parentCommentId == commentId && !it.deleted }.sortedBy { it.createdAt }, page, perPage)
+            .mapNotNull { commentToApi(it, viewerId) }
+    }
+
     override fun createComment(mediaId: Long, authorId: String, content: String, parentCommentId: String?): SocialComment = synchronized(lock) {
         require(users.findById(authorId) != null) { "author not found" }
         val stored = StoredComment(UUID.randomUUID().toString(), mediaId, parentCommentId, authorId, content.trim(), createdAt = Instant.now().toString())
