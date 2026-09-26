@@ -97,20 +97,16 @@ class ProfileStatsWidget : AppWidgetProvider() {
                             .putString("avatar_url", user.avatarUrl ?: "")
                             .putInt("anime_count", profile.stats.animeTotal)
                             .putInt("episodes_watched", profile.stats.episodesWatched)
-                            .putInt("manga_count", 0)
-                            .putInt("chapters_read", 0)
                             .apply()
 
                         renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, user.id, titleTextColor, statsTextColor,
-                            user.displayName ?: user.username, user.avatarUrl, profile.stats.animeTotal, profile.stats.episodesWatched,
-                            0, 0)
+                            user.displayName ?: user.username, profile.stats.animeTotal, profile.stats.episodesWatched)
                     } else {
                         val userName = prefs.getString("user_name", "") ?: ""
                         val avatarUrl = prefs.getString("avatar_url", "")
                         val animeCount = prefs.getInt("anime_count", 0)
                         val episodesWatched = prefs.getInt("episodes_watched", 0)
-                        val chaptersRead = prefs.getInt("chapters_read", 0)
-                        
+
                         renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, userPref, titleTextColor, statsTextColor,
                             userName, avatarUrl, animeCount, episodesWatched)
                     }
@@ -147,10 +143,6 @@ class ProfileStatsWidget : AppWidgetProvider() {
                         setTextColor(R.id.topLeftLabel, statsTextColor)
                         setTextColor(R.id.topRightItem, titleTextColor)
                         setTextColor(R.id.topRightLabel, statsTextColor)
-                        setTextColor(R.id.bottomLeftItem, titleTextColor)
-                        setTextColor(R.id.bottomLeftLabel, statsTextColor)
-                        setTextColor(R.id.bottomRightItem, titleTextColor)
-                        setTextColor(R.id.bottomRightLabel, statsTextColor)
                         
                         avatarUrl?.takeIf { it.isNotEmpty() }?.let { url ->
                             val avatarBitmap = downloadImageAsBitmap(url)
