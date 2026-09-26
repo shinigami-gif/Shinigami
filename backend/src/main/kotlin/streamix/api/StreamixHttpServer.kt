@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import streamix.auth.AuthRuntime
+import streamix.auth.ExternalIdentityVerifier
 import streamix.runtime.StreamixService
 import java.net.InetSocketAddress
 import java.net.URLDecoder
@@ -19,6 +20,7 @@ class StreamixHttpServer(
     private val controlApi: ProviderControlApi? = null,
     private val canonicalResolver: CanonicalAnimeRequestResolver? = null,
     private val authRuntime: AuthRuntime? = null,
+    private val authVerifier: ExternalIdentityVerifier? = null,
     private val host: String = "0.0.0.0",
     private val port: Int = 8080,
     private val gson: Gson = Gson()
@@ -44,10 +46,34 @@ class StreamixHttpServer(
                     respond(exchange, 200, SessionResponse(user = user))
                 }
                 "POST" -> {
-                    val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
-                    auth.auth.currentUser(token)
-                        ?: return@createContext unauthorized(exchange)
-                    respond(exchange, 200, mapOf("status" to "active"))
+                    val verifier = authVerifier
+                        ?: return@createContext respond(
+                            exchange,
+                            503,
+                            mapOf("error" to "authentication verifier is not configured")
+                        )
+                    val request = try {
+                        gson.fromJson(
+                            exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                            AuthSessionRequest::class.java
+                        )
+                    } catch (_: Throwable) {
+                        null
+                    } ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid auth request"))
+
+                    try {
+                        respond(
+                            exchange,
+                            200,
+                            auth.auth.signIn(
+                                provider = request.provider,
+                                credential = request.credential,
+                                verifier = verifier
+                            )
+                        )
+                    } catch (error: IllegalArgumentException) {
+                        respond(exchange, 401, mapOf("error" to (error.message ?: "invalid credentials")))
+                    }
                 }
                 else -> method(exchange, "GET")
             }
