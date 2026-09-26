@@ -300,25 +300,7 @@ class AddRepositoryBottomSheet : BottomSheetDialogFragment() {
                     }
                 }
 
-                MediaType.MANGA -> {
-                    val manga =
-                        PrefManager.getVal<Set<String>>(PrefName.MangaExtensionRepos)
-                            .minus(input)
-                    PrefManager.setVal(PrefName.MangaExtensionRepos, manga)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        Injekt.get<MangaExtensionManager>().findAvailableExtensions()
-                    }
-                }
 
-                MediaType.NOVEL -> {
-                    val novel =
-                        PrefManager.getVal<Set<String>>(PrefName.NovelExtensionRepos)
-                            .minus(input)
-                    PrefManager.setVal(PrefName.NovelExtensionRepos, novel)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        Injekt.get<NovelExtensionManager>().findAvailableExtensions()
-                    }
-                }
             }
         }
 
