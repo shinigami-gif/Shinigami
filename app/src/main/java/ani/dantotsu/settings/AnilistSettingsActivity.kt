@@ -163,21 +163,13 @@ class AnilistSettingsActivity : AppCompatActivity() {
                 settingsAnilistRowOrder.clearFocus()
             }
 
-            val containers =
-                listOf(binding.animeCustomListsContainer, binding.mangaCustomListsContainer)
-            val customLists = listOf(Anilist.animeCustomLists, Anilist.mangaCustomLists)
-            val buttons = listOf(binding.addAnimeListButton, binding.addMangaListButton)
-
-            containers.forEachIndexed { index, container ->
-                customLists[index]?.forEach { listName ->
-                    addCustomListItem(listName, container, index == 0)
-                }
+            val animeCustomLists = Anilist.animeCustomLists.orEmpty()
+            animeCustomLists.forEach { listName ->
+                addCustomListItem(listName, binding.animeCustomListsContainer)
             }
 
-            buttons.forEachIndexed { index, button ->
-                button.setOnClickListener {
-                    addCustomListItem("", containers[index], index == 0)
-                }
+            binding.addAnimeListButton.setOnClickListener {
+                addCustomListItem("", binding.animeCustomListsContainer)
             }
 
             binding.SettingsAnilistCustomListSave.setOnClickListener {
@@ -277,7 +269,7 @@ class AnilistSettingsActivity : AppCompatActivity() {
 
     }
 
-    private fun addCustomListItem(listName: String, container: LinearLayout, isAnime: Boolean) {
+    private fun addCustomListItem(listName: String, container: LinearLayout) {
         val customListItemView = layoutInflater.inflate(R.layout.item_custom_list, container, false)
         val textInputLayout = customListItemView.findViewById<TextInputLayout>(R.id.customListItem)
         val editText = textInputLayout.editText as? TextInputEditText
@@ -285,18 +277,14 @@ class AnilistSettingsActivity : AppCompatActivity() {
         textInputLayout.setEndIconOnClickListener {
             val name = editText?.text.toString()
             if (name.isNotEmpty()) {
-                val listExists = if (isAnime) {
-                    Anilist.animeCustomLists?.contains(name) ?: false
-                } else {
-                    Anilist.mangaCustomLists?.contains(name) ?: false
-                }
+                val listExists = Anilist.animeCustomLists?.contains(name) ?: false
 
                 if (listExists) {
                     customAlertDialog().apply {
                         setTitle(getString(R.string.delete_custom_list))
                         setMessage(getString(R.string.delete_custom_list_confirm, name))
                         setPosButton(getString(R.string.delete)) {
-                            deleteCustomList(name, isAnime)
+                            deleteCustomList(name)
                             container.removeView(customListItemView)
                         }
                         setNegButton(getString(R.string.cancel))
@@ -311,16 +299,11 @@ class AnilistSettingsActivity : AppCompatActivity() {
         container.addView(customListItemView)
     }
 
-    private fun deleteCustomList(name: String, isAnime: Boolean) {
+    private fun deleteCustomList(name: String) {
         lifecycleScope.launch {
-            val type = if (isAnime) "ANIME" else "MANGA"
-            val success = anilistMutations.deleteCustomList(name, type)
+            val success = anilistMutations.deleteCustomList(name, "ANIME")
             if (success) {
-                if (isAnime) {
-                    Anilist.animeCustomLists = Anilist.animeCustomLists?.filter { it != name }
-                } else {
-                    Anilist.mangaCustomLists = Anilist.mangaCustomLists?.filter { it != name }
-                }
+                Anilist.animeCustomLists = Anilist.animeCustomLists?.filter { it != name }
                 toast("Custom list deleted")
             } else {
                 toast("Failed to delete custom list")
@@ -333,16 +316,10 @@ class AnilistSettingsActivity : AppCompatActivity() {
             .mapNotNull { (it.findViewById<TextInputLayout>(R.id.customListItem).editText as? TextInputEditText)?.text?.toString() }
             .filter { it.isNotEmpty() }
             .toList()
-        val mangaCustomLists = binding.mangaCustomListsContainer.children
-            .mapNotNull { (it.findViewById<TextInputLayout>(R.id.customListItem).editText as? TextInputEditText)?.text?.toString() }
-            .filter { it.isNotEmpty() }
-            .toList()
-
-        lifecycleScope.launch {
-            val success = anilistMutations.updateCustomLists(animeCustomLists, mangaCustomLists)
+         lifecycleScope.launch {
+            val success = anilistMutations.updateCustomLists(animeCustomLists, emptyList())
             if (success) {
                 Anilist.animeCustomLists = animeCustomLists
-                Anilist.mangaCustomLists = mangaCustomLists
                 toast("Custom lists saved")
             } else {
                 toast("Failed to save custom lists")
