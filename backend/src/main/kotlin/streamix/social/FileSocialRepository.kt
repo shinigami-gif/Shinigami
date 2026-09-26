@@ -6,6 +6,7 @@ import streamix.api.ActivityRef
 import streamix.api.ActivityReplyRef
 import streamix.api.ShinigamiUser
 import streamix.api.SocialComment
+import streamix.api.NotificationRef
 import streamix.auth.UserRepository
 import java.nio.file.Files
 import java.nio.file.Path
@@ -73,7 +74,7 @@ class FileSocialRepository(
 
     override fun activities(userId: String?, page: Int, perPage: Int): List<ActivityRef> = synchronized(lock) {
         paginate(read<StoredActivity>("activities.json").sortedByDescending { it.createdAt }, page, perPage)
-            .map { activity(it, userId) }
+            .mapNotNull { activity(it, userId) }
     }
 
     override fun activity(activityId: String, viewerId: String?): ActivityRef? = synchronized(lock) {
