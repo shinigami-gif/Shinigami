@@ -27,11 +27,9 @@ class UserService(
         )
     }
 
-    private fun countFollowing(userId: String): Long =
-        users.search("", 1, 100000).count { it.id != userId && users.relationship(userId, it.id).following }.toLong()
+    private fun countFollowing(userId: String): Long = users.countFollowing(userId)
 
-    private fun countFollowers(userId: String): Long =
-        users.search("", 1, 100000).count { it.id != userId && users.relationship(it.id, userId).following }.toLong()
+    private fun countFollowers(userId: String): Long = users.countFollowers(userId)
 
     fun search(query: String, page: Int = 1, perPage: Int = 20): UserPage {
         val safePage = page.coerceAtLeast(1)
