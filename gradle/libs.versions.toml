@@ -28,6 +28,8 @@ androidx-profileInstaller = "1.4.1"
 leakcanary = "2.14"
 desugar-jdk-libs = "2.1.5"
 ktor = "3.6.0"
+credentials = "1.5.0"
+googleid = "1.1.1"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
@@ -46,6 +48,9 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-admin = { module = "com.google.firebase:firebase-admin", version = "9.11.0" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # AndroidX Core
@@ -73,6 +78,7 @@ gson = "com.google.code.gson:gson:2.14.0"
 nicehttp = "com.github.Blatzar:NiceHttp:0.4.18"
 
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
@@ -181,7 +187,7 @@ androidx-baselineProfile = { id = "androidx.baselineprofile", version.ref = "and
 
 sqldelight = ["sqldelight-androidxDriver", "sqldelight-coroutines", "sqldelight-async", "sqldelight-androidxPaging"]
 
-firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-auth"]
+firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-auth", "androidx-credentials", "androidx-credentials-play-services-auth", "googleid", "coroutines-play-services"]
 
 androidx = [
     "androidx-core",
