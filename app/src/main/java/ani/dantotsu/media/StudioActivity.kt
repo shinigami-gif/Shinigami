@@ -18,6 +18,7 @@ import ani.dantotsu.R
 import ani.dantotsu.Refresh
 import ani.dantotsu.databinding.ActivityStudioBinding
 import ani.dantotsu.initActivity
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.others.getSerialized
 import ani.dantotsu.px
@@ -58,7 +59,7 @@ class StudioActivity : AppCompatActivity() {
         }
 
         var isFav = false
-        binding.studioFav.visibility = if (ani.dantotsu.connections.anilist.Anilist.token != null) View.VISIBLE else View.GONE
+        binding.studioFav.visibility = if (ShinigamiSessionStore(this).getToken() != null) View.VISIBLE else View.GONE
         scope.launch(Dispatchers.IO) {
             val studioId = studio?.id?.toIntOrNull() ?: return@launch
             isFav = false
