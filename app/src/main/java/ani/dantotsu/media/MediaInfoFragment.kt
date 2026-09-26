@@ -47,7 +47,6 @@ import ani.dantotsu.setSafeOnClickListener
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.toast
-import ani.dantotsu.media.mangaupdates.MangaAnimeUtil
 import ani.dantotsu.util.Logger
 import com.xwray.groupie.GroupieAdapter
 import io.noties.markwon.Markwon
@@ -305,28 +304,6 @@ class MediaInfoFragment : Fragment() {
                         (media.anime.totalEpisodes ?: "~").toString()
                     binding.mediaInfoTotal.text = infoTotal
 
-                } else if (media.manga != null) {
-                    type = "MANGA"
-                    binding.mediaInfoTotalTitle.setText(R.string.total_chaps)
-                    binding.mediaInfoTotal.text = (media.manga.totalChapters ?: "~").toString()
-                    if (media.manga.author != null) {
-                        binding.mediaInfoAuthorContainer.visibility = View.VISIBLE
-                        binding.mediaInfoAuthor.text = media.manga.author!!.name
-                        if (!offline) {
-                            binding.mediaInfoAuthorContainer.setOnClickListener {
-                                ContextCompat.startActivity(
-                                    requireActivity(),
-                                    Intent(activity, AuthorActivity::class.java).putExtra(
-                                        "author",
-                                        media.manga.author!! as Serializable
-                                    ),
-                                    null
-                                )
-                            }
-                        }
-                    }
-                }
-
                 val desc = HtmlCompat.fromHtml(
                     (media.description ?: "null").replace("\\n", "<br>").replace("\\\"", "\""),
                     HtmlCompat.FROM_HTML_MODE_LEGACY
@@ -355,17 +332,6 @@ class MediaInfoFragment : Fragment() {
 
                 val screenWidth = resources.displayMetrics.run { widthPixels / density }
 
-                if (media.manga != null && !offline) {
-                    model.loadMangaExtras(media)
-
-                    model.adaptation.observe(viewLifecycleOwner) {
-                        it?.let { displayAnimeAdaptation(it) }
-                    }
-
-                    model.nextRelease.observe(viewLifecycleOwner) {
-                        it?.let { displayNextChapterPrediction(it) }
-                    }
-                }
                 if (media.synonyms.isNotEmpty()) {
                     val bind = ItemTitleChipgroupBinding.inflate(
                         LayoutInflater.from(context),
