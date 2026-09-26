@@ -1,7 +1,7 @@
 package ani.dantotsu.connections.mal
 
 /**
- * MyAnimeList is a public anime/manga metadata provider only.
+ * MyAnimeList is a public anime metadata provider only.
  *
  * Authentication, user profile, list mutation, and tracking are intentionally
  * not part of the Shinigami MAL integration. User state belongs to Shinigami
