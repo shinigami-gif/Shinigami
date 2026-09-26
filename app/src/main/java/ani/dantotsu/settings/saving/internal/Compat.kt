@@ -41,8 +41,6 @@ class Compat {
             }
 
             migrateSet(PrefName.AnimeExtensionRepos)
-            migrateSet(PrefName.MangaExtensionRepos)
-            migrateSet(PrefName.NovelExtensionRepos)
 
             migratedPrefs.edit().putBoolean(migratedKey, true).apply()
         }
