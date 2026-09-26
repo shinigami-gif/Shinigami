@@ -77,7 +77,7 @@ abstract class BaseParser {
             }
         }
         var response: ShowResponse? = loadSavedShowResponse(mediaObj.id)
-        if (response != null && this !is OfflineMangaParser && this !is OfflineAnimeParser) {
+        if (response != null) {
             if (response.sManga == null) {
                 response.sManga = SManga.create().apply {
                     url = response.link
