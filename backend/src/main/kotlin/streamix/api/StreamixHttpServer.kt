@@ -3,6 +3,7 @@ package streamix.api
 import com.google.gson.Gson
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import streamix.auth.AuthRuntime
 import streamix.runtime.StreamixService
 import java.net.InetSocketAddress
 import java.net.URLDecoder
@@ -17,6 +18,7 @@ class StreamixHttpServer(
     private val service: StreamixService,
     private val controlApi: ProviderControlApi? = null,
     private val canonicalResolver: CanonicalAnimeRequestResolver? = null,
+    private val authRuntime: AuthRuntime? = null,
     private val host: String = "0.0.0.0",
     private val port: Int = 8080,
     private val gson: Gson = Gson()
@@ -27,9 +29,59 @@ class StreamixHttpServer(
         check(server == null) { "HTTP server is already started" }
         val http = HttpServer.create(InetSocketAddress(host, port), 0)
         http.executor = Executors.newCachedThreadPool()
+
         http.createContext(BackendApiContract.HEALTH) { exchange ->
             respond(exchange, 200, mapOf("status" to "ok"))
         }
+
+        http.createContext(UserApiContract.SESSION) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            when {
+                method(exchange, "GET") -> {
+                    val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+                    val user = auth.auth.currentUser(token)
+                        ?: return@createContext unauthorized(exchange)
+                    respond(exchange, 200, SessionResponse(user = user))
+                }
+                method(exchange, "POST") -> {
+                    val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+                    auth.auth.currentUser(token)
+                        ?: return@createContext unauthorized(exchange)
+                    respond(exchange, 200, mapOf("status" to "active"))
+                }
+                else -> Unit
+            }
+        }
+
+        http.createContext(UserApiContract.LOGOUT) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            if (!method(exchange, "POST")) return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            auth.auth.logout(token)
+            respond(exchange, 204, emptyMap<String, Any>())
+        }
+
+        http.createContext(UserApiContract.ME) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val user = auth.auth.currentUser(token)
+                ?: return@createContext unauthorized(exchange)
+            runSuspend(exchange) { auth.userService.me(user.id) }
+        }
+
+        http.createContext(UserApiContract.SEARCH) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            auth.auth.currentUser(token)
+                ?: return@createContext unauthorized(exchange)
+            val query = query(exchange, "q").orEmpty()
+            val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+            val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
+            runSuspend(exchange) { auth.userService.search(query, page, perPage) }
+        }
+
         http.createContext(BackendApiContract.SEARCH) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val query = query(exchange, "q")?.trim().orEmpty()
@@ -37,14 +89,17 @@ class StreamixHttpServer(
             val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
             runSuspend(exchange) { service.search(query, page) }
         }
+
         http.createContext(BackendApiContract.PROVIDERS) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
         }
+
         http.createContext(BackendApiContract.PROVIDER_STATUS) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
         }
+
         http.createContext("/api/v1/anime/") { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val parts = exchange.requestURI.path.removePrefix("/api/v1/anime/").split("/")
@@ -78,6 +133,7 @@ class StreamixHttpServer(
                 else -> respond(exchange, 404, mapOf("error" to "route not found"))
             }
         }
+
         http.start()
         server = http
     }
@@ -85,6 +141,24 @@ class StreamixHttpServer(
     override fun close() {
         server?.stop(1)
         server = null
+    }
+
+    private fun requireAuthRuntime(exchange: HttpExchange): AuthRuntime? {
+        val auth = authRuntime
+        if (auth != null) return auth
+        respond(exchange, 503, mapOf("error" to "authentication runtime is not configured"))
+        return null
+    }
+
+    private fun bearerToken(exchange: HttpExchange): String? {
+        val value = exchange.requestHeaders.getFirst("Authorization") ?: return null
+        if (!value.startsWith("Bearer ", ignoreCase = true)) return null
+        return value.substring(7).trim().takeIf { it.isNotEmpty() }
+    }
+
+    private fun unauthorized(exchange: HttpExchange) {
+        exchange.responseHeaders.set("WWW-Authenticate", "Bearer")
+        respond(exchange, 401, mapOf("error" to "authentication required"))
     }
 
     private fun method(exchange: HttpExchange, expected: String): Boolean {
