@@ -101,7 +101,6 @@ data class NotificationRef(
     val type: String,
     val actor: ShinigamiUser? = null,
     val activityId: String? = null,
-    val threadId: String? = null,
     val commentId: String? = null,
     val mediaId: Long? = null,
     val message: String? = null,
