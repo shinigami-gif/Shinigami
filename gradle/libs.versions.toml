@@ -9,10 +9,8 @@ glide = "5.0.9"
 exo = "1.11.1"
 markwon = "4.6.2"
 groupie = "2.10.1"
-nextlib = "0.8.4"
 ass = "0.5.1"
 shizuku = "13.1.5"
-ffmpeg-kit = "2.2.1"
 nanohttpd = "2.3.1"
 metro = "1.4.3"
 metrox-viewmodel = "1.4.3"
@@ -40,7 +38,6 @@ ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging-jvm", ve
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 leakcanary-plumber = { module = "com.squareup.leakcanary:plumber-android", version.ref = "leakcanary" }
-ffmpeg-kit = { module = "com.antonkarpenko:ffmpeg-kit-https", version.ref = "ffmpeg-kit" }
 
 
 # Firebase
@@ -111,7 +108,6 @@ media3-cast = { module = "androidx.media3:media3-cast", version.ref = "exo" }
 media3-effect = { module = "androidx.media3:media3-effect", version.ref = "exo" }
 
 # Extra Media
-nextlib = { module = "com.github.anilbeesetti.nextlib:nextlib-media3ext", version.ref = "nextlib" }
 ass-media = { module = "io.github.peerless2012:ass-media", version.ref = "ass" }
 ass-kt = { module = "io.github.peerless2012:ass-kt", version.ref = "ass" }
 
@@ -214,8 +210,7 @@ media3 = [
     "media3-okhttp",
     "media3-session",
     "media3-cast",
-    "media3-effect",
-    "nextlib"
+    "media3-effect"
 ]
 
 subtitles = ["ass-media", "ass-kt"]
