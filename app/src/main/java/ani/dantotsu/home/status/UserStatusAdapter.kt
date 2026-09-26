@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.ItemUserStatusBinding
 import ani.dantotsu.getAppString
 import ani.dantotsu.loadImage
@@ -22,8 +22,8 @@ fun sortUserStatusList(users: List<User>): ArrayList<User> {
     val watchedActivity = PrefManager.getCustomVal<Set<String>>("activities", emptySet())
         .mapNotNull { it.toIntOrNull() }.toSet()
 
-    val currentUser = users.firstOrNull { it.id == Anilist.userid }
-    val otherUsers = users.filter { it.id != Anilist.userid }
+    val currentUser = users.firstOrNull { it.id == ShinigamiSessionStore(itemView.context).getUserId() }
+    val otherUsers = users.filter { it.id != ShinigamiSessionStore(b.root.context).getUserId() }
 
     val sortedOthers = otherUsers.sortedWith(
         compareBy<User> { user ->
