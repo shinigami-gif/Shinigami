@@ -503,14 +503,13 @@ class AnilistAnimeViewModel : ViewModel() {
 class AnilistSearch : ViewModel() {
 
     enum class SearchType {
-        ANIME, MANGA, CHARACTER, STAFF, STUDIO, USER;
+        ANIME, CHARACTER, STAFF, STUDIO, USER;
 
         companion object {
 
             fun SearchType.toAnilistString(): String {
                 return when (this) {
                     ANIME -> "ANIME"
-                    MANGA -> "MANGA"
                     CHARACTER -> "CHARACTER"
                     STAFF -> "STAFF"
                     STUDIO -> "STUDIO"
@@ -521,7 +520,6 @@ class AnilistSearch : ViewModel() {
             fun fromString(string: String): SearchType {
                 return when (string.uppercase()) {
                     "ANIME" -> ANIME
-                    "MANGA" -> MANGA
                     "CHARACTER" -> CHARACTER
                     "STAFF" -> STAFF
                     "STUDIO" -> STUDIO
@@ -556,7 +554,7 @@ class AnilistSearch : ViewModel() {
 
     fun <T> getSearch(type: SearchType): MutableLiveData<T?> {
         return when (type) {
-            SearchType.ANIME, SearchType.MANGA -> aniMangaResult as MutableLiveData<T?>
+            SearchType.ANIME -> aniMangaResult as MutableLiveData<T?>
             SearchType.CHARACTER -> characterResult as MutableLiveData<T?>
             SearchType.STUDIO -> studioResult as MutableLiveData<T?>
             SearchType.STAFF -> staffResult as MutableLiveData<T?>
@@ -566,7 +564,7 @@ class AnilistSearch : ViewModel() {
 
     suspend fun loadSearch(type: SearchType) {
         when (type) {
-            SearchType.ANIME, SearchType.MANGA -> loadAniMangaSearch(aniMangaSearchResults)
+            SearchType.ANIME -> loadAniMangaSearch(aniMangaSearchResults)
             SearchType.CHARACTER -> loadCharacterSearch(characterSearchResults)
             SearchType.STUDIO -> loadStudiosSearch(studioSearchResults)
             SearchType.STAFF -> loadStaffSearch(staffSearchResults)
@@ -576,7 +574,7 @@ class AnilistSearch : ViewModel() {
 
     suspend fun loadNextPage(type: SearchType) {
         when (type) {
-            SearchType.ANIME, SearchType.MANGA -> loadNextAniMangaPage(aniMangaSearchResults)
+            SearchType.ANIME -> loadNextAniMangaPage(aniMangaSearchResults)
             SearchType.CHARACTER -> loadNextCharacterPage(characterSearchResults)
             SearchType.STUDIO -> loadNextStudiosPage(studioSearchResults)
             SearchType.STAFF -> loadNextStaffPage(staffSearchResults)
@@ -586,7 +584,7 @@ class AnilistSearch : ViewModel() {
 
     fun hasNextPage(type: SearchType): Boolean {
         return when (type) {
-            SearchType.ANIME, SearchType.MANGA -> aniMangaSearchResults.hasNextPage
+            SearchType.ANIME -> aniMangaSearchResults.hasNextPage
             SearchType.CHARACTER -> characterSearchResults.hasNextPage
             SearchType.STUDIO -> studioSearchResults.hasNextPage
             SearchType.STAFF -> staffSearchResults.hasNextPage
@@ -596,7 +594,7 @@ class AnilistSearch : ViewModel() {
 
     fun resultsIsNotEmpty(type: SearchType): Boolean {
         return when (type) {
-            SearchType.ANIME, SearchType.MANGA -> aniMangaSearchResults.results.isNotEmpty()
+            SearchType.ANIME -> aniMangaSearchResults.results.isNotEmpty()
             SearchType.CHARACTER -> characterSearchResults.results.isNotEmpty()
             SearchType.STUDIO -> studioSearchResults.results.isNotEmpty()
             SearchType.STAFF -> staffSearchResults.results.isNotEmpty()
@@ -606,7 +604,7 @@ class AnilistSearch : ViewModel() {
 
     fun size(type: SearchType): Int {
         return when (type) {
-            SearchType.ANIME, SearchType.MANGA -> aniMangaSearchResults.results.size
+            SearchType.ANIME -> aniMangaSearchResults.results.size
             SearchType.CHARACTER -> characterSearchResults.results.size
             SearchType.STUDIO -> studioSearchResults.results.size
             SearchType.STAFF -> staffSearchResults.results.size
@@ -616,7 +614,7 @@ class AnilistSearch : ViewModel() {
 
     fun clearResults(type: SearchType) {
         when (type) {
-            SearchType.ANIME, SearchType.MANGA -> aniMangaSearchResults.results.clear()
+            SearchType.ANIME -> aniMangaSearchResults.results.clear()
             SearchType.CHARACTER -> characterSearchResults.results.clear()
             SearchType.STUDIO -> studioSearchResults.results.clear()
             SearchType.STAFF -> staffSearchResults.results.clear()
