@@ -13,8 +13,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.anilist.api.Activity
+import ani.dantotsu.connections.shinigami.ShinigamiActivity
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.FragmentFeedBinding
 import ani.dantotsu.media.MediaDetailsActivity
 import ani.dantotsu.navBarHeight
@@ -26,13 +27,13 @@ import kotlinx.coroutines.launch
 
 class ActivityFragment : Fragment() {
     private lateinit var type: ActivityType
-    private var userId: Int? = null
-    private var activityId: Int? = null
+    private var userId: String? = null
+    private var activityId: String? = null
     private var _binding: FragmentFeedBinding? = null
     private val binding get() = _binding!!
     private var adapter: GroupieAdapter = GroupieAdapter()
     private var page: Int = 1
-    private var allActivities: MutableList<Activity> = mutableListOf()
+    private var allActivities: MutableList<ShinigamiActivity> = mutableListOf()
     private var currentFilter: ActivityFilterType = ActivityFilterType.ALL
     private var hasMoreActivities: Boolean = true
     private var shouldRefreshOnResume: Boolean = false
@@ -56,14 +57,14 @@ class ActivityFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         arguments?.let {
             type = it.getSerializableCompat<ActivityType>("type") as ActivityType
-            userId = if (it.containsKey("userId")) it.getInt("userId").takeIf { id -> id != 0 } else null
-            activityId = if (it.containsKey("activityId")) it.getInt("activityId").takeIf { id -> id != 0 } else null
+            userId = if (it.containsKey("userId")) it.getString("userId").takeIf { id -> id.isNotBlank() } else null
+            activityId = if (it.containsKey("activityId")) it.getString("activityId").takeIf { id -> id.isNotBlank() } else null
         }
-        val isUserActivity = type == ActivityType.USER || type == ActivityType.GLOBAL || userId == null || userId == Anilist.userid
+        val isUserActivity = type == ActivityType.USER || type == ActivityType.GLOBAL || userId == null || userId == currentUserId()
         binding.titleBar.visibility =
             if (type != ActivityType.ONE) View.VISIBLE else View.GONE
         binding.titleText.text = when (type) {
-            ActivityType.OTHER_USER -> if (userId == null || userId == Anilist.userid) getString(R.string.create_new_activity) else getString(R.string.write_a_message)
+            ActivityType.OTHER_USER -> if (userId == null || userId == currentUserId()) getString(R.string.create_new_activity) else getString(R.string.write_a_message)
             ActivityType.USER, ActivityType.GLOBAL -> getString(R.string.create_new_activity)
             ActivityType.ONE -> ""
         }
@@ -133,7 +134,7 @@ class ActivityFragment : Fragment() {
         val filteredActivities = getFilteredActivities()
         
         adapter.clear()
-        adapter.addAll(filteredActivities.map { ActivityItem(it, adapter, ::onActivityClick) })
+        adapter.addAll(filteredActivities.map { ShinigamiActivityItem(it, adapter) })
         
         binding.emptyTextView.isVisible = filteredActivities.isEmpty()
         binding.emptyTextView.text = when (currentFilter) {
@@ -201,50 +202,37 @@ class ActivityFragment : Fragment() {
         applyFilter()
     }
 
-    private fun getFilteredActivities(): List<Activity> {
-        return when (currentFilter) {
-            ActivityFilterType.ALL -> allActivities
-            ActivityFilterType.TEXT -> allActivities.filter {
-                it.typename == "TextActivity" || it.type == "TEXT"
-            }
-            ActivityFilterType.ANIME_PROGRESS -> allActivities.filter {
-                it.type == "ANIME_LIST"
-            }
-            ActivityFilterType.MANGA_PROGRESS -> allActivities.filter {
-                it.type == "MANGA_LIST"
-            }
-            ActivityFilterType.ALL_PROGRESS -> allActivities.filter {
-                it.type == "ANIME_LIST" || it.type == "MANGA_LIST" || it.typename == "ListActivity"
-            }
-            ActivityFilterType.MESSAGES -> allActivities.filter {
-                it.typename == "MessageActivity" || it.type == "MESSAGE"
-            }
-            ActivityFilterType.PINNED -> allActivities.filter {
-                it.isPinned == true
-            }
-            ActivityFilterType.SUBSCRIBED -> allActivities.filter {
-                it.isSubscribed == true
-            }
-        }
+    private fun getFilteredActivities(): List<ShinigamiActivity> = when (currentFilter) {
+        ActivityFilterType.ALL -> allActivities
+        ActivityFilterType.TEXT -> allActivities.filter { it.type == "TEXT" }
+        ActivityFilterType.ANIME_PROGRESS -> allActivities.filter { it.type == "ANIME_LIST" }
+        ActivityFilterType.MANGA_PROGRESS -> allActivities.filter { it.type == "MANGA_LIST" }
+        ActivityFilterType.ALL_PROGRESS -> allActivities.filter { it.type == "ANIME_LIST" || it.type == "MANGA_LIST" }
+        ActivityFilterType.MESSAGES -> allActivities.filter { it.type == "MESSAGE" }
+        ActivityFilterType.PINNED -> emptyList()
+        ActivityFilterType.SUBSCRIBED -> allActivities.filter { it.isSubscribed }
     }
 
     private suspend fun getActivities(
         global: Boolean = false,
-        userId: Int? = null,
-        activityId: Int? = null,
+        userId: String? = null,
+        activityId: String? = null,
         filter: Boolean = false
-    ): List<Activity> {
-        val pageData = Anilist.query.getFeed(userId, global, page, activityId)?.data?.page
-        val res = pageData?.activities
-        hasMoreActivities = pageData?.pageInfo?.hasNextPage ?: false
-        if (hasMoreActivities) {
-            page += 1
+    ): List<ShinigamiActivity> {
+        val token = ShinigamiSessionStore(requireContext()).getToken()
+            ?: run { hasMoreActivities = false; return emptyList() }
+        val client = ShinigamiSocialClient()
+        if (activityId != null) {
+            hasMoreActivities = false
+            return listOfNotNull(client.activity(token, activityId))
         }
-        return res
-            ?.filter { if (Anilist.adult) true else it.media?.isAdult != true }
-            ?.filterNot { it.recipient?.id != null && it.recipient.id != Anilist.userid && filter }
-            ?: emptyList()
+        val pageData = if (global) client.feed(token, page) else client.activities(token, page)
+        hasMoreActivities = pageData.hasNextPage
+        if (hasMoreActivities) page += 1
+        return if (userId == null) pageData.items else pageData.items.filter { it.author.id == userId }
     }
+
+    private fun currentUserId(): String? = ShinigamiSessionStore(requireContext()).getUserId()
 
     private fun shouldLoadMore(): Boolean {
         val layoutManager =
@@ -286,14 +274,14 @@ class ActivityFragment : Fragment() {
 
         fun newInstance(
             type: ActivityType,
-            userId: Int? = null,
-            activityId: Int? = null
+            userId: String? = null,
+            activityId: String? = null
         ): ActivityFragment {
             return ActivityFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable("type", type)
-                    userId?.let { putInt("userId", it) }
-                    activityId?.let { putInt("activityId", it) }
+                    userId?.let { putString("userId", it) }
+                    activityId?.let { putString("activityId", it) }
                 }
             }
         }
