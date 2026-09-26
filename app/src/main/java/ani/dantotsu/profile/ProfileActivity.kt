@@ -20,19 +20,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import ani.dantotsu.R
 import ani.dantotsu.blurImage
-import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.anilist.api.Query
 import ani.dantotsu.copyToClipboard
 import ani.dantotsu.databinding.ActivityProfileBinding
 import ani.dantotsu.databinding.ItemProfileAppBarBinding
 import ani.dantotsu.initActivity
 import ani.dantotsu.loadImage
-import ani.dantotsu.media.user.ListActivity
-import ani.dantotsu.navBarHeight
 import ani.dantotsu.openImage
-import ani.dantotsu.openLinkInBrowser
-import ani.dantotsu.profile.activity.ActivityFragment
-import ani.dantotsu.profile.activity.ActivityFragment.Companion.ActivityType
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.snackString
@@ -54,66 +47,65 @@ class ProfileActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListene
     private var selected: Int = 0
     lateinit var navBar: AnimatedBottomBar
 
+    lateinit var shinigamiProfile: ani.dantotsu.connections.shinigami.ShinigamiUserProfile
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeManager(this).applyTheme()
         initActivity(this)
-        if (savedInstanceState != null) {
-            selected = savedInstanceState.getInt("selectedTab", 0)
-        }
+        if (savedInstanceState != null) selected = savedInstanceState.getInt("selectedTab", 0)
+
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val context = this
         screenWidth = resources.displayMetrics.widthPixels.toFloat()
+
         navBar = binding.profileNavBar
-        val feedTab = navBar.createTab(R.drawable.ic_round_filter_24, "Feed")
         val profileTab = navBar.createTab(R.drawable.ic_round_person_24, "Profile")
         val statsTab = navBar.createTab(R.drawable.ic_stats_24, "Stats")
         navBar.addTab(profileTab)
-        navBar.addTab(feedTab)
         navBar.addTab(statsTab)
         navBar.visibility = View.GONE
         binding.profileViewPager.isUserInputEnabled = false
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val userid = intent.getIntExtra("userId", -1)
-            val username = intent.getStringExtra("username") ?: ""
-            val respond =
-                if (userid != -1) Anilist.query.getUserProfile(userid) else
-                    Anilist.query.getUserProfile(username)
-            val user = respond?.data?.user
-            if (user == null) {
-                toast("User not found")
-                finish()
-                return@launch
-            }
+            try {
+                val token = ani.dantotsu.connections.shinigami.ShinigamiSessionStore(context).getToken()
+                    ?: throw IllegalStateException("Not signed in")
+                val userId = intent.getStringExtra("userId")
+                    ?: throw IllegalArgumentException("Missing backend user id")
+                val profile = ani.dantotsu.connections.shinigami.ShinigamiBackendClient()
+                    .getProfile(token, userId)
+                shinigamiProfile = profile
 
-            withContext(Dispatchers.Main) {
-                binding.profileViewPager.adapter =
-                    ViewPagerAdapter(supportFragmentManager, lifecycle, user)
-                binding.profileViewPager.setOffscreenPageLimit(3)
-                binding.profileViewPager.setCurrentItem(selected, false)
-                navBar.visibility = View.VISIBLE
-                navBar.selectTabAt(selected)
-                navBar.setOnTabSelectListener(object : AnimatedBottomBar.OnTabSelectListener {
-                    override fun onTabSelected(
-                        lastIndex: Int,
-                        lastTab: AnimatedBottomBar.Tab?,
-                        newIndex: Int,
-                        newTab: AnimatedBottomBar.Tab
-                    ) {
-                        selected = newIndex
-                        binding.profileViewPager.setCurrentItem(selected, true)
-                    }
-                })
+                withContext(Dispatchers.Main) {
+                    binding.profileViewPager.adapter =
+                        ViewPagerAdapter(supportFragmentManager, lifecycle)
+                    binding.profileViewPager.setOffscreenPageLimit(2)
+                    binding.profileViewPager.setCurrentItem(selected.coerceIn(0, 1), false)
+                    navBar.visibility = View.VISIBLE
+                    navBar.selectTabAt(selected.coerceIn(0, 1))
+                    navBar.setOnTabSelectListener(object : AnimatedBottomBar.OnTabSelectListener {
+                        override fun onTabSelected(
+                            lastIndex: Int,
+                            lastTab: AnimatedBottomBar.Tab?,
+                            newIndex: Int,
+                            newTab: AnimatedBottomBar.Tab
+                        ) {
+                            selected = newIndex
+                            binding.profileViewPager.setCurrentItem(selected, true)
+                        }
+                    })
 
-                bindingProfileAppBar = ItemProfileAppBarBinding.bind(binding.root).apply {
-                    binding.profileProgressBar.visibility = View.GONE
-                    followButton.isGone =
-                        user.id == Anilist.userid || Anilist.userid == null
+                    bindingProfileAppBar = ItemProfileAppBarBinding.bind(binding.root).apply {
+                        binding.profileProgressBar.visibility = View.GONE
+                        val user = profile.user
+                        val currentUserId =
+                            ani.dantotsu.connections.shinigami.ShinigamiSessionStore(context).getUserId()
+                        followButton.isGone = currentUserId == null || currentUserId == user.id
 
-                    fun followText(): String {
-                        return getString(
+                        fun followText(): String = getString(
                             when {
                                 user.isFollowing && user.isFollower -> R.string.mutual
                                 user.isFollowing -> R.string.unfollow
@@ -121,165 +113,157 @@ class ProfileActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListene
                                 else -> R.string.follow
                             }
                         )
-                    }
 
-                    followButton.text = followText()
-
-                    followButton.setOnClickListener {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            val res = Anilist.mutation.toggleFollow(user.id)
-                            if (res?.data?.toggleFollow != null) {
-                                withContext(Dispatchers.Main) {
-                                    snackString(R.string.success)
-                                    user.isFollowing = res.data.toggleFollow.isFollowing
-                                    followButton.text = followText()
+                        followButton.text = followText()
+                        followButton.setOnClickListener {
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                try {
+                                    val updated = ani.dantotsu.connections.shinigami.ShinigamiBackendClient()
+                                        .setFollow(token, user.id, !user.isFollowing)
+                                    user.isFollowing = updated.isFollowing
+                                    user.isFollower = updated.isFollower
+                                    withContext(Dispatchers.Main) {
+                                        followButton.text = followText()
+                                        snackString(R.string.success)
+                                    }
+                                } catch (e: Exception) {
+                                    withContext(Dispatchers.Main) {
+                                        snackString(e.message ?: "Failed to update follow status")
+                                    }
                                 }
                             }
                         }
-                    }
-                    profileAppBar.visibility = View.VISIBLE
-                    profileMenuButton.setOnClickListener {
-                        val popup = PopupMenu(context, profileMenuButton)
-                        popup.menuInflater.inflate(R.menu.menu_profile, popup.menu)
-                        popup.setOnMenuItemClickListener { item ->
-                            when (item.itemId) {
-                                R.id.action_view_on_anilist -> {
-                                    openLinkInBrowser(getString(R.string.anilist_link, user.name))
-                                    true
-                                }
 
-                                R.id.action_share_profile -> {
-                                    val shareIntent = Intent(Intent.ACTION_SEND)
-                                    shareIntent.type = "text/plain"
-                                    shareIntent.putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        getString(R.string.anilist_link, user.name)
-                                    )
-                                    startActivity(
-                                        Intent.createChooser(
-                                            shareIntent,
-                                            "Share Profile"
-                                        )
-                                    )
-                                    true
-                                }
-
-                                R.id.action_copy_user_id -> {
-                                    copyToClipboard(user.id.toString(), true)
-                                    true
-                                }
-
-                                R.id.action_block_user -> {
-                                    if (user.id == Anilist.userid) {
-                                        snackString("Cannot block yourself")
-                                        return@setOnMenuItemClickListener true
+                        profileAppBar.visibility = View.VISIBLE
+                        profileMenuButton.setOnClickListener {
+                            val popup = PopupMenu(context, profileMenuButton)
+                            popup.menuInflater.inflate(R.menu.menu_profile, popup.menu)
+                            popup.menu.findItem(R.id.action_view_on_anilist)?.isVisible = false
+                            popup.setOnMenuItemClickListener { item ->
+                                when (item.itemId) {
+                                    R.id.action_share_profile -> {
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_TEXT, "@" + user.username)
+                                        }
+                                        startActivity(Intent.createChooser(shareIntent, "Share Profile"))
+                                        true
                                     }
-                                    customAlertDialog().apply {
-                                        setTitle(R.string.warning)
-                                        setMessage("Toggle block status for ${user.name}?")
-                                        setPosButton(R.string.ok) {
-                                            lifecycleScope.launch(Dispatchers.IO) {
-                                                val success = Anilist.mutation.toggleBlock(user.id)
-                                                withContext(Dispatchers.Main) {
-                                                    snackString(if (success) "Updated block status" else "Failed to update block status")
+
+                                    R.id.action_copy_user_id -> {
+                                        copyToClipboard(user.id, true)
+                                        true
+                                    }
+
+                                    R.id.action_block_user -> {
+                                        if (currentUserId == user.id) {
+                                            snackString("Cannot block yourself")
+                                            return@setOnMenuItemClickListener true
+                                        }
+                                        customAlertDialog().apply {
+                                            setTitle(R.string.warning)
+                                            setMessage("Toggle block status for " + user.username + "?")
+                                            setPosButton(R.string.ok) {
+                                                lifecycleScope.launch(Dispatchers.IO) {
+                                                    try {
+                                                        val updated = ani.dantotsu.connections.shinigami.ShinigamiBackendClient()
+                                                            .setBlock(token, user.id, !user.isBlocked)
+                                                        withContext(Dispatchers.Main) {
+                                                            snackString(
+                                                                if (updated.isBlocked) "User blocked" else "User unblocked"
+                                                            )
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        withContext(Dispatchers.Main) {
+                                                            snackString(e.message ?: "Failed to update block status")
+                                                        }
+                                                    }
                                                 }
                                             }
+                                            setNegButton(R.string.cancel)
+                                            show()
                                         }
-                                        setNegButton(R.string.cancel)
-                                        show()
+                                        true
                                     }
-                                    true
+
+                                    else -> false
                                 }
-
-                                else -> false
                             }
+                            popup.show()
                         }
-                        popup.show()
-                    }
 
-                    profileUserAvatar.loadImage(user.avatar?.medium)
-                    profileUserAvatar.openImage(
-                        context.getString(R.string.avatar, user.name),
-                        user.avatar?.medium ?: ""
-                    )
-                    profileUserName.text = user.name
-                    profileUserName.setOnClickListener {
-                        copyToClipboard(profileUserName.text.toString(), true)
-                    }
-
-                    val bannerAnimations: ImageView =
-                        if (PrefManager.getVal(PrefName.BannerAnimations)) profileBannerImage else profileBannerImageNoKen
-
-                    blurImage(
-                        bannerAnimations,
-                        user.bannerImage ?: user.avatar?.medium
-                    )
-                    profileBannerImage.updateLayoutParams { height += statusBarHeight }
-                    profileBannerImageNoKen.updateLayoutParams { height += statusBarHeight }
-                    profileBannerGradient.updateLayoutParams { height += statusBarHeight }
-                    profileCloseButton.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
-                    profileMenuButton.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
-                    profileButtonContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
-
-                    profileBannerImage.openImage(
-                        context.getString(R.string.banner, user.name),
-                        user.bannerImage ?: user.avatar?.medium ?: ""
-                    )
-
-                    mMaxScrollSize = profileAppBar.totalScrollRange
-                    profileAppBar.addOnOffsetChangedListener(context)
-
-
-                    profileFollowerCount.text =
-                        (respond.data.followerPage?.pageInfo?.total ?: 0).toString()
-                    profileFollowerCountContainer.setOnClickListener {
-                        ContextCompat.startActivity(
-                            context,
-                            Intent(context, FollowActivity::class.java)
-                                .putExtra("title", getString(R.string.followers))
-                                .putExtra("userId", user.id),
-                            null
+                        val displayName = user.displayName?.takeIf { it.isNotBlank() } ?: user.username
+                        profileUserAvatar.loadImage(user.avatarUrl)
+                        profileUserAvatar.openImage(
+                            context.getString(R.string.avatar, displayName),
+                            user.avatarUrl ?: ""
                         )
-                    }
-                    profileFollowingCount.text =
-                        (respond.data.followingPage?.pageInfo?.total ?: 0).toString()
-                    profileFollowingCountContainer.setOnClickListener {
-                        ContextCompat.startActivity(
-                            context,
-                            Intent(context, FollowActivity::class.java)
-                                .putExtra("title", "Following")
-                                .putExtra("userId", user.id),
-                            null
-                        )
-                    }
+                        profileUserName.text = displayName
+                        profileUserName.setOnClickListener {
+                            copyToClipboard(user.username, true)
+                        }
 
-                    profileAnimeCount.text = user.statistics.anime.count.toString()
-                    profileAnimeCountContainer.setOnClickListener {
-                        ContextCompat.startActivity(
-                            context,
-                            Intent(context, ListActivity::class.java)
-                                .putExtra("anime", true)
-                                .putExtra("userId", user.id)
-                                .putExtra("username", user.name),
-                            null
-                        )
-                    }
+                        val bannerAnimations: ImageView =
+                            if (PrefManager.getVal(PrefName.BannerAnimations)) profileBannerImage
+                            else profileBannerImageNoKen
 
-                    profileMangaCount.text = user.statistics.manga.count.toString()
-                    profileMangaCountContainer.setOnClickListener {
-                        ContextCompat.startActivity(
-                            context,
-                            Intent(context, ListActivity::class.java)
-                                .putExtra("anime", false)
-                                .putExtra("userId", user.id)
-                                .putExtra("username", user.name),
-                            null
-                        )
-                    }
+                        blurImage(bannerAnimations, user.bannerUrl ?: user.avatarUrl)
+                        profileBannerImage.updateLayoutParams { height += statusBarHeight }
+                        profileBannerImageNoKen.updateLayoutParams { height += statusBarHeight }
+                        profileBannerGradient.updateLayoutParams { height += statusBarHeight }
+                        profileCloseButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                            topMargin += statusBarHeight
+                        }
+                        profileMenuButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                            topMargin += statusBarHeight
+                        }
+                        profileButtonContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                            topMargin += statusBarHeight
+                        }
 
-                    profileCloseButton.setOnClickListener {
-                        onBackPressedDispatcher.onBackPressed()
+                        profileBannerImage.openImage(
+                            context.getString(R.string.banner, displayName),
+                            user.bannerUrl ?: user.avatarUrl ?: ""
+                        )
+
+                        mMaxScrollSize = profileAppBar.totalScrollRange
+                        profileAppBar.addOnOffsetChangedListener(context)
+
+                        profileFollowerCount.text = profile.followerCount.toString()
+                        profileFollowerCountContainer.setOnClickListener {
+                            ContextCompat.startActivity(
+                                context,
+                                Intent(context, FollowActivity::class.java)
+                                    .putExtra("title", getString(R.string.followers))
+                                    .putExtra("userId", user.id),
+                                null
+                            )
+                        }
+                        profileFollowingCount.text = profile.followingCount.toString()
+                        profileFollowingCountContainer.setOnClickListener {
+                            ContextCompat.startActivity(
+                                context,
+                                Intent(context, FollowActivity::class.java)
+                                    .putExtra("title", "Following")
+                                    .putExtra("userId", user.id),
+                                null
+                            )
+                        }
+
+                        profileAnimeCount.text = profile.stats.animeTotal.toString()
+                        profileAnimeCountContainer.setOnClickListener(null)
+                        profileMangaCount.text = "—"
+                        profileMangaCountContainer.setOnClickListener(null)
+
+                        profileCloseButton.setOnClickListener {
+                            onBackPressedDispatcher.onBackPressed()
+                        }
                     }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    toast(e.message ?: "Failed to load profile")
+                    finish()
                 }
             }
         }
@@ -341,17 +325,16 @@ class ProfileActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListene
 
     private class ViewPagerAdapter(
         fragmentManager: FragmentManager,
-        lifecycle: Lifecycle,
-        private val user: Query.UserProfile
-    ) :
-        FragmentStateAdapter(fragmentManager, lifecycle) {
+        lifecycle: Lifecycle
+    ) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
-        override fun getItemCount(): Int = 3
+        override fun getItemCount(): Int = 2
+
         override fun createFragment(position: Int): Fragment = when (position) {
-            0 -> ProfileFragment.newInstance(user)
-            1 -> ActivityFragment.newInstance(ActivityType.OTHER_USER, user.id)
-            2 -> StatsFragment.newInstance(user)
-            else -> ProfileFragment.newInstance(user)
+            0 -> ShinigamiProfileFragment()
+            1 -> ShinigamiStatsFragment()
+            else -> ShinigamiProfileFragment()
         }
     }
+
 }
