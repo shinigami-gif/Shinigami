@@ -55,7 +55,6 @@ class EditProfileActivity : AppCompatActivity() {
                 )
             }.getOrNull() ?: return@launch
 
-            ShinigamiSessionStore(this@EditProfileActivity).save(session)
             finish()
         }
     }
