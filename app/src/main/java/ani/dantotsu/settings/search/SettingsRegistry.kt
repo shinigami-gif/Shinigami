@@ -106,27 +106,9 @@ object SettingsRegistry {
                 highlightKey = context.getString(R.string.ui_settings)
             )
         )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.download_manager_select),
-                desc = context.getString(R.string.download_manager_select_desc),
-                icon = R.drawable.ic_download_24,
-                category = context.getString(R.string.common),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.common)}",
-                targetActivity = SettingsCommonActivity::class.java,
-                highlightKey = context.getString(R.string.download_manager_select)
-            )
+
         )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.download_wifi_only),
-                desc = context.getString(R.string.download_wifi_only_desc),
-                icon = R.drawable.lan_24,
-                category = context.getString(R.string.common),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.common)}",
-                targetActivity = SettingsCommonActivity::class.java,
-                highlightKey = context.getString(R.string.download_wifi_only)
-            )
+
         )
         list.add(
             SearchableSetting(
@@ -150,16 +132,7 @@ object SettingsRegistry {
                 highlightKey = context.getString(R.string.backup_restore)
             )
         )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.change_download_location),
-                desc = context.getString(R.string.change_download_location_desc),
-                icon = R.drawable.ic_round_source_24,
-                category = context.getString(R.string.common),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.common)}",
-                targetActivity = SettingsCommonActivity::class.java,
-                highlightKey = context.getString(R.string.change_download_location)
-            )
+
         )
         list.add(
             SearchableSetting(
