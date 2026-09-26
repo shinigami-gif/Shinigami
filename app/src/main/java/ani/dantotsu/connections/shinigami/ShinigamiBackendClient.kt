@@ -35,9 +35,9 @@ class ShinigamiBackendClient(
             )
         }
 
-    suspend fun getMe(token: String): ShinigamiUser =
+    suspend fun getMe(token: String): ShinigamiUserProfile =
         withContext(Dispatchers.IO) {
-            executeUser(
+            executeUserProfile(
                 Request.Builder()
                     .url("$baseUrl/api/v1/users/me")
                     .header("Authorization", "Bearer $token")
@@ -58,9 +58,9 @@ class ShinigamiBackendClient(
             )
         }
 
-    suspend fun getProfile(token: String, userId: String): ShinigamiUser =
+    suspend fun getProfile(token: String, userId: String): ShinigamiUserProfile =
         withContext(Dispatchers.IO) {
-            executeUser(
+            executeUserProfile(
                 Request.Builder()
                     .url("$baseUrl/api/v1/users/$userId")
                     .header("Authorization", "Bearer $token")
@@ -146,7 +146,17 @@ class ShinigamiBackendClient(
         }
     }
 
-    private fun executeUserProfile(request: Request): ShinigamiUserProfile {\n        val response = http.newCall(request).execute()\n        response.use {\n            val body = it.body?.string().orEmpty()\n            if (!it.isSuccessful) throw IllegalStateException("Backend profile request failed: HTTP " + it.code)\n            return gson.fromJson(body, ShinigamiUserProfile::class.java)\n                ?: throw IllegalStateException("Backend returned an empty profile")\n        }\n    }\n\n    private fun executeUser(request: Request): ShinigamiUser {
+    private fun executeUserProfile(request: Request): ShinigamiUserProfile {
+        val response = http.newCall(request).execute()
+        response.use {
+            val body = it.body?.string().orEmpty()
+            if (!it.isSuccessful) {
+                throw IllegalStateException("Backend profile request failed: HTTP " + it.code)
+            }
+            return gson.fromJson(body, ShinigamiUserProfile::class.java)
+                ?: throw IllegalStateException("Backend returned an empty profile")
+        }
+    }\n\n    private fun executeUser(request: Request): ShinigamiUser {
         val response = http.newCall(request).execute()
         response.use {
             val body = it.body?.string().orEmpty()
