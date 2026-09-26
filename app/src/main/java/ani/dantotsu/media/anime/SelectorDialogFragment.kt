@@ -1,3 +1,4 @@
+import android.content.Intent
 package ani.dantotsu.media.anime
 
 import android.annotation.SuppressLint
@@ -134,7 +135,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                             LinearLayoutManager.VERTICAL,
                             false
                         )
-                    val adapter = ExtractorAdapter(onEpisodeDownloadHandler)
+                    val adapter = ExtractorAdapter()
                     binding.selectorRecyclerView.adapter = adapter
                     if (!ep.allStreams) {
                         ep.extractorCallback = { extractor ->
@@ -333,125 +334,11 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
     }
 
-    private val externalPlayerResult = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        Logger.log(result.data.toString())
-    }
-
-    private fun exportMagnetIntent(episode: Episode, video: Video): Intent {
-        val amnis = "com.amnis"
-        return Intent(Intent.ACTION_VIEW).apply {
-            component = ComponentName(amnis, "$amnis.gui.player.PlayerActivity")
-            data = Uri.parse(video.file.url)
-            putExtra("title", "${media?.name} - ${episode.title}")
-            putExtra("position", 0)
-            putExtra(Intent.EXTRA_RETURN_RESULT, true)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            putExtra("secure_uri", true)
-            val headersArray = arrayOf<String>()
-            video.file.headers.forEach {
-                headersArray.plus(arrayOf(it.key, it.value))
-            }
-            putExtra("headers", headersArray)
-        }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    @SuppressLint("UnsafeOptInUsageError")
     fun startExoplayer(media: Media) {
         if (!isAdded || _binding == null) return
         prevEpisode = null
-
-        episode?.let { ep ->
-            val video = ep.extractors?.find {
-                it.server.name == ep.selectedExtractor
-            }?.videos?.getOrNull(ep.selectedVideo)
-            video?.file?.url?.let { url ->
-                val isTorrent = url.startsWith("magnet:") || url.endsWith(".torrent") ||
-                        url.contains("/stream?hash=") || url.contains("127.0.0.1") ||
-                        ep.extra?.containsKey("torrentHash") == true
-                if (isTorrent) {
-                    val torrentManager = Injekt.get<TorrentServerManager>()
-                    if (torrentManager.isAvailable()) {
-                        val activity = activity ?: currActivity()
-                        launchIO {
-                            try {
-                                ani.dantotsu.addons.torrent.TorrentServerService.start()
-                                torrentManager.start()
-                                val torrentHash = ep.extra?.get("torrentHash")
-                                    ?: (if (url.contains("hash=")) url.substringAfter("hash=").substringBefore("&") else null)
-                                val index = ep.extra?.get("fileId")?.toIntOrNull()
-                                    ?: (if (url.contains("index=")) url.substringAfter("index=").substringBefore("&").toIntOrNull() else null)
-                                    ?: 0
-
-                                if (torrentHash != null) {
-                                    torrentManager.activeTorrentHash = torrentHash
-                                    torrentManager.prebuffer(torrentHash, index)
-                                } else if (url.startsWith("magnet:") || url.endsWith(".torrent")) {
-                                    torrentManager.activeTorrentHash?.let {
-                                        torrentManager.removeTorrent(it)
-                                    }
-                                    val currentTorrent = torrentManager.addTorrent(
-                                        url, video.quality.toString(), "", "", false
-                                    )
-                                    torrentManager.activeTorrentHash = currentTorrent.hash
-                                    torrentManager.prebuffer(currentTorrent.hash!!, index)
-                                    video.file.url = torrentManager.getLink(currentTorrent, index)
-                                }
-
-                                if (launch == true) {
-                                    Intent(activity, ExoplayerView::class.java).apply {
-                                        ExoplayerView.media = media
-                                        ExoplayerView.initialized = true
-                                        startActivity(this)
-                                    }
-                                } else {
-                                    val epKey = media.anime?.selectedEpisode
-                                    val targetEp = media.anime?.episodes?.getEpisode(epKey) ?: ep
-                                    if (targetEp != null) {
-                                        model.setEpisode(targetEp, "startExo no launch")
-                                    }
-                                }
-                                dismissAllowingStateLoss()
-                            } catch (e: Exception) {
-                                Injekt.get<CrashlyticsInterface>().logException(e)
-                                Logger.log(e)
-                                toast("Error starting video: ${e.message}")
-                                dismissAllowingStateLoss()
-                            }
-                        }
-                        return
-                    }
-                } else if (url.startsWith("magnet:")) {
-                    try {
-                        externalPlayerResult.launch(exportMagnetIntent(ep, video))
-                    } catch (e: ActivityNotFoundException) {
-                        val amnis = "com.amnis"
-                        try {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("market://details?id=$amnis")
-                                )
-                            )
-                            dismissAllowingStateLoss()
-                        } catch (e: ActivityNotFoundException) {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("https://play.google.com/store/apps/details?id=$amnis")
-                                )
-                            )
-                        }
-                    }
-                    return
-                }
-            }
-        }
-
         dismissAllowingStateLoss()
-        if (launch!!) {
+        if (launch == true) {
             stopAddingToList()
             val intent = Intent(activity, ExoplayerView::class.java)
             ExoplayerView.media = media
@@ -473,7 +360,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private inner class ExtractorAdapter(private val onEpisodeDownloadHandler: EpisodeDownloadHandler? = null) :
+    private inner class ExtractorAdapter :
         RecyclerView.Adapter<ExtractorAdapter.StreamViewHolder>() {
         val links = mutableListOf<VideoExtractor>()
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StreamViewHolder =
@@ -491,7 +378,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
             holder.binding.streamName.visibility = View.GONE
 
             holder.binding.streamRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-            holder.binding.streamRecyclerView.adapter = VideoAdapter(extractor, onEpisodeDownloadHandler)
+            holder.binding.streamRecyclerView.adapter = VideoAdapter(extractor)
         }
 
         override fun getItemCount(): Int = links.size
@@ -537,7 +424,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
             RecyclerView.ViewHolder(binding.root)
     }
 
-    private inner class VideoAdapter(private val extractor: VideoExtractor,private val onEpisodeDownloadHandler: EpisodeDownloadHandler?) :
+    private inner class VideoAdapter(private val extractor: VideoExtractor) :
         RecyclerView.Adapter<VideoAdapter.UrlViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UrlViewHolder {
@@ -553,11 +440,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
         override fun onBindViewHolder(holder: UrlViewHolder, position: Int) {
             val binding = holder.binding
             val video = extractor.videos[position]
-            if (isDownloadMenu == true) {
-                binding.urlDownload.visibility = View.VISIBLE
-            } else {
-                binding.urlDownload.visibility = View.GONE
-            }
+            binding.urlDownload.visibility = View.GONE
             val subtitles = extractor.subtitles
             if (subtitles.isNotEmpty()) {
                 binding.urlSub.visibility = View.VISIBLE
