@@ -162,16 +162,6 @@ class SettingsActivity : AppCompatActivity() {
                     */
                     Settings(
                         type = 1,
-                        name = getString(R.string.torrent_settings),
-                        desc = getString(R.string.torrent_settings_desc),
-                        icon = R.drawable.ic_round_dns_24,
-                        onClick = {
-                            startActivity(Intent(context, TorrentSettingsActivity::class.java))
-                        },
-                        isActivity = true
-                    ),
-                    Settings(
-                        type = 1,
                         name = getString(R.string.notifications),
                         desc = getString(R.string.notifications_desc),
                         icon = R.drawable.ic_round_notifications_none_24,
