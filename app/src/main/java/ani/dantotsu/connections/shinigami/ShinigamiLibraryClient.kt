@@ -7,7 +7,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 class ShinigamiLibraryClient(
-    private val backend: ShinigamiBackendClient = ShinigamiBackendClient(),
     private val http: OkHttpClient = OkHttpClient(),
     private val gson: Gson = Gson()
 ) {
