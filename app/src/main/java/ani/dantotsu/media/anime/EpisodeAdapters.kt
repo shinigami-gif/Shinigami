@@ -3,11 +3,9 @@ package ani.dantotsu.media.anime
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.LinearInterpolator
 import android.widget.LinearLayout
 import androidx.annotation.OptIn
 import androidx.core.view.isVisible
-import androidx.lifecycle.coroutineScope
 import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.R
@@ -23,8 +21,6 @@ import ani.dantotsu.util.customAlertDialog
 import ani.dantotsu.util.SizeFormatter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 fun handleProgress(cont: LinearLayout, bar: View, empty: View, mediaId: Int, ep: String) {
     val cleanNum = MediaNameAdapter.findChapterNumber(ep)?.let {
@@ -300,173 +296,24 @@ class EpisodeAdapter(
 
     inner class EpisodeListViewHolder(val binding: ItemEpisodeListBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        private val activeCoroutines = mutableSetOf<String>()
-
         init {
             itemView.setOnClickListener {
-                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0)
+                if (bindingAdapterPosition in arr.indices) {
                     fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
-            }
-            binding.itemDownload.setOnClickListener {
-                if (0 <= bindingAdapterPosition && bindingAdapterPosition < arr.size) {
-                    val episodeNumber = arr[bindingAdapterPosition].number
-                    if(AnimeDownloader.isDownloading(media.id, episodeNumber)){
-                        fragment.onAnimeEpisodeStopDownloadClick(episodeNumber)
-                        return@setOnClickListener
-                    } else if (downloadedEpisodes.contains(episodeNumber)) {
-                        binding.root.context.customAlertDialog().apply {
-                            setTitle("Delete Episode")
-                            setMessage("Are you sure you want to delete Episode $episodeNumber?")
-                            setPosButton(R.string.yes) {
-                                fragment.onAnimeEpisodeRemoveDownloadClick(episodeNumber)
-                            }
-                            setNegButton(R.string.no)
-                        }.show()
-                        return@setOnClickListener
-                    } else {
-                        fragment.onAnimeEpisodesDownload(arrayListOf(episodeNumber))
-                    }
                 }
             }
-            binding.itemDownload.setOnLongClickListener {
-                if (0 <= bindingAdapterPosition && bindingAdapterPosition < arr.size) {
-                    val episodeNumber = arr[bindingAdapterPosition].number
-                    if (downloadedEpisodes.contains(episodeNumber)) {
-                        //fragment.fixDownload(episodeNumber)
-                        fragment.requireContext().customAlertDialog().apply {
-                            setTitle("Multi Episode Deleter")
-                            setMessage("Enter the number of episodes to delete")
-                            val input = NumberPicker(currContext())
-                            input.minValue = 1
-                            input.maxValue = itemCount - bindingAdapterPosition
-                            input.value = 1
-                            setCustomView(input)
-                            setPosButton(R.string.ok) {
-                                binding.root.context.customAlertDialog().apply {
-                                    setTitle("Delete Episodes")
-                                    setMessage("Are you sure you want to delete Episodes $episodeNumber -> ${arr[bindingAdapterPosition + input.value - 1].number}?")
-                                    setPosButton(R.string.yes) {
-                                        fragment.multiDelete(episodeNumber, input.value)
-                                    }
-                                    setNegButton(R.string.no)
-                                }.show()
-                            }
-                            setNegButton(R.string.cancel)
-                            show()
-                        }
-                    }
-                    else {
-                        fragment.requireContext().customAlertDialog().apply {
-                            setTitle("Multi Episode Downloader")
-                            setMessage("Enter the number of episodes to download")
-                            val input = NumberPicker(currContext())
-                            input.minValue = 1
-                            input.maxValue = itemCount - bindingAdapterPosition
-                            input.value = 1
-                            setCustomView(input)
-                            setPosButton(R.string.ok) {
-                                fragment.multiDownload(episodeNumber, input.value)
-                            }
-                            setNegButton(R.string.cancel)
-                            show()
-                        }
-                    }
-                }
-
-                true
-            }
+            binding.itemDownload.visibility = View.GONE
+            binding.itemDownloadStatus.visibility = View.GONE
             binding.itemEpisodeDesc.setOnClickListener {
-                if (binding.itemEpisodeDesc.maxLines == 3)
-                    binding.itemEpisodeDesc.maxLines = 100
-                else
-                    binding.itemEpisodeDesc.maxLines = 3
+                binding.itemEpisodeDesc.maxLines = if (binding.itemEpisodeDesc.maxLines == 3) 100 else 3
             }
         }
 
-        /** Stop spin animator so cancel doesn't leave the icon tilted. */
-        private fun stopDownloadAnimation() {
-            binding.itemDownload.animate().cancel()
-            binding.itemDownload.rotation = 0f
-        }
-
-        /** Progress-only update: status text, no icon/animation/Glide side effects. */
-        fun bindProgressText(progress: String?) {
-            if (progress.isNullOrEmpty()) {
-                binding.itemDownloadStatus.visibility = View.GONE
-                return
-            }
-            binding.itemEpisodeDesc.visibility = View.GONE
-            binding.itemDownloadStatus.visibility = View.VISIBLE
-            binding.itemDownloadStatus.text = progress
-        }
-
-        fun bind(episodeNumber: String, progress: String?, desc: String?) {
-            if (progress != null) {
-                binding.itemEpisodeDesc.visibility = View.GONE
-                if (progress == "")
-                    binding.itemDownloadStatus.visibility = View.GONE
-                else
-                    binding.itemDownloadStatus.visibility = View.VISIBLE
-                binding.itemDownloadStatus.text = progress
-            } else {
-                binding.itemDownloadStatus.visibility = View.GONE
-                binding.itemDownloadStatus.text = ""
-            }
-            if (media.format == "LOCAL") {
-                binding.itemDownload.visibility = View.GONE
-            } else {
-                binding.itemDownload.visibility = View.VISIBLE
-                if (AnimeDownloader.isDownloading(media.id, episodeNumber)) {
-                    stopDownloadAnimation()
-                    binding.itemDownload.setImageResource(R.drawable.ic_sync)
-                    startOrContinueRotation(episodeNumber)
-                    binding.itemEpisodeDesc.visibility = View.GONE
-                } else if (downloadedEpisodes.contains(episodeNumber)) {
-                    stopDownloadAnimation()
-                    binding.itemEpisodeDesc.visibility = View.GONE
-                    binding.itemDownloadStatus.visibility = View.VISIBLE
-
-                    binding.itemDownload.setImageResource(R.drawable.ic_circle_check)
-                    binding.itemDownload.postDelayed({
-                        binding.itemDownload.setImageResource(R.drawable.ic_round_delete_24)
-                        stopDownloadAnimation()
-                    }, 1000)
-                } else {
-                    stopDownloadAnimation()
-                    binding.itemDownloadStatus.visibility = View.GONE
-                    binding.itemEpisodeDesc.visibility =
-                        if (desc != null && desc.trim(' ') != "") View.VISIBLE else View.GONE
-
-                    binding.itemDownload.setImageResource(R.drawable.ic_download_24)
-                }
-            }
-        }
-
-        private fun startOrContinueRotation(episodeNumber: String) {
-            if (!isRotationCoroutineRunningFor(episodeNumber)) {
-                val scope = fragment.lifecycle.coroutineScope
-                scope.launch {
-                    activeCoroutines.add(episodeNumber)
-                    try {
-                        while (AnimeDownloader.isDownloading(media.id, episodeNumber)) {
-                            binding.itemDownload.animate()
-                                .rotationBy(360f)
-                                .setDuration(1000)
-                                .setInterpolator(LinearInterpolator())
-                                .start()
-                            delay(1000)
-                        }
-                    } finally {
-                        activeCoroutines.remove(episodeNumber)
-                        // Cancel in-flight ViewPropertyAnimator so icon isn't left mid-spin
-                        stopDownloadAnimation()
-                    }
-                }
-            }
-        }
-
-        private fun isRotationCoroutineRunningFor(episodeNumber: String): Boolean {
-            return episodeNumber in activeCoroutines
+        fun bind(desc: String?) {
+            binding.itemDownload.visibility = View.GONE
+            binding.itemDownloadStatus.visibility = View.GONE
+            binding.itemEpisodeDesc.visibility = if (!desc.isNullOrBlank()) View.VISIBLE else View.GONE
+            binding.itemEpisodeDesc.text = desc ?: ""
         }
     }
 
