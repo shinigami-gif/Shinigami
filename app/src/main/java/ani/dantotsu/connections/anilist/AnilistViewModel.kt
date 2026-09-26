@@ -27,15 +27,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 suspend fun getUserId(context: Context? = null, block: () -> Unit) {
-    if ((!Anilist.initialized || Anilist.avatar == null) && PrefManager.getVal<String>(PrefName.AnilistToken) != "") {
-        if (Anilist.query.getUserData()) {
-            tryWithSuspend {
-                if (true && !true)
-                    context?.let { snackString(it.getString(R.string.error_loading_mal_user_data)) }
-            }
-        } else {
-            context?.let { snackString(it.getString(R.string.error_loading_anilist_user_data)) }
+    try {
+        val appContext = context ?: ani.dantotsu.App.instance
+        val token = appContext?.let { ani.dantotsu.connections.shinigami.ShinigamiSessionStore(it).getToken() }
+        if (!token.isNullOrBlank()) {
+            val profile = ani.dantotsu.connections.shinigami.ShinigamiBackendClient().getMe(token)
+            Anilist.userid = profile.user.id.toIntOrNull()
+            Anilist.username = profile.user.displayName ?: profile.user.username
+            Anilist.avatar = profile.user.avatarUrl
+            Anilist.bg = profile.user.bannerUrl
+            Anilist.episodesWatched = profile.stats.episodesWatched
+            Anilist.initialized = true
         }
+    } catch (e: Exception) {
+        Logger.log("Failed to load Shinigami user data: ${e.message}")
     }
     block.invoke()
 }
