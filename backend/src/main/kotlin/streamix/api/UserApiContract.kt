@@ -70,5 +70,6 @@ data class UserPage(
 
 data class SessionResponse(
     val user: ShinigamiUser,
-    val expiresAt: String? = null
+    val expiresAt: String? = null,
+    val token: String? = null
 )
