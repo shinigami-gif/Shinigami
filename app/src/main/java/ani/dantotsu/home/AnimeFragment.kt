@@ -25,7 +25,9 @@ import ani.dantotsu.bottomBarOrNull
 import ani.dantotsu.connections.anilist.AniMangaSearchResults
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.anilist.AnilistAnimeViewModel
-import ani.dantotsu.connections.anilist.getUserId
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.FragmentAnimeBinding
 import ani.dantotsu.media.CarouselLogoResolver
 import ani.dantotsu.media.MediaAdaptor
@@ -99,6 +101,22 @@ class AnimeFragment : Fragment() {
         binding.animePageRecyclerView.updatePaddingRelative(bottom = navBarHeight + 160f.px)
 
         animePageAdapter = AnimePageAdapter()
+        scope.launch(Dispatchers.IO) {
+            val sessionStore = ShinigamiSessionStore(requireContext())
+            val token = sessionStore.getToken()
+            if (!token.isNullOrBlank()) {
+                val profile = runCatching { ShinigamiBackendClient().getMe(token) }.getOrNull()
+                val notificationCount = runCatching { ShinigamiNotificationClient().unreadCount(token) }.getOrDefault(0)
+                withContext(Dispatchers.Main) {
+                    animePageAdapter.updateShinigamiIdentity(
+                        profile?.user?.id,
+                        profile?.user?.username,
+                        profile?.user?.avatarUrl,
+                        notificationCount
+                    )
+                }
+            }
+        }
 
         var loading = true
         if (model.notSet) {
