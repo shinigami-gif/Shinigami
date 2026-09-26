@@ -637,7 +637,7 @@ class AnilistQueries {
         return null
     }
 
-    suspend fun searchAniManga(
+    suspend fun searchAnime(
         type: String,
         page: Int? = null,
         perPage: Int? = null,
@@ -659,7 +659,7 @@ class AnilistQueries {
         id: Int? = null,
         hd: Boolean = false,
         adultOnly: Boolean = false
-    ): AniMangaSearchResults? {
+    ): AnimeSearchResults? {
         val variables = """{"type":"$type","isAdult":$isAdult
             ${if (adultOnly) ""","isAdult":true""" else ""}
             ${if (onList != null) ""","onList":$onList""" else ""}
@@ -725,7 +725,7 @@ class AnilistQueries {
 
             val pageInfo = response.pageInfo ?: return null
 
-            return AniMangaSearchResults(
+            return AnimeSearchResults(
                 type = type,
                 perPage = perPage,
                 search = search,
