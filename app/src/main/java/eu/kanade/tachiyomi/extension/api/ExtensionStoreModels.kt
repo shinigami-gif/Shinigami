@@ -106,7 +106,6 @@ data class NetworkAnimeExtensionStore(
         @ProtoNumber(5) val versionCode: Long = 0,
         @ProtoNumber(6) val versionName: String = "",
         @ProtoNumber(7) val contentWarning: ContentWarning = ContentWarning.UNSPECIFIED,
-        @ProtoNumber(8) val isTorrent: Boolean = false,
         @ProtoNumber(9) val sources: List<Source> = emptyList(),
     )
 
