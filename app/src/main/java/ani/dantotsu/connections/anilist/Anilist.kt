@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import ani.dantotsu.R
 import ani.dantotsu.client
-import ani.dantotsu.connections.comments.CommentsAPI
 import ani.dantotsu.currContext
 import ani.dantotsu.openLinkInBrowser
 import ani.dantotsu.settings.saving.PrefManager
@@ -305,8 +304,6 @@ object Anilist {
         PrefManager.setVal(PrefName.UnreadSubscriptionNotifications, 0)
         PrefManager.setVal(PrefName.UnreadCommentNotifications, 0)
         Anilist.unreadNotificationCount = 0
-                //logout from comments api
-        CommentsAPI.logout()
 
     }
 
