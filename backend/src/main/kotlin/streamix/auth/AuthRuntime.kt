@@ -1,6 +1,9 @@
 package streamix.auth
 
 import com.google.gson.Gson
+import streamix.chat.ChatService
+import streamix.chat.FileChatRepository
+import streamix.chat.ChatRepository
 import streamix.library.FileUserLibraryRepository
 import streamix.library.UserLibraryRepository
 import streamix.library.UserLibraryService
@@ -42,4 +45,6 @@ class AuthRuntime(
     val libraryService: UserLibraryService = UserLibraryService(library)
     val social: SocialRepository = FileSocialRepository(dataRoot.resolve("social"), users, gson)
     val socialService: SocialService = SocialService(social)
+    val chat: ChatRepository = FileChatRepository(dataRoot.resolve("chat"), users, gson)
+    val chatService: ChatService = ChatService(chat)
 }
