@@ -120,7 +120,10 @@ class AdminService(
         return audit.recent(limit)
     }
 
-    private fun moderationCount(status: ModerationStatus): Long =\n        users.allIds().count { moderation.state(it).status == status }.toLong()\n\n    private fun view(user: streamix.api.ShinigamiUser): AdminUserView {
+    private fun moderationCount(status: ModerationStatus): Long =
+        users.allIds().count { moderation.state(it).status == status }.toLong()
+
+    private fun view(user: streamix.api.ShinigamiUser): AdminUserView {
         val state = moderation.state(user.id)
         return AdminUserView(
             user = user,
