@@ -61,20 +61,6 @@ class ActivityMarkdownCreator : AppCompatActivity() {
         UNDERLINE("<u></u>", 4, 0)
     }
 
-    companion object {
-        val FORUM_CATEGORIES = listOf(
-            1 to "General Discussion",
-            2 to "Anime",
-            3 to "Manga",
-            4 to "Release Discussion",
-            5 to "News",
-            7 to "Music",
-            8 to "Light Novels",
-            17 to "Gaming",
-            18 to "Visual Novels"
-        )
-    }
-
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,7 +168,6 @@ class ActivityMarkdownCreator : AppCompatActivity() {
 
             val summary = binding.reviewSummaryEditText.text.toString().trim()
             val scoreText = binding.reviewScoreEditText.text.toString().trim()
-            val titleText = binding.threadTitleEditText.text.toString().trim()
 
             if (type == "review") {
                 if (text.length < 2200) {
