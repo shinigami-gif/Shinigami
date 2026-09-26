@@ -127,6 +127,32 @@ class StreamixHttpServer(
             }
         }
 
+        http.createContext(UserApiContract.FOLLOW) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val actor = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            val targetId = exchange.requestURI.path.removePrefix("/api/v1/users/").removeSuffix("/follow")
+            if (exchange.requestMethod.uppercase() != "POST") return@createContext method(exchange, "POST")
+            val enabled = query(exchange, "enabled")?.toBooleanStrictOrNull()
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "enabled is required"))
+            val user = runCatching { auth.users.setRelationship(actor.id, targetId, following = enabled) }
+                .getOrElse { return@createContext respond(exchange, 404, mapOf("error" to (it.message ?: "user not found"))) }
+            respond(exchange, 200, user)
+        }
+
+        http.createContext(UserApiContract.BLOCK) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val actor = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            val targetId = exchange.requestURI.path.removePrefix("/api/v1/users/").removeSuffix("/block")
+            if (exchange.requestMethod.uppercase() != "POST") return@createContext method(exchange, "POST")
+            val enabled = query(exchange, "enabled")?.toBooleanStrictOrNull()
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "enabled is required"))
+            val user = runCatching { auth.users.setRelationship(actor.id, targetId, blocked = enabled) }
+                .getOrElse { return@createContext respond(exchange, 404, mapOf("error" to (it.message ?: "user not found"))) }
+            respond(exchange, 200, user)
+        }
+
         http.createContext(UserApiContract.SEARCH) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             if (!method(exchange, "GET")) return@createContext
