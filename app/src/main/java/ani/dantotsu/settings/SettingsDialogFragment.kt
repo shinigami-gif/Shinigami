@@ -111,7 +111,7 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
             binding.settingsLogin.setText(R.string.login)
             binding.settingsLogin.setOnClickListener {
                 dismiss()
-                dismiss()
+                startActivity(Intent(requireActivity(), MainActivity::class.java).putExtra("FRAGMENT_CLASS_NAME", LoginFragment::class.java.name))
             }
         }
         val isRescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
