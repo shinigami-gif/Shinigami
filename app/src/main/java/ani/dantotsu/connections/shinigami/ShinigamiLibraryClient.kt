@@ -10,6 +10,19 @@ class ShinigamiLibraryClient(
     private val http: OkHttpClient = OkHttpClient(),
     private val gson: Gson = Gson()
 ) {
+    suspend fun deleteFromLibrary(token: String, mediaId: Long) = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url(ShinigamiBackendConfig.baseUrl + "/api/v1/users/me/library/" + mediaId)
+            .header("Authorization", "Bearer " + token)
+            .delete()
+            .build()
+        http.newCall(request).execute().use {
+            if (!it.isSuccessful) {
+                throw IllegalStateException("Library delete failed: HTTP " + it.code)
+            }
+        }
+    }
+
     suspend fun getLibrary(token: String, page: Int = 1, perPage: Int = 50): ShinigamiLibraryPage =
         withContext(Dispatchers.IO) {
             val baseUrl = ShinigamiBackendConfig.baseUrl
