@@ -37,18 +37,18 @@ class FileUserRepository(
     private val lock = Any()
 
     override fun findById(id: String): ShinigamiUser? = synchronized(lock) {
-        read().firstOrNull { it.id == id }?.toPublic()
+        read().firstOrNull { it.id == id }?.toApiUser()
     }
 
     override fun findByExternalIdentity(provider: String, subject: String): ShinigamiUser? =
         synchronized(lock) {
             read().firstOrNull {
                 it.externalProvider == provider && it.externalSubject == subject
-            }?.toPublic()
+            }?.toApiUser()
         }
 
     override fun findByUsername(username: String): ShinigamiUser? = synchronized(lock) {
-        read().firstOrNull { it.username.equals(username, ignoreCase = true) }?.toPublic()
+        read().firstOrNull { it.username.equals(username, ignoreCase = true) }?.toApiUser()
     }
 
     override fun count(): Long = synchronized(lock) {
@@ -74,7 +74,7 @@ class FileUserRepository(
                 .sortedBy { it.username.lowercase() }
                 .drop((safePage - 1) * safeSize)
                 .take(safeSize)
-                .map(StoredUser::toPublic)
+                .map(StoredUser::toApiUser)
                 .toList()
         }
 
@@ -111,7 +111,7 @@ class FileUserRepository(
             email = email
         )
         write(users + stored)
-        stored.toPublic()
+        stored.toApiUser()
     }
 
     override fun update(user: ShinigamiUser): ShinigamiUser = synchronized(lock) {
@@ -135,7 +135,7 @@ class FileUserRepository(
             isModerator = user.isModerator
         )
         write(users.map { if (it.id == user.id) updated else it })
-        updated.toPublic()
+        updated.toApiUser()
     }
 
     override fun setRelationship(userId: String, targetUserId: String, following: Boolean?, blocked: Boolean?): ShinigamiUser = synchronized(lock) {
@@ -196,7 +196,7 @@ class FileUserRepository(
         }
     }
 
-    private fun StoredUser.toPublic() = ShinigamiUser(
+    private fun StoredUser.toApiUser() = ShinigamiUser(
         id = id,
         username = username,
         displayName = displayName,
