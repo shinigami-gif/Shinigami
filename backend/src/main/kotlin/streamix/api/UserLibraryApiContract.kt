@@ -40,3 +40,16 @@ data class UserLibraryPage(
     val hasNextPage: Boolean,
     val total: Long? = null
 )
+
+
+data class UpsertLibraryRequest(
+    val status: LibraryStatus? = null,
+    val progress: Int = 0,
+    val score: Double? = null,
+    val isFavorite: Boolean = false,
+    val notes: String? = null
+)
+
+data class LibraryStatusRequest(val status: LibraryStatus?)
+data class LibraryProgressRequest(val progress: Int)
+data class LibraryScoreRequest(val score: Double?)
