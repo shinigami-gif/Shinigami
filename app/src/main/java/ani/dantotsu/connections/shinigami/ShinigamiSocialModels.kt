@@ -1,0 +1,7 @@
+package ani.dantotsu.connections.shinigami
+
+data class ShinigamiActivity(val id: String, val author: ShinigamiUser, val type: String, val text: String? = null, val mediaId: Long? = null, val mediaTitle: String? = null, val replyCount: Int = 0, val likeCount: Int = 0, val isLiked: Boolean = false, val isSubscribed: Boolean = false, val createdAt: String)
+data class ShinigamiActivityReply(val id: String, val activityId: String, val author: ShinigamiUser, val text: String, val likeCount: Int = 0, val isLiked: Boolean = false, val createdAt: String)
+data class ShinigamiForumThread(val id: String, val title: String, val body: String, val author: ShinigamiUser, val replyCount: Int = 0, val viewCount: Int = 0, val likeCount: Int = 0, val isLiked: Boolean = false, val isSubscribed: Boolean = false, val isLocked: Boolean = false, val isSticky: Boolean = false, val mediaIds: List<Long> = emptyList(), val createdAt: String, val updatedAt: String? = null)
+data class ShinigamiForumComment(val id: String, val threadId: String, val author: ShinigamiUser, val content: String, val parentCommentId: String? = null, val likeCount: Int = 0, val isLiked: Boolean = false, val isLocked: Boolean = false, val createdAt: String, val updatedAt: String? = null)
+data class ShinigamiSocialPage<T>(val items: List<T> = emptyList(), val page: Int = 1, val perPage: Int = 20, val hasNextPage: Boolean = false, val total: Long? = null)
