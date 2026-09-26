@@ -22,16 +22,22 @@ class ShinigamiCommentsClient(
                 .header("Authorization", "Bearer " + token).get().build())
         }
 
+    suspend fun get(token: String, commentId: String): ShinigamiComment =
+        withContext(Dispatchers.IO) {
+            executeComment(Request.Builder().url(baseUrl + "/api/v1/social/comments/" + commentId)
+                .header("Authorization", "Bearer " + token).get().build())
+        }
+
     suspend fun replies(token: String, commentId: String, page: Int = 1, perPage: Int = 20): ShinigamiCommentPage =
         withContext(Dispatchers.IO) {
             executePage(Request.Builder().url(baseUrl + "/api/v1/social/comments/" + commentId + "/replies?page=" + page + "&perPage=" + perPage)
                 .header("Authorization", "Bearer " + token).get().build())
         }
 
-    suspend fun create(token: String, mediaId: Long, content: String, parentCommentId: String? = null): ShinigamiComment =
+    suspend fun create(token: String, mediaId: Long, content: String, parentCommentId: String? = null, tag: Int? = null): ShinigamiComment =
         withContext(Dispatchers.IO) {
             executeComment(Request.Builder().url(baseUrl + "/api/v1/social/comments")
-                .header("Authorization", "Bearer " + token).post(json(mapOf("mediaId" to mediaId, "content" to content, "parentCommentId" to parentCommentId))).build())
+                .header("Authorization", "Bearer " + token).post(json(mapOf("mediaId" to mediaId, "content" to content, "parentCommentId" to parentCommentId, "tag" to tag))).build())
         }
 
     suspend fun edit(token: String, commentId: String, content: String): ShinigamiComment =
