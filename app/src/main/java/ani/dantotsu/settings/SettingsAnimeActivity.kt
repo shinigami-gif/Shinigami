@@ -10,18 +10,13 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.R
 import ani.dantotsu.databinding.ActivitySettingsAnimeBinding
-import ani.dantotsu.download.DownloadsManager
 import ani.dantotsu.initActivity
-import ani.dantotsu.media.MediaType
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.restartApp
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
-import ani.dantotsu.util.customAlertDialog
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 class SettingsAnimeActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsAnimeBinding
@@ -52,36 +47,8 @@ class SettingsAnimeActivity : AppCompatActivity() {
                         },
                         isActivity = true
                     ),
-                    Settings(
-                        type = 1,
-                        name = getString(R.string.purge_anime_downloads),
-                        desc = getString(R.string.purge_anime_downloads_desc),
-                        icon = R.drawable.ic_round_delete_24,
-                        onClick = {
-                            context.customAlertDialog().apply {
-                                setTitle(R.string.purge_anime_downloads)
-                                setMessage(R.string.purge_confirm, getString(R.string.anime))
-                                setPosButton(R.string.yes, onClick = {
-                                    val downloadsManager = Injekt.get<DownloadsManager>()
-                                    downloadsManager.purgeDownloads(MediaType.ANIME)
-                                })
-                                setNegButton(R.string.no)
-                                show()
-                            }
-                        }
 
-                    ),
-                    Settings(
-                        type = 1,
-                        name = getString(R.string.preferred_download_resolutions),
-                        desc = (PrefManager.getVal<List<String>>(PrefName.PreferredDownloadResolutions)).joinToString(", "),
-                        icon = R.drawable.ic_round_high_quality_24,
-                        onClick = {
-                            ResolutionPriorityDialog.show(context, null) {
-                                (settingsRecyclerView.adapter as? SettingsAdapter)?.notifyDataSetChanged()
-                            }
-                        }
-                    ),
+
                     Settings(
                         type = 2,
                         name = getString(R.string.auto_select_server_title),
@@ -92,16 +59,7 @@ class SettingsAnimeActivity : AppCompatActivity() {
                             PrefManager.setVal(PrefName.AutoSelectServer, isChecked)
                         }
                     ),
-                    Settings(
-                        type = 2,
-                        name = getString(R.string.smart_download_anime),
-                        desc = getString(R.string.smart_download_anime_desc),
-                        icon = R.drawable.ic_download_24,
-                        isChecked = PrefManager.getVal(PrefName.SmartDownloadAnime),
-                        switch = { isChecked, _ ->
-                            PrefManager.setVal(PrefName.SmartDownloadAnime, isChecked)
-                        }
-                    ),
+
                     Settings(
                         type = 2,
                         name = getString(R.string.prefer_dub),
@@ -171,39 +129,3 @@ class SettingsAnimeActivity : AppCompatActivity() {
     }
 }
 
-object ResolutionPriorityDialog {
-    val ALL_RESOLUTIONS = listOf("1080p", "720p", "480p", "360p", "240p", "144p")
-
-    fun show(
-        context: android.content.Context,
-        extensionName: String? = null,
-        onUpdated: ((List<String>) -> Unit)? = null
-    ) {
-        val currentResolutions = PrefManager.getPreferredDownloadResolutions(extensionName).toMutableList()
-        val fullList = currentResolutions + ALL_RESOLUTIONS.filter { it !in currentResolutions }
-        val checkedItems = fullList.map { it in currentResolutions }.toBooleanArray()
-
-        context.customAlertDialog().apply {
-            setTitle(R.string.preferred_download_resolutions)
-            multiChoiceItems(fullList.toTypedArray(), checkedItems) { updatedSelection ->
-                currentResolutions.clear()
-                fullList.forEachIndexed { index, res ->
-                    if (updatedSelection[index]) {
-                        currentResolutions.add(res)
-                    }
-                }
-            }
-            setPosButton(R.string.ok) {
-                val toSave = if (currentResolutions.isEmpty()) ALL_RESOLUTIONS else currentResolutions
-                PrefManager.setPreferredDownloadResolutions(extensionName, toSave)
-                onUpdated?.invoke(toSave)
-            }
-            setNeutralButton(R.string.reset) {
-                PrefManager.setPreferredDownloadResolutions(extensionName, ALL_RESOLUTIONS)
-                onUpdated?.invoke(ALL_RESOLUTIONS)
-            }
-            setNegButton(R.string.cancel)
-            show()
-        }
-    }
-}
