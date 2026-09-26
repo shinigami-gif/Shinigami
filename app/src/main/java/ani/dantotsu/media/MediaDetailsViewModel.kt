@@ -56,24 +56,17 @@ class MediaDetailsViewModel : ViewModel() {
     }
 
 
-    fun loadSelected(media: Media, isDownload: Boolean = false): Selected {
+    fun loadSelected(media: Media): Selected {
         if (media.format == "LOCAL" && media.selected != null) {
             return media.selected!!
         }
-        val data =
-            PrefManager.getNullableCustomVal("Selected-${media.id}", null, Selected::class.java)
-                ?: Selected().let {
-                    it.sourceIndex = 0
-                    it.preferDub = PrefManager.getVal(PrefName.SettingsPreferDub)
-                    saveSelected(media.id, it)
-                    it
-                }
-        if (isDownload) {
-            if (media.anime != null) {
-                data.sourceIndex = AnimeSources.list.size - 1
+        return PrefManager.getNullableCustomVal("Selected-${media.id}", null, Selected::class.java)
+            ?: Selected().let {
+                it.sourceIndex = 0
+                it.preferDub = PrefManager.getVal(PrefName.SettingsPreferDub)
+                saveSelected(media.id, it)
+                it
             }
-        }
-        return data
     }
 
     var continueMedia: Boolean? = null
@@ -911,8 +904,7 @@ class MediaDetailsViewModel : ViewModel() {
         manager: FragmentManager,
         launch: Boolean = true,
         prevEp: String? = null,
-        isDownload: Boolean = false,
-        episodes: ArrayList<String> = arrayListOf() // used for handling an array of episodes to download or to view a single episode
+        episodes: ArrayList<String> = arrayListOf() // episodes to view
     ) {
         Handler(Looper.getMainLooper()).post {
             if (manager.findFragmentByTag("dialog") == null && !manager.isDestroyed && !manager.isStateSaved) {
@@ -931,7 +923,6 @@ class MediaDetailsViewModel : ViewModel() {
                         media.selected!!.server,
                         launch,
                         prevEp,
-                        isDownload,
                         episodes
                     )
                 try {
