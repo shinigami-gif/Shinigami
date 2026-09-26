@@ -135,7 +135,7 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                 }
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     val ctx = context
-                    val offline = (ctx != null && !isOnline(ctx)) || PrefManager.getVal(PrefName.OfflineMode)
+                    val offline = ctx != null && !isOnline(ctx)
                     val isLocal = model.watchSources?.list?.getOrNull(media.selected!!.sourceIndex)?.name == "Local"
                     if (!offline && !isLocal) {
                         val kitsuEpisodes = async { model.loadKitsuEpisodes(media, force = true) }
@@ -200,8 +200,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                 if (!loaded) {
                     model.watchSources = if (media.isAdult) HAnimeSources else AnimeSources
 
-                    val offlineMode = false
-
                     headerAdapter = AnimeWatchAdapter(it, this, model.watchSources!!)
                     headerAdapter.scanlatorSelectionListener = this
                     episodeAdapter =
@@ -217,8 +215,7 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
 
                     viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                         val ctx = context
-                        val offline =
-                            (ctx != null && !isOnline(ctx)) || PrefManager.getVal(PrefName.OfflineMode)
+                        val offline = ctx != null && !isOnline(ctx)
                         val isLocal = model.watchSources!!.list.getOrNull(media.selected!!.sourceIndex)?.name == "Local"
                         if (offline && !isLocal) {
                             media.selected!!.sourceIndex = model.watchSources!!.list.lastIndex
@@ -609,7 +606,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
 
         model.saveSelected(media.id, selected)
         headerAdapter.handleEpisodes()
-        episodeAdapter.offlineMode = false
         episodeAdapter.notifyItemRangeRemoved(0, episodeAdapter.arr.size)
         var arr: ArrayList<Episode> = arrayListOf()
         if (media.anime!!.episodes != null) {
