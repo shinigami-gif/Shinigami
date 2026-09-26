@@ -4,7 +4,6 @@ import ani.dantotsu.Lazier
 import ani.dantotsu.lazyList
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
-import kotlinx.coroutines.flow.first
 
 object AnimeSources : WatchSources() {
     override var list: List<Lazier<BaseParser>> = runtimeSources()
@@ -26,17 +25,8 @@ object AnimeSources : WatchSources() {
 
     }
 
-    fun performReorderAnimeSources() {
-        list = list.filter { it.name != "Torrent" && it.name != "Local" }
-        list = sortPinnedAnimeSources(list, pinnedAnimeSources) + listOf(
-            Lazier({ TorrentAnimeParser() }, "Torrent"),
-            Lazier({ LocalAnimeParser() }, "Local")
-        )
-    }
-
     private fun runtimeSources(): List<Lazier<BaseParser>> = listOf(
         Lazier({ StreamixAnimeParser() }, "Shinigami Runtime"),
-        Lazier({ TorrentAnimeParser() }, "Torrent"),
         Lazier({ LocalAnimeParser() }, "Local")
     )
 
