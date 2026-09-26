@@ -555,10 +555,9 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
                     withContext(Dispatchers.IO) {
                         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
                         if (rescueMode) {
-                            if (MAL.token != null && MAL.episodesWatched == null) {
-                                tryWithSuspend { MAL.query.getUserData() }
+                            withContext(Dispatchers.Main) {
+                                getUserId(context) { load() }
                             }
-                            withContext(Dispatchers.Main) { load() }
                         } else {
                             Anilist.userid =
                                 PrefManager.getNullableVal<String>(PrefName.AnilistUserId, null)
