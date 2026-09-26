@@ -239,7 +239,7 @@ class CommentItem(
                 val previousVoteType = comment.userVoteType
                 val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
                 scope.launch {
-                    val success = /*legacy CommentsAPI removed*/.vote(comment.id, voteType)
+                    val success = commentsFragment.voteComment(comment.id, voteType)
                     if (success) {
                         comment.userVoteType = voteType
                         if (previousVoteType == 1) {
@@ -252,10 +252,10 @@ class CommentItem(
             }
             commentTotalVotes.text = (comment.upvotes - comment.downvotes).toString()
             commentUserAvatar.openImage(
-                commentsFragment.activity.getString(R.string.avatar, comment.username),
+                commentsFragment.activity.getString(R.string.avatar, comment.author.username),
                 comment.author.avatarUrl ?: ""
             )
-            comment.profilePictureUrl?.let { commentUserAvatar.loadImage(it) }
+            comment.author.avatarUrl?.let { commentUserAvatar.loadImage(it) }
             commentUserName.text = comment.username
             val userColor = "[${levelColor.second}]"
             commentUserLevel.text = userColor
