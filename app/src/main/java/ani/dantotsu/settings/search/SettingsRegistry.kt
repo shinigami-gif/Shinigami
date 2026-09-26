@@ -8,7 +8,6 @@ import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.settings.AnilistSettingsActivity
 import ani.dantotsu.settings.FAQActivity
 import ani.dantotsu.settings.PlayerSettingsActivity
-import ani.dantotsu.settings.ReaderSettingsActivity
 import ani.dantotsu.settings.SettingsAboutActivity
 import ani.dantotsu.settings.SettingsAccountActivity
 import ani.dantotsu.settings.SettingsAnimeActivity
@@ -337,41 +336,6 @@ object SettingsRegistry {
                 breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.anime)} > ${context.getString(R.string.player_settings)}",
                 targetActivity = PlayerSettingsActivity::class.java,
                 highlightKey = context.getString(R.string.cursed_speeds)
-            )
-        )
-
-        // 6. Manga & Reader Settings
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.reader_settings),
-                desc = context.getString(R.string.reader_settings_desc),
-                icon = R.drawable.ic_round_reader_settings,
-                category = context.getString(R.string.manga),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.manga)}",
-                targetActivity = ReaderSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.reader_settings)
-            )
-        )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.true_colors),
-                desc = context.getString(R.string.true_colors),
-                icon = R.drawable.ic_palette,
-                category = context.getString(R.string.reader_settings),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.manga)} > ${context.getString(R.string.reader_settings)}",
-                targetActivity = ReaderSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.true_colors)
-            )
-        )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.crop_borders),
-                desc = context.getString(R.string.crop_borders),
-                icon = R.drawable.ic_round_screen_rotation_alt_24,
-                category = context.getString(R.string.reader_settings),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.manga)} > ${context.getString(R.string.reader_settings)}",
-                targetActivity = ReaderSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.crop_borders)
             )
         )
 
