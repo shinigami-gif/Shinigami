@@ -127,6 +127,29 @@ class FileUserRepository(
         updated.toPublic()
     }
 
+    override fun setRelationship(userId: String, targetUserId: String, following: Boolean?, blocked: Boolean?): ShinigamiUser = synchronized(lock) {
+        require(userId != targetUserId) { "cannot modify relationship with self" }
+        val users = read()
+        val current = users.firstOrNull { it.id == userId } ?: error("user not found")
+        users.firstOrNull { it.id == targetUserId } ?: error("target user not found")
+        val updated = current.copy(
+            isFollowing = following ?: current.isFollowing,
+            isBlocked = blocked ?: current.isBlocked
+        )
+        write(users.map { if (it.id == userId) updated else it })
+        updated.toPublic()
+    }
+
+    override fun relationship(userId: String, targetUserId: String): UserRelationship {
+        val user = read().firstOrNull { it.id == userId } ?: error("user not found")
+        return UserRelationship(
+            userId = targetUserId,
+            following = user.isFollowing && user.id == targetUserId,
+            follower = false,
+            blocked = user.isBlocked && user.id == targetUserId
+        )
+    }
+
     private fun read(): List<StoredUser> {
         if (!Files.exists(file)) return emptyList()
         val json = Files.readString(file)
