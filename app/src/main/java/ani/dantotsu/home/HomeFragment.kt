@@ -29,6 +29,9 @@ import ani.dantotsu.Refresh
 import ani.dantotsu.blurImage
 import ani.dantotsu.bottomBarOrNull
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.connections.anilist.AnilistHomeViewModel
 import ani.dantotsu.connections.anilist.getUserId
