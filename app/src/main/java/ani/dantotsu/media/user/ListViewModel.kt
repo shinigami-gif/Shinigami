@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.shinigami.ShinigamiLibraryClient
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
-import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.media.Media
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -20,11 +19,6 @@ class ListViewModel : ViewModel() {
     fun getLists(): LiveData<MutableMap<String, ArrayList<Media>>> = lists
 
     suspend fun loadLists(anime: Boolean, userId: Int = 0, sortOrder: String? = null) {
-        val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-        if (rescueMode) {
-            loadListsFromMAL(anime)
-            return
-        }
         if (!anime) {
             lists.postValue(mutableMapOf())
             unfilteredLists.postValue(mutableMapOf())
@@ -81,43 +75,6 @@ class ListViewModel : ViewModel() {
                 }
             }
 
-            lists.postValue(result)
-            unfilteredLists.postValue(result)
-        }
-    }
-
-    private suspend fun loadListsFromMAL(anime: Boolean) {
-        tryWithSuspend {
-            val statuses = if (anime)
-                listOf("watching" to "Watching", "completed" to "Completed", "plan_to_watch" to "Planned",
-                    "on_hold" to "Paused", "dropped" to "Dropped")
-            else
-                listOf("reading" to "Reading", "completed" to "Completed", "plan_to_read" to "Planned",
-                    "on_hold" to "Paused", "dropped" to "Dropped")
-
-            val result = mutableMapOf<String, ArrayList<Media>>()
-            for ((malStatus, label) in statuses) {
-                var offset = 0
-                val limit = 1000
-                val mediaList = ArrayList<Media>()
-                var hasNext = true
-                while (hasNext) {
-                    val response = if (anime)
-                        MAL.query.getUserAnimeList(status = malStatus, limit = limit, offset = offset)
-                    else
-                        MAL.query.getUserMangaList(status = malStatus, limit = limit, offset = offset)
-
-                    response?.data?.let { entries ->
-                        mediaList.addAll(entries.map { Media(it, anime) })
-                    }
-                    if (response?.paging?.next != null) {
-                        offset += limit
-                    } else {
-                        hasNext = false
-                    }
-                }
-                if (mediaList.isNotEmpty()) result[label] = mediaList
-            }
             lists.postValue(result)
             unfilteredLists.postValue(result)
         }
