@@ -280,8 +280,6 @@ enum class PrefName(val data: Pref) {
     DiscordUserName(Pref(Location.Protected, String::class, "")),
     DiscordAvatar(Pref(Location.Protected, String::class, "")),
     AnilistToken(Pref(Location.Protected, String::class, "")),
-    AnilistUserName(Pref(Location.Protected, String::class, "")),
-    AnilistUserId(Pref(Location.Protected, String::class, "")),
     AppPassword(Pref(Location.Protected, String::class, "")),
     BiometricToken(Pref(Location.Protected, String::class, "")),
     OverridePassword(Pref(Location.Protected, Boolean::class, false)),
