@@ -25,7 +25,6 @@ import ani.dantotsu.others.Jikan
 import ani.dantotsu.others.Kitsu
 import ani.dantotsu.others.TmdbService
 import ani.dantotsu.parsers.AnimeSources
-import ani.dantotsu.parsers.OfflineAnimeParser
 import ani.dantotsu.parsers.ShowResponse
 import ani.dantotsu.parsers.VideoExtractor
 import ani.dantotsu.parsers.WatchSources
@@ -562,9 +561,8 @@ $resolvedFmt"
     }
 
     suspend fun loadEpisodes(media: Media, i: Int, invalidate: Boolean = false) {
-        val isOffline = watchSources?.get(i) is OfflineAnimeParser
         val current = epsLoaded[i]
-        if (current.isNullOrEmpty() || invalidate || isOffline) {
+        if (current.isNullOrEmpty() || invalidate) {
             val loaded = watchSources?.loadEpisodesFromMedia(
                 i = i,
                 media = media,
