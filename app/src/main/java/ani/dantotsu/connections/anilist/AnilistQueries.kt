@@ -56,7 +56,7 @@ class AnilistQueries {
     suspend fun getMedia(id: Int, mal: Boolean = false, type: String? = null): Media? {
         val typeArg = if (type != null) "type: $type," else ""
         val response = executeQuery<Query.Media>(
-            """{Media($typeArg${if (!mal) "id:" else "idMal:"}$id){id idMal status chapters episodes nextAiringEpisode{episode}type meanScore isAdult isFavourite format bannerImage coverImage{large}title{english romaji userPreferred}}}""",
+            """{Media($typeArg${if (!mal) "id:" else "idMal:"}$id){id idMal status chapters episodes nextAiringEpisode{episode}type meanScore format bannerImage coverImage{large}title{english romaji userPreferred}}}""",
             force = true
         )
         val fetchedMedia = response?.data?.media ?: return null
@@ -76,7 +76,7 @@ class AnilistQueries {
 
         val idsString = ids.joinToString(",")
         val response = executeQuery<Query.MediaList>(
-            """{Page(page:1,perPage:50){media(id_in:[${idsString}],isAdult:false){id idMal type isAdult popularity status(version:2) chapters episodes nextAiringEpisode{episode} meanScore isFavourite format bannerImage coverImage{large} title{english romaji userPreferred} startDate{year}}}}""",
+            """{Page(page:1,perPage:50){media(id_in:[${idsString}],isAdult:false){id idMal type isAdult popularity status(version:2) chapters episodes nextAiringEpisode{episode} meanScore format bannerImage coverImage{large} title{english romaji userPreferred} startDate{year}}}}""",
             force = true
         )
         val fetchedMediaList = response?.data?.page?.media ?: return null
@@ -104,7 +104,7 @@ class AnilistQueries {
                         val fetchedMedia = response?.data?.media ?: return
                         val user = response?.data?.page
                         if (fetchedMedia.idMal != null) media.idMAL = fetchedMedia.idMal
-                        media.isFav = fetchedMedia.isFavourite ?: false
+                        media.isFav = false
                         media.source = fetchedMedia.source?.toString()?.replace("_", " ")?.lowercase()?.split(" ")?.joinToString(" ") { it.replaceFirstChar(Char::titlecase) }
                         media.countryOfOrigin = fetchedMedia.countryOfOrigin
                         media.format = fetchedMedia.format?.toString()
@@ -433,7 +433,7 @@ class AnilistQueries {
     }
 
     private fun recommendationQuery(sort: String = "RATING_DESC", page: Int = 1, perPage: Int = 50): String {
-        return """ Page(page: $page, perPage:$perPage) { $standardPageInformation recommendations(sort: $sort, onList: false) { rating userRating mediaRecommendation { id idMal isAdult mediaListEntry { progress progressVolumes private score(format:POINT_100) status } chapters volumes isFavourite format episodes nextAiringEpisode {episode} popularity meanScore isFavourite format title {english romaji userPreferred } type status(version: 2) bannerImage coverImage { large } description genres tags { name isMediaSpoiler } } } } """
+        return """ Page(page: $page, perPage:$perPage) { $standardPageInformation recommendations(sort: $sort, onList: false) { rating userRating mediaRecommendation { id idMal isAdult chapters volumes format episodes nextAiringEpisode {episode} popularity meanScore format title {english romaji userPreferred } type status(version: 2) bannerImage coverImage { large } description genres tags { name isMediaSpoiler } } } } """
     }
 
     suspend fun getRecommendations(page: Int, perPage: Int = 50): Pair<ArrayList<Media>, Boolean> {
