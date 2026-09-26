@@ -20,10 +20,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.R
 import ani.dantotsu.buildMarkwon
-import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.comments.Comment
-import ani.dantotsu.connections.comments.CommentResponse
-import ani.dantotsu.connections.comments.CommentsAPI
+import ani.dantotsu.connections.shinigami.ShinigamiComment
+import ani.dantotsu.connections.shinigami.ShinigamiCommentsClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.DialogEdittextBinding
 import ani.dantotsu.databinding.FragmentCommentsBinding
 import ani.dantotsu.loadImage
@@ -73,6 +72,7 @@ class CommentsFragment : Fragment() {
     private var isSpoilerMode = false
     private var markwonTextWatcher: TextWatcher? = null
     private var limitTextWatcher: TextWatcher? = null
+    private val shinigamiCommentsClient = ShinigamiCommentsClient()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -127,7 +127,7 @@ class CommentsFragment : Fragment() {
 
         val markwon = buildMarkwon(activity, fragment = this@CommentsFragment)
 
-        activity.binding.commentUserAvatar.loadImage(Anilist.avatar)
+        activity.binding.commentUserAvatar.loadImage(null)
         val markwonEditor = MarkwonEditor.create(markwon)
         val watcher = MarkwonEditorTextWatcher.withProcess(markwonEditor)
         markwonTextWatcher = watcher
@@ -147,7 +147,7 @@ class CommentsFragment : Fragment() {
             binding.commentFilter.visibility = View.VISIBLE
             binding.commentSort.visibility = View.VISIBLE
             activity.binding.commentMessageContainer.visibility =
-                if (CommentsAPI.authToken != null) View.VISIBLE else View.GONE
+                if (backendToken() != null) View.VISIBLE else View.GONE
 
             viewLifecycleOwner.lifecycleScope.launch {
                 loadAndDisplayComments()
@@ -184,10 +184,10 @@ class CommentsFragment : Fragment() {
                         binding.commentCurrentProgress.visibility = View.GONE
                         binding.commentsProgressBar.visibility = View.GONE
                         activity.binding.commentMessageContainer.visibility = View.GONE
-                    } else if (CommentsAPI.authToken != null) {
+                    } else if (backendToken() != null) {
                         lifecycleScope.launch {
-                            val commentId = arguments?.getInt("commentId")
-                            if (commentId != null && commentId > 0) {
+                            val commentId = arguments?.getString("commentId")
+                            if (!commentId.isNullOrBlank()) {
                                 loadCommentThread(commentId)
                             } else {
                                 loadAndDisplayComments()
@@ -351,27 +351,23 @@ class CommentsFragment : Fragment() {
                     isFetching = true
                     lifecycleScope.launch {
                         val comments = fetchComments()
-                        comments?.comments?.forEach { comment ->
+                        comments?.items?.forEach { comment ->
                             updateUIWithComment(comment)
                         }
-                        totalPages = comments?.totalPages ?: 1
+                        totalPages = if (comments?.hasNextPage == true) 2 else 1
                         pagesLoaded++
                         isFetching = false
                     }
                 }
 
-                private suspend fun fetchComments(): CommentResponse? {
+                private suspend fun fetchComments(): ShinigamiCommentPage? {
+                    val token = backendToken() ?: return null
                     return withContext(Dispatchers.IO) {
-                        CommentsAPI.getCommentsForId(
-                            mediaId,
-                            pagesLoaded + 1,
-                            getEffectiveFilter(),
-                            PrefManager.getVal(PrefName.CommentSortOrder, "newest")
-                        )
+                        shinigamiCommentsClient.list(token, mediaId.toLong(), pagesLoaded + 1, 20)
                     }
                 }
                 //adds additional comments to the section
-                private suspend fun updateUIWithComment(comment: Comment) {
+                private suspend fun updateUIWithComment(comment: ShinigamiComment) {
                     withContext(Dispatchers.Main) {
                         section.add(
                             CommentItem(
@@ -501,7 +497,7 @@ class CommentsFragment : Fragment() {
         }
 
         activity.binding.commentSend.setOnClickListener {
-            if (CommentsAPI.isBanned) {
+            if (false) { // backend moderation status is not exposed by the comment client yet
                 snackString("You are banned from commenting :(")
                 return@setOnClickListener
             }
@@ -523,6 +519,28 @@ class CommentsFragment : Fragment() {
                 it.notifyChanged()
             }
         }
+    }
+
+    private fun backendToken(): String? = ShinigamiSessionStore(requireContext()).getToken()
+
+    fun currentUserId(): String? = ShinigamiSessionStore(requireContext()).getUserId()
+
+    suspend fun deleteComment(commentId: String): Boolean {
+        val token = backendToken() ?: return false
+        return runCatching { shinigamiCommentsClient.delete(token, commentId); true }.getOrDefault(false)
+    }
+
+    suspend fun voteComment(commentId: String, vote: Int?): Boolean {
+        val token = backendToken() ?: return false
+        return runCatching { shinigamiCommentsClient.vote(token, commentId, vote); true }.getOrDefault(false)
+    }
+
+    suspend fun reportComment(comment: ShinigamiComment): Boolean {
+        val token = backendToken() ?: return false
+        return runCatching {
+            shinigamiCommentsClient.report(token, comment.author.id, comment.id, "OTHER", "Reported comment: ${comment.content.take(500)}")
+            true
+        }.getOrDefault(false)
     }
 
     enum class InteractionState {
@@ -790,7 +808,7 @@ class CommentsFragment : Fragment() {
             )
         }
 
-        comments?.comments?.forEach { comment ->
+        comments?.items?.forEach { comment ->
             withContext(Dispatchers.Main) {
                 section.add(
                     CommentItem(
@@ -805,18 +823,19 @@ class CommentsFragment : Fragment() {
             }
         }
 
-        totalPages = comments?.totalPages ?: 1
+        totalPages = if (comments?.hasNextPage == true) pagesLoaded + 1 else pagesLoaded
         binding.commentsProgressBar.visibility = View.GONE
         binding.commentsList.visibility = View.VISIBLE
     }
 
-    private suspend fun loadCommentThread(commentId: Int) {
+    private suspend fun loadCommentThread(commentId: String) {
         binding.commentsProgressBar.visibility = View.VISIBLE
         binding.commentsList.visibility = View.GONE
         section.clear()
 
+        val token = backendToken() ?: return
         val targetComment = withContext(Dispatchers.IO) {
-            CommentsAPI.getSingleComment(commentId)
+            shinigamiCommentsClient.get(token, commentId)
         }
         if (targetComment == null) {
             loadAndDisplayComments()
@@ -829,9 +848,9 @@ class CommentsFragment : Fragment() {
 
         var currentParentId = targetComment.parentCommentId
         var hops = 0
-        while (currentParentId != null && currentParentId > 0 && hops < 10) {
+        while (currentParentId != null && hops < 10) {
             val parent = withContext(Dispatchers.IO) {
-                CommentsAPI.getSingleComment(currentParentId!!)
+                shinigamiCommentsClient.get(token, currentParentId!!)
             } ?: break
             commentChain.add(parent)
             currentParentId = parent.parentCommentId
@@ -897,10 +916,10 @@ class CommentsFragment : Fragment() {
         binding.commentsList.visibility = View.VISIBLE
     }
 
-    private fun sortComments(comments: List<Comment>?): List<Comment> {
+    private fun sortComments(comments: List<ShinigamiComment>?): List<ShinigamiComment> {
         if (comments == null) return emptyList()
         return when (PrefManager.getVal(PrefName.CommentSortOrder, "newest")) {
-            "newest" -> comments.sortedByDescending { CommentItem.timestampToMillis(it.timestamp) }
+            "newest" -> comments.sortedByDescending { CommentItem.timestampToMillis(it.createdAt) }
             "oldest" -> comments.sortedBy { CommentItem.timestampToMillis(it.timestamp) }
             "highest_rated" -> comments.sortedByDescending { it.upvotes - it.downvotes }
             "lowest_rated" -> comments.sortedBy { it.upvotes - it.downvotes }
@@ -994,7 +1013,7 @@ class CommentsFragment : Fragment() {
     fun viewReplyCallback(comment: CommentItem) {
         lifecycleScope.launch {
             val replies = withContext(Dispatchers.IO) {
-                CommentsAPI.getRepliesFromId(comment.comment.commentId)
+                shinigamiCommentsClient.replies(token, comment.comment.id)
             }
 
             replies?.comments?.forEach {
@@ -1002,7 +1021,7 @@ class CommentsFragment : Fragment() {
                     if (comment.commentDepth + 1 > comment.MAX_DEPTH) comment.commentDepth else comment.commentDepth + 1
                 val section =
                     if (comment.commentDepth + 1 > comment.MAX_DEPTH) comment.parentSection else comment.repliesSection
-                if (depth >= comment.MAX_DEPTH) comment.registerSubComment(it.commentId)
+                if (depth >= comment.MAX_DEPTH) comment.registerSubComment(it.id)
                 val newCommentItem = CommentItem(
                     it,
                     buildMarkwon(activity, fragment = this@CommentsFragment),
@@ -1082,30 +1101,26 @@ class CommentsFragment : Fragment() {
 
     private suspend fun handleEditComment(commentText: String) {
         val success = withContext(Dispatchers.IO) {
-            CommentsAPI.editComment(
-                commentWithInteraction?.comment?.commentId ?: return@withContext false, commentText
-            )
+            shinigamiCommentsClient.edit(token, commentWithInteraction?.comment?.id ?: return@withContext null, commentText)
         }
-        if (success) {
-            updateCommentInSection(commentText)
+        if (success != null) {
+            updateCommentInSection(success)
         }
     }
 
-    private fun updateCommentInSection(commentText: String) {
+    private fun updateCommentInSection(updated: ShinigamiComment) {
         val groups = section.groups
         groups.forEach { item ->
-            if (item is CommentItem && item.comment.commentId == commentWithInteraction?.comment?.commentId) {
-                updateCommentItem(item, commentText)
+            if (item is CommentItem && item.comment.id == commentWithInteraction?.comment?.id) {
+                updateCommentItem(item, updated)
                 snackString("Comment edited")
             }
         }
     }
 
-    private fun updateCommentItem(item: CommentItem, commentText: String) {
-        item.comment.content = commentText
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-        item.comment.timestamp = dateFormat.format(System.currentTimeMillis())
+    private fun updateCommentItem(item: CommentItem, updated: ShinigamiComment) {
+        item.comment.content = updated.content
+        item.comment.updatedAt = updated.updatedAt
         item.notifyChanged()
     }
 
@@ -1115,10 +1130,11 @@ class CommentsFragment : Fragment() {
      */
     private suspend fun handleNewComment(commentText: String) {
         val success = withContext(Dispatchers.IO) {
-            CommentsAPI.comment(
-                mediaId,
-                if (interactionState == InteractionState.REPLY) commentWithInteraction?.comment?.commentId else null,
+            shinigamiCommentsClient.create(
+                token,
+                mediaId.toLong(),
                 commentText,
+                if (interactionState == InteractionState.REPLY) commentWithInteraction?.comment?.id else null,
                 tag
             )
         }
