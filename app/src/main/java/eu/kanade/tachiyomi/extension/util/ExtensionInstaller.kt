@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import ani.dantotsu.R
-import ani.dantotsu.media.AddonType
 import ani.dantotsu.media.MediaType
 import ani.dantotsu.media.Type
 import ani.dantotsu.toast
@@ -199,9 +198,7 @@ class ExtensionInstaller(private val context: Context) {
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 if (type is MediaType) {
                     intent.putExtra(EXTRA_EXTENSION_TYPE, type)
-                } else if (type is AddonType) {
-                    intent.putExtra(EXTRA_ADDON_TYPE, type)
-                }
+
 
                 context.startActivity(intent)
             }
@@ -369,7 +366,6 @@ class ExtensionInstaller(private val context: Context) {
         const val APK_MIME = "application/vnd.android.package-archive"
         const val EXTRA_DOWNLOAD_ID = "ExtensionInstaller.extra.DOWNLOAD_ID"
         const val EXTRA_EXTENSION_TYPE = "ExtensionInstaller.extra.EXTENSION_TYPE"
-        const val EXTRA_ADDON_TYPE = "ExtensionInstaller.extra.ADDON_TYPE"
         const val FILE_SCHEME = "file://"
     }
 }
