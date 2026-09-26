@@ -6,7 +6,6 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import ani.dantotsu.addons.download.DownloadAddonManager
 import ani.dantotsu.connections.crashlytics.CrashlyticsInterface
 import ani.dantotsu.notifications.TaskScheduler
 import ani.dantotsu.others.DisabledReports
@@ -47,7 +46,6 @@ class App : Application(), GraphProvider<AppGraph> {
 
     @Inject lateinit var interopModule: MetroInteropModule
 
-    private lateinit var downloadAddonManager: DownloadAddonManager
 
     init {
         instance = this
@@ -134,8 +132,6 @@ class App : Application(), GraphProvider<AppGraph> {
                 Logger.log(it)
             }
 
-            downloadAddonManager = Injekt.get()
-            downloadAddonManager.init()
             val useAlarmManager = PrefManager.getVal<Boolean>(PrefName.UseAlarmManager)
             val scheduler = TaskScheduler.create(this@App, useAlarmManager)
             try {
