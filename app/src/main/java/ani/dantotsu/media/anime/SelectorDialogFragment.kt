@@ -246,10 +246,10 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                             selectedServerName = selectedServerName
                         )
                     }.join()
-                    Log.d("AnimeDownloader", "Loading Episode Server State: $success")
+                    Log.d("StreamSelector", "Loading Episode Server State: $success")
                     return success
                 }
-                Log.d("AnimeDownloader", "Selected Server for watching: $selected")
+                Log.d("StreamSelector", "Selected Server for watching: $selected")
                 if(episodes.isNullOrEmpty()){
                     fail(R.string.empty_episodes_list)
                 }
@@ -482,7 +482,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                             media!!.selected!!.video = bindingAdapterPosition
                             model.saveSelected(media!!.id, media!!.selected!!)
                         }
-                        Log.d("AnimeDownloader", "Should start the player")
+                        Log.d("StreamSelector", "Should start the player")
                         startExoplayer(media!!)
                     }
                 }
