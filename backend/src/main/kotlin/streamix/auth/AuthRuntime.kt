@@ -7,6 +7,9 @@ import streamix.chat.ChatRepository
 import streamix.library.FileUserLibraryRepository
 import streamix.library.UserLibraryRepository
 import streamix.library.UserLibraryService
+import streamix.notification.FileNotificationRepository
+import streamix.notification.NotificationRepository
+import streamix.notification.NotificationService
 import streamix.social.FileSocialRepository
 import streamix.social.SocialRepository
 import streamix.social.SocialService
@@ -46,5 +49,11 @@ class AuthRuntime(
     val social: SocialRepository = FileSocialRepository(dataRoot.resolve("social"), users, gson)
     val socialService: SocialService = SocialService(social)
     val chat: ChatRepository = FileChatRepository(dataRoot.resolve("chat"), users, gson)
-    val chatService: ChatService = ChatService(chat)
+    val notification: NotificationRepository = FileNotificationRepository(
+        dataRoot.resolve("notifications"),
+        users,
+        gson
+    )
+    val notificationService: NotificationService = NotificationService(notification)
+    val chatService: ChatService = ChatService(chat, notificationService)
 }
