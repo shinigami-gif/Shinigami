@@ -17,7 +17,6 @@ import ani.dantotsu.connections.anilist.api.MediaType
 import ani.dantotsu.connections.anilist.api.Query
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.media.anime.Anime
-import ani.dantotsu.profile.User
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import kotlinx.coroutines.CoroutineScope
@@ -90,7 +89,6 @@ data class Media(
     @Transient var recommendationList: ArrayList<ani.dantotsu.connections.anilist.api.Recommendation>? = null,
     @Transient var stats: ani.dantotsu.connections.anilist.api.MediaStats? = null,
     @Transient var rankings: List<ani.dantotsu.connections.anilist.api.MediaRank>? = null,
-    var users: ArrayList<User>? = null,
     var vrvId: String? = null,
     var crunchySlug: String? = null,
 
