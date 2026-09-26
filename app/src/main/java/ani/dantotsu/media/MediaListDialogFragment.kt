@@ -58,10 +58,7 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                 binding.mediaListLayout.visibility = View.VISIBLE
 
                 val statuses: Array<String> = resources.getStringArray(R.array.status)
-                val statusStrings =
-                    if (media?.manga == null) resources.getStringArray(R.array.status_anime) else resources.getStringArray(
-                        R.array.status_manga
-                    )
+                val statusStrings = resources.getStringArray(R.array.status_anime)
                 val userStatus =
                     if (media!!.userStatus != null) statusStrings[statuses.indexOf(media!!.userStatus).coerceAtLeast(0)] else statusStrings[0]
 
@@ -77,15 +74,8 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
 
                 var total: Int? = null
                 binding.mediaListProgress.setText(if (media!!.userProgress != null) media!!.userProgress.toString() else "")
-                if (media!!.anime != null) if (media!!.anime!!.totalEpisodes != null) {
-                    total = media!!.anime!!.totalEpisodes!!;
-                    binding.mediaListProgress.filters =
-                        arrayOf(
-                            InputFilterMinMax(0.0, total.toDouble(), binding.mediaListStatus),
-                            LengthFilter(total.toString().length)
-                        )
-                } else if (media!!.manga != null) if (media!!.manga!!.totalChapters != null) {
-                    total = media!!.manga!!.totalChapters!!;
+                if (media!!.anime?.totalEpisodes != null) {
+                    total = media!!.anime!!.totalEpisodes!!
                     binding.mediaListProgress.filters =
                         arrayOf(
                             InputFilterMinMax(0.0, total.toDouble(), binding.mediaListStatus),
@@ -98,26 +88,7 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                 }
                 binding.mediaListProgressLayout.suffixTextView.gravity = Gravity.CENTER
 
-                val volumeTotal = media?.manga?.totalVolumes
-                if (media?.manga != null) {
-                    binding.mediaListVolumeProgressLayout.visibility = View.VISIBLE
-                    binding.mediaListVolumeProgress.setText(
-                        media?.userProgressVolumes?.toString() ?: ""
-                    )
-                    if (volumeTotal != null) {
-                        binding.mediaListVolumeProgress.filters = arrayOf(
-                            InputFilterMinMax(0.0, volumeTotal.toDouble()),
-                            LengthFilter(volumeTotal.toString().length)
-                        )
-                    }
-                    binding.mediaListVolumeProgressLayout.suffixText = " / ${volumeTotal ?: "?"}"
-                    binding.mediaListVolumeProgressLayout.suffixTextView.updateLayoutParams {
-                        height = ViewGroup.LayoutParams.MATCH_PARENT
-                    }
-                    binding.mediaListVolumeProgressLayout.suffixTextView.gravity = Gravity.CENTER
-                } else {
-                    binding.mediaListVolumeProgressLayout.visibility = View.GONE
-                }
+                binding.mediaListVolumeProgressLayout.visibility = View.GONE
 
                 binding.mediaListScore.setText(
                     if (media!!.userScore != 0) media!!.userScore.div(
