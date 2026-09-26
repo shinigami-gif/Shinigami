@@ -33,11 +33,6 @@ class SearchBottomSheet : BottomSheetDialogFragment() {
             startActivity(requireContext(), SearchType.ANIME)
             dismiss()
         }
-        binding.mangaSearch.setOnClickListener {
-            startActivity(requireContext(), SearchType.MANGA)
-            dismiss()
-        }
-
         binding.characterSearch.setOnClickListener {
             startActivity(requireContext(), SearchType.CHARACTER)
             dismiss()
