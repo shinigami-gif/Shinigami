@@ -46,7 +46,7 @@ class ChatActivity : AppCompatActivity() {
         ThemeManager(this).applyTheme()
         initActivity(this)
 
-        val title = intent.getStringExtra("chat_title") ?: "Global Chat"
+        val chatTitle = intent.getStringExtra("chat_title") ?: "Global Chat"
         mediaId = intent.getLongExtra("mediaId", -1L).takeIf { it > 0L }
         directUserId = intent.getStringExtra("message_user_id")
 
@@ -56,7 +56,7 @@ class ChatActivity : AppCompatActivity() {
         }
 
         val toolbar = MaterialToolbar(this).apply {
-            title = title
+            title = chatTitle
             setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
             updateLayoutParams<LinearLayout.LayoutParams> {
                 height = (56 * resources.displayMetrics.density).toInt()
