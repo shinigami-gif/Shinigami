@@ -345,6 +345,7 @@ class AnilistQueries {
 
                         media.shareLink = fetchedMedia.siteUrl
                     }
+                    }
 
                     if (response.data?.media != null) parse()
                     else {
