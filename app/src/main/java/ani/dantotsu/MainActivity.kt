@@ -296,9 +296,7 @@ class MainActivity : AppCompatActivity() {
         binding.root.doOnAttach {
             initActivity(this)
             val preferences: SourcePreferences = Injekt.get()
-            if (preferences.animeExtensionUpdatesCount()
-                    .get() > 0 || preferences.mangaExtensionUpdatesCount().get() > 0
-            ) {
+            if (preferences.animeExtensionUpdatesCount().get() > 0) {
                 snackString(R.string.extension_updates_available)
                     ?.setDuration(Snackbar.LENGTH_SHORT)
                     ?.setAction(R.string.review) {
