@@ -18,7 +18,6 @@ import ani.dantotsu.Mapper
 import ani.dantotsu.R
 import ani.dantotsu.buildMarkwon
 import ani.dantotsu.client
-import ani.dantotsu.connections.comments.CommentsAPI
 import ani.dantotsu.currContext
 import ani.dantotsu.decodeBase64ToString
 import ani.dantotsu.logError
@@ -71,7 +70,7 @@ object AppUpdater {
 
     private suspend fun fetchFromFallback(isDebug: Boolean): Pair<String, String> {
         val url = if (isDebug) fallbackBetaUrl else fallbackStableUrl
-        val response = CommentsAPI.requestBuilder().get(url).parsed<FallbackResponse>()
+        val response = client.get(url).parsed<FallbackResponse>()
         return response.changelog to response.version
     }
 
@@ -85,7 +84,7 @@ object AppUpdater {
 
     private suspend fun fetchApkUrlFromFallback(version: String, isDebug: Boolean): String? {
         val url = if (isDebug) fallbackBetaUrl else fallbackStableUrl
-        return CommentsAPI.requestBuilder().get("$url/$version").parsed<FallbackResponse>().downloadUrl
+        return client.get("$url/$version").parsed<FallbackResponse>().downloadUrl
     }
 
     // Custom updater repo support for itsmechinmoy/dantotsu-updater with multi-ABI APK selection
