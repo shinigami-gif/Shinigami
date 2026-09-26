@@ -166,7 +166,10 @@ configurations.all {
 }
 
 dependencies {
-    implementation(project(":backend"))
+    implementation(project(":backend")) {
+        exclude(group = "com.google.firebase", module = "firebase-admin")
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+    }
     // Media3 & decoders
     implementation(libs.bundles.media3)
     implementation(libs.bundles.subtitles)
