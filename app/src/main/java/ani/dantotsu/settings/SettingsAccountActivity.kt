@@ -101,7 +101,7 @@ class SettingsAccountActivity : AppCompatActivity() {
             val highlightKey =
                 intent.getStringExtra(ani.dantotsu.settings.search.SettingsSearchAdapter.EXTRA_HIGHLIGHT_KEY)
 
-            settingsRecyclerView.adapter = SettingsAdapter(emptyList(), highlightKey = highlightKey)
+            settingsRecyclerView.adapter = SettingsAdapter(arrayListOf(), highlightKey = highlightKey)
 
             settingsRecyclerView.layoutManager =
                 LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
