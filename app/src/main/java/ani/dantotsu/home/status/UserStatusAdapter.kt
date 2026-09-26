@@ -92,14 +92,14 @@ class UserStatusAdapter(userList: ArrayList<User>) :
         val user = user[position]
         b.profileUserAvatar.loadImage(user.pfp)
         b.profileUserName.text =
-            if (Anilist.userid == user.id) getAppString(R.string.your_story) else user.name
+            if (ShinigamiSessionStore(b.root.context).getUserId() == user.id) getAppString(R.string.your_story) else user.name
         val watchedActivity = PrefManager.getCustomVal<Set<String>>("activities", emptySet())
             .mapNotNull { it.toIntOrNull() }.toSet()
         val booleanList = user.activity.map { watchedActivity.contains(it.id) }
         b.profileUserStatusIndicator.setParts(
             user.activity.size,
             booleanList,
-            user.id == Anilist.userid
+            user.id == ShinigamiSessionStore(b.root.context).getUserId()
         )
 
     }
