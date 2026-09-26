@@ -548,67 +548,6 @@ class StreamixHttpServer(
                     }
                 }
 
-                relative == "forum/threads" -> when (exchange.requestMethod.uppercase()) {
-                    "GET" -> {
-                        val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
-                        val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
-                        respond(exchange, 200, auth.socialService.forumThreads(query(exchange, "q"), viewer.id, page, perPage))
-                    }
-                    "POST" -> {
-                        val request = runCatching { gson.fromJson(bodyText(), CreateForumThreadRequest::class.java) }.getOrNull()
-                            ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid forum thread request"))
-                        if (request.title.isBlank() || request.body.isBlank())
-                            return@createContext respond(exchange, 400, mapOf("error" to "title and body are required"))
-                        respond(exchange, 201, auth.socialService.createForumThread(viewer.id, request.title.trim(), request.body.trim(), request.mediaIds))
-                    }
-                    else -> method(exchange, "GET")
-                }
-
-                relative.startsWith("forum/threads/") -> {
-                    val parts = relative.split("/")
-                    val threadId = parts.getOrNull(2)?.takeIf { it.isNotBlank() }
-                        ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid thread id"))
-                    when (parts.drop(3).joinToString("/")) {
-                        "" -> when (exchange.requestMethod.uppercase()) {
-                            "GET" -> {
-                                val thread = auth.socialService.forumThread(threadId, viewer.id)
-                                    ?: return@createContext respond(exchange, 404, mapOf("error" to "thread not found"))
-                                respond(exchange, 200, thread)
-                            }
-                            "DELETE" -> {
-                                if (!auth.socialService.deleteForumThread(threadId, viewer.id))
-                                    return@createContext respond(exchange, 404, mapOf("error" to "thread not found"))
-                                respond(exchange, 200, mapOf("status" to "deleted"))
-                            }
-                            else -> method(exchange, "GET")
-                        }
-                        "comments" -> when (exchange.requestMethod.uppercase()) {
-                            "GET" -> {
-                                val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
-                                val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
-                                respond(exchange, 200, auth.socialService.forumComments(threadId, viewer.id, page, perPage))
-                            }
-                            "POST" -> {
-                                val request = runCatching { gson.fromJson(bodyText(), CreateForumCommentRequest::class.java) }.getOrNull()
-                                    ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid forum comment request"))
-                                if (request.content.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "content is required"))
-                                respond(exchange, 201, auth.socialService.createForumComment(threadId, viewer.id, request.content.trim(), request.parentCommentId))
-                            }
-                            else -> method(exchange, "GET")
-                        }
-                        "like" -> if (exchange.requestMethod.equals("POST", true)) {
-                            val result = auth.socialService.likeThread(threadId, viewer.id)
-                                ?: return@createContext respond(exchange, 404, mapOf("error" to "thread not found"))
-                            respond(exchange, 200, result)
-                        } else method(exchange, "POST")
-                        "subscribe" -> if (exchange.requestMethod.equals("POST", true)) {
-                            val result = auth.socialService.subscribeThread(threadId, viewer.id)
-                                ?: return@createContext respond(exchange, 404, mapOf("error" to "thread not found"))
-                            respond(exchange, 200, result)
-                        } else method(exchange, "POST")
-                        else -> respond(exchange, 404, mapOf("error" to "route not found"))
-                    }
-                }
 
                 relative == "notifications" -> if (exchange.requestMethod.equals("GET", true)) {
                     val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
