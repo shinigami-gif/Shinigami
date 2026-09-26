@@ -337,16 +337,7 @@ class AnilistQueries {
                                     "vrv" -> media.vrvId = i.url?.split("/")?.getOrNull(4)
                                 }
                             }
-                        } else if (media.manga != null) {
-                            fetchedMedia.staff?.edges?.find { authorRoles.contains(it.role?.trim()) }?.node?.let {
-                                media.manga.author = Author(
-                                    it.id,
-                                    it.name?.userPreferred ?: "N/A",
-                                    it.image?.medium,
-                                    "AUTHOR"
-                                )
-                            }
-                        }
+
 
                         if (!fetchedMedia.externalLinks.isNullOrEmpty()) {
                             media.externalLinks = ArrayList(fetchedMedia.externalLinks!!)
