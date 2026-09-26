@@ -18,10 +18,6 @@ abstract class WatchSources : BaseSources() {
             ?: EmptyAnimeParser()
     }
 
-    fun isDownloadedSource(i: Int): Boolean {
-        return get(i) is OfflineAnimeParser
-    }
-
     suspend fun loadEpisodesFromMedia(
         i: Int,
         media: Media,
@@ -33,7 +29,7 @@ abstract class WatchSources : BaseSources() {
             val sourceKey = parser.saveName.ifBlank { parser.name }
 
             var cached: MutableMap<String, Episode>? = null
-            if (!invalidate && parser !is OfflineAnimeParser) {
+            if (!invalidate) {
                 val savedResponse = parser.loadSavedShowResponse(media.id)
                 if (savedResponse != null && savedResponse.link.isNotBlank()) {
                     cached = EpisodeStorage.loadEpisodes(sourceKey, savedResponse.link)
@@ -44,7 +40,7 @@ abstract class WatchSources : BaseSources() {
             }
 
             val res = parser.autoSearch(media) ?: return@tryWithSuspend (cached ?: mutableMapOf())
-            if (cached.isNullOrEmpty() && !invalidate && parser !is OfflineAnimeParser) {
+            if (cached.isNullOrEmpty() && !invalidate) {
                 cached = EpisodeStorage.loadEpisodes(sourceKey, res.link)
                 if (!cached.isNullOrEmpty()) {
                     onCachedLoaded?.invoke(cached)
@@ -55,7 +51,7 @@ abstract class WatchSources : BaseSources() {
                 loadEpisodes(i, res.link, res.extra, res.sAnime)
             } ?: mutableMapOf()
 
-            if (loaded.isNotEmpty() && parser !is OfflineAnimeParser) {
+            if (loaded.isNotEmpty()) {
                 EpisodeStorage.saveEpisodes(sourceKey, res.link, loaded)
                 loaded
             } else {
@@ -91,7 +87,7 @@ abstract class WatchSources : BaseSources() {
                 )
             }
         }
-        if (map.isNotEmpty() && parser !is OfflineAnimeParser) {
+        if (map.isNotEmpty()) {
             val sourceKey = parser.saveName.ifBlank { parser.name }
             EpisodeStorage.saveEpisodes(sourceKey, showLink, map)
         }
@@ -106,10 +102,6 @@ abstract class MangaReadSources : BaseSources() {
             ?: EmptyMangaParser()
     }
 
-    fun isDownloadedSource(i: Int): Boolean {
-        return get(i) is OfflineMangaParser
-    }
-
     suspend fun loadChaptersFromMedia(
         i: Int,
         media: Media,
@@ -121,7 +113,7 @@ abstract class MangaReadSources : BaseSources() {
             val sourceKey = parser.saveName.ifBlank { parser.name }
 
             var cached: MutableMap<String, MangaChapter>? = null
-            if (!invalidate && parser !is OfflineMangaParser) {
+            if (!invalidate) {
                 val savedResponse = parser.loadSavedShowResponse(media.id)
                 if (savedResponse != null && savedResponse.link.isNotBlank()) {
                     cached = ChapterStorage.loadChapters(sourceKey, savedResponse.link)
@@ -132,7 +124,7 @@ abstract class MangaReadSources : BaseSources() {
             }
 
             val res = parser.autoSearch(media) ?: return@tryWithSuspend (cached ?: mutableMapOf())
-            if (cached.isNullOrEmpty() && !invalidate && parser !is OfflineMangaParser) {
+            if (cached.isNullOrEmpty() && !invalidate) {
                 cached = ChapterStorage.loadChapters(sourceKey, res.link)
                 if (!cached.isNullOrEmpty()) {
                     onCachedLoaded?.invoke(cached)
@@ -143,7 +135,7 @@ abstract class MangaReadSources : BaseSources() {
                 loadChapters(i, res)
             } ?: mutableMapOf()
 
-            if (loaded.isNotEmpty() && parser !is OfflineMangaParser) {
+            if (loaded.isNotEmpty()) {
                 ChapterStorage.saveChapters(sourceKey, res.link, loaded)
                 loaded
             } else {
@@ -166,7 +158,7 @@ abstract class MangaReadSources : BaseSources() {
                 map["${it.number}-${it.scanlator}"] = MangaChapter(it)
             }
         }
-        if (map.isNotEmpty() && parser !is OfflineMangaParser) {
+        if (map.isNotEmpty()) {
             val sourceKey = parser.saveName.ifBlank { parser.name }
             ChapterStorage.saveChapters(sourceKey, show.link, map)
         }
