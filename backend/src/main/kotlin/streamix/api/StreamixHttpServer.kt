@@ -23,6 +23,18 @@ data class CreateCommentRequest(val mediaId: Long, val content: String, val pare
 data class VoteCommentRequest(val vote: Int?)
 data class CreateForumThreadRequest(val title: String, val body: String, val mediaIds: List<Long> = emptyList())
 data class CreateForumCommentRequest(val content: String, val parentCommentId: String? = null)
+data class AdminUserActionRequest(
+    val action: String,
+    val reason: String? = null,
+    val suspendedUntil: String? = null
+)
+data class AdminRoleRequest(val role: AdminRole)
+data class AdminReportUpdateRequest(val status: ReportStatus, val assignedTo: String? = null)
+data class CreateAnnouncementRequest(
+    val title: String,
+    val body: String,
+    val imageUrl: String? = null
+)
 
 interface CanonicalAnimeRequestResolver {
     suspend fun resolve(anilistId: Long): CanonicalAnimeIdentity?
@@ -695,12 +707,242 @@ class StreamixHttpServer(
             runSuspend(exchange) { service.search(query, page) }
         }
 
+        http.createContext(ControlApiContract.PROVIDERS) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
+        }
+
+        http.createContext(ControlApiContract.EXTRACTORS) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            respond(exchange, 200, controlApi?.extractors() ?: mapOf("total" to 0, "extractors" to emptyList<Any>()))
+        }
+
+        http.createContext(ControlApiContract.INCIDENTS) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
+            val relative = exchange.requestURI.path.removePrefix(ControlApiContract.INCIDENTS).trim('/')
+            if (relative.isBlank()) {
+                if (!method(exchange, "GET")) return@createContext
+                respond(exchange, 200, controlApi?.incidents() ?: emptyList<Any>())
+            } else if (relative.endsWith("/resolve")) {
+                if (!method(exchange, "POST")) return@createContext
+                val id = relative.removeSuffix("/resolve").trim('/')
+                val resolved = controlApi?.resolveIncident(id) ?: false
+                respond(exchange, if (resolved) 200 else 404, mapOf("resolved" to resolved))
+            } else {
+                respond(exchange, 404, mapOf("error" to "route not found"))
+            }
+        }
+
+        http.createContext(ControlApiContract.UPDATES) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
+            val relative = exchange.requestURI.path.removePrefix(ControlApiContract.UPDATES).trim('/')
+            val api = controlApi
+                ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            if (relative.isBlank()) {
+                if (!method(exchange, "GET")) return@createContext
+                respond(exchange, 200, api.updates())
+                return@createContext
+            }
+            val parts = relative.split("/")
+            val providerId = parts.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
+            try {
+                when {
+                    parts.size == 1 && exchange.requestMethod.equals("GET", true) ->
+                        respond(exchange, 200, api.update(providerId) ?: return@createContext respond(exchange, 404, mapOf("error" to "update not found")))
+                    parts.size == 2 && parts[1] == "check" && exchange.requestMethod.equals("POST", true) ->
+                        respond(exchange, 200, runSuspendValue { api.checkUpdate(providerId) })
+                    parts.size == 2 && parts[1] == "queue" && exchange.requestMethod.equals("POST", true) ->
+                        respond(exchange, 200, api.queueUpdate(providerId))
+                    parts.size == 2 && parts[1] == "run" && exchange.requestMethod.equals("POST", true) ->
+                        respond(exchange, 200, runSuspendValue { api.runUpdate(providerId) })
+                    parts.size == 2 && parts[1] == "activate" && exchange.requestMethod.equals("POST", true) ->
+                        respond(exchange, 200, runSuspendValue { api.activateUpdate(providerId) })
+                    parts.size == 2 && parts[1] == "rollback" && exchange.requestMethod.equals("POST", true) -> {
+                        val body = readBody(exchange)
+                        val request = gson.fromJson(body, Map::class.java)
+                        val targetVersion = request["targetVersion"]?.toString()?.trim()
+                            ?: return@createContext respond(exchange, 400, mapOf("error" to "targetVersion is required"))
+                        respond(exchange, 200, runSuspendValue { api.rollback(providerId, targetVersion) })
+                    }
+                    else -> respond(exchange, 405, mapOf("error" to "method not allowed"))
+                }
+            } catch (error: IllegalArgumentException) {
+                respond(exchange, 400, mapOf("error" to (error.message ?: "invalid control request")))
+            } catch (error: IllegalStateException) {
+                respond(exchange, 409, mapOf("error" to (error.message ?: "control operation rejected")))
+            }
+        }
+
+        http.createContext(ControlApiContract.SNAPSHOT) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            respond(exchange, 200, mapOf(
+                "providers" to api.status(),
+                "extractors" to api.extractors(),
+                "incidents" to api.recentIncidents()
+            ))
+        }
+
+        http.createContext(AdminApiContract.DASHBOARD) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            try {
+                respond(exchange, 200, auth.adminService.dashboard(actor.id))
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            }
+        }
+
+        http.createContext(AdminApiContract.USERS) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            try {
+                val q = query(exchange, "q")?.trim().orEmpty()
+                val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+                respond(exchange, 200, auth.adminService.users(actor.id, q, page, perPage))
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            }
+        }
+
+        http.createContext("/api/v1/admin/users/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            val relative = exchange.requestURI.path.removePrefix("/api/v1/admin/users/").trim('/')
+            val parts = relative.split("/")
+            val targetId = parts.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "user id is required"))
+            try {
+                when {
+                    parts.size == 1 && exchange.requestMethod.equals("GET", true) ->
+                        respond(exchange, 200, auth.adminService.user(actor.id, targetId))
+                    parts.size == 1 && exchange.requestMethod.equals("PUT", true) -> {
+                        val request = gson.fromJson(readBody(exchange), AdminRoleRequest::class.java)
+                        respond(exchange, 200, auth.adminService.setRole(actor.id, targetId, request.role))
+                    }
+                    parts.size == 2 && parts[1] == "actions" && exchange.requestMethod.equals("POST", true) -> {
+                        val request = gson.fromJson(readBody(exchange), AdminUserActionRequest::class.java)
+                        val result = when (request.action.lowercase()) {
+                            "warn" -> auth.adminService.warn(actor.id, targetId, request.reason)
+                            "activate" -> auth.adminService.setStatus(actor.id, targetId, ModerationStatus.ACTIVE, request.reason)
+                            "suspend" -> auth.adminService.setStatus(actor.id, targetId, ModerationStatus.SUSPENDED, request.reason, request.suspendedUntil)
+                            "ban" -> auth.adminService.setStatus(actor.id, targetId, ModerationStatus.BANNED, request.reason)
+                            else -> return@createContext respond(exchange, 400, mapOf("error" to "unsupported user action"))
+                        }
+                        respond(exchange, 200, result)
+                    }
+                    else -> respond(exchange, 404, mapOf("error" to "route not found"))
+                }
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            } catch (error: IllegalArgumentException) {
+                respond(exchange, 400, mapOf("error" to (error.message ?: "invalid admin request")))
+            } catch (error: IllegalStateException) {
+                respond(exchange, 404, mapOf("error" to (error.message ?: "target not found")))
+            }
+        }
+
+        http.createContext(AdminApiContract.REPORTS) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            try {
+                val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+                respond(exchange, 200, auth.adminService.reports(actor.id, page, perPage))
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            }
+        }
+
+        http.createContext("/api/v1/admin/reports/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            if (!method(exchange, "PUT")) return@createContext
+            val reportId = exchange.requestURI.path.removePrefix("/api/v1/admin/reports/").trim('/')
+            if (reportId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "report id is required"))
+            try {
+                val current = auth.reports.find(reportId)
+                    ?: return@createContext respond(exchange, 404, mapOf("error" to "report not found"))
+                val request = gson.fromJson(readBody(exchange), AdminReportUpdateRequest::class.java)
+                respond(exchange, 200, auth.adminService.updateReport(
+                    actor.id,
+                    current.copy(status = request.status, assignedTo = request.assignedTo ?: current.assignedTo)
+                ))
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            }
+        }
+
+        http.createContext(AdminApiContract.ANNOUNCEMENTS) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            try {
+                when (exchange.requestMethod.uppercase()) {
+                    "GET" -> {
+                        val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+                        respond(exchange, 200, auth.announcementService.list(actor.id, page, perPage))
+                    }
+                    "POST" -> {
+                        val request = gson.fromJson(readBody(exchange), CreateAnnouncementRequest::class.java)
+                        respond(exchange, 201, auth.announcementService.create(actor.id, request.title, request.body, request.imageUrl))
+                    }
+                    else -> method(exchange, "GET")
+                }
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            }
+        }
+
+        http.createContext("/api/v1/admin/announcements/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            val parts = exchange.requestURI.path.removePrefix("/api/v1/admin/announcements/").trim('/').split("/")
+            val id = parts.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "announcement id is required"))
+            try {
+                when {
+                    parts.size == 2 && parts[1] == "publish" && exchange.requestMethod.equals("POST", true) ->
+                        respond(exchange, 200, auth.announcementService.publish(actor.id, id))
+                    parts.size == 1 && exchange.requestMethod.equals("DELETE", true) ->
+                        respond(exchange, 200, mapOf("deleted" to auth.announcementService.delete(actor.id, id)))
+                    else -> respond(exchange, 404, mapOf("error" to "route not found"))
+                }
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            } catch (error: IllegalStateException) {
+                respond(exchange, 404, mapOf("error" to (error.message ?: "announcement not found")))
+            }
+        }
+
+        http.createContext(AdminApiContract.AUDIT_LOG) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            try {
+                val limit = query(exchange, "limit")?.toIntOrNull()?.coerceIn(1, 500) ?: 100
+                respond(exchange, 200, auth.adminService.auditLog(actor.id, limit))
+            } catch (error: SecurityException) {
+                respond(exchange, 403, mapOf("error" to (error.message ?: "permission denied")))
+            }
+        }
+
         http.createContext(BackendApiContract.PROVIDERS) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
             if (!method(exchange, "GET")) return@createContext
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
         }
 
         http.createContext(BackendApiContract.PROVIDER_STATUS) { exchange ->
+            val auth = requireControlAccess(exchange) ?: return@createContext
             if (!method(exchange, "GET")) return@createContext
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
         }
@@ -786,6 +1028,33 @@ class StreamixHttpServer(
         server?.stop(1)
         server = null
     }
+
+    private fun authenticatedAdminActor(exchange: HttpExchange, auth: AuthRuntime): ShinigamiUser? {
+        val token = bearerToken(exchange) ?: run {
+            unauthorized(exchange)
+            return null
+        }
+        return auth.auth.currentUser(token) ?: run {
+            unauthorized(exchange)
+            null
+        }
+    }
+
+    private fun requireControlAccess(exchange: HttpExchange): AuthRuntime? {
+        val auth = requireAuthRuntime(exchange) ?: return null
+        val actor = authenticatedAdminActor(exchange, auth) ?: return null
+        if (!auth.adminAccess.can(actor, AdminPermission.ACCESS_BACKEND_CONTROL)) {
+            respond(exchange, 403, mapOf("error" to "backend control access denied"))
+            return null
+        }
+        return auth
+    }
+
+    private fun readBody(exchange: HttpExchange): String =
+        exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
+
+    private fun <T> runSuspendValue(block: suspend () -> T): T =
+        kotlinx.coroutines.runBlocking { block() }
 
     private fun requireAuthRuntime(exchange: HttpExchange): AuthRuntime? {
         val auth = authRuntime
