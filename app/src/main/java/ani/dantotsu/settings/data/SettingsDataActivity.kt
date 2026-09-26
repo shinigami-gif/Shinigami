@@ -18,11 +18,8 @@ import com.anggrayudi.storage.file.getAbsolutePath
 import androidx.recyclerview.widget.LinearLayoutManager
 import ani.dantotsu.R
 import ani.dantotsu.databinding.ActivitySettingsDataBinding
-import ani.dantotsu.download.DownloadsManager
 import ani.dantotsu.initActivity
-import ani.dantotsu.media.MediaType
 import ani.dantotsu.navBarHeight
-import ani.dantotsu.util.LauncherWrapper
 import ani.dantotsu.util.StoragePermissions
 import ani.dantotsu.restartApp
 import ani.dantotsu.savePrefsToDownloads
@@ -48,7 +45,6 @@ import java.util.Locale
 
 class SettingsDataActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsDataBinding
-    private lateinit var launcher: LauncherWrapper
     private var cacheSize: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,9 +62,6 @@ class SettingsDataActivity : AppCompatActivity() {
         binding.dataSettingsBack.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
-
-        val contract = ActivityResultContracts.OpenDocumentTree()
-        launcher = LauncherWrapper(this, contract)
 
         val openDocumentLauncher =
             registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -116,93 +109,9 @@ class SettingsDataActivity : AppCompatActivity() {
             binding.storageAvailableText.text =
                 getString(R.string.storage_available_info, freeFormatted, totalFormatted)
 
-            val downloadsDirUri = PrefManager.getVal<String>(PrefName.DownloadsDir)
-            val displayPath = getReadableDownloadPath(downloadsDirUri)
-            binding.storageDirectoryText.text = "Downloads: $displayPath"
+            binding.storageDirectoryText.text = "App storage"
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-    }
-
-    private fun getReadableDownloadPath(uriString: String): String {
-        val defaultPath = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path}/Dantotsu"
-        if (uriString.isBlank()) return defaultPath
-
-        return try {
-            val uri = Uri.parse(uriString)
-
-            // 1. Try Anggrayudi getAbsolutePath on DocumentFile
-            val docFile = DocumentFile.fromTreeUri(this, uri)
-            val resolvedPath = runCatching { docFile?.getAbsolutePath(this) }.getOrNull()
-            if (!resolvedPath.isNullOrBlank() && !resolvedPath.contains("/tree/") && !resolvedPath.contains("msd:")) {
-                return resolvedPath
-            }
-
-            // 2. Handle MediaStore document tree (e.g. msd:1000174957)
-            val docId = runCatching { DocumentsContract.getTreeDocumentId(uri) }.getOrNull()
-                ?: uri.lastPathSegment ?: ""
-            if (docId.startsWith("msd:") || uriString.contains("msd:")) {
-                val mediaId = docId.substringAfterLast(":")
-                if (mediaId.isNotEmpty() && mediaId.all { it.isDigit() }) {
-                    val contentUri = MediaStore.Files.getContentUri("external")
-                    val projection = arrayOf(
-                        MediaStore.MediaColumns.DATA,
-                        MediaStore.MediaColumns.RELATIVE_PATH,
-                        MediaStore.MediaColumns.DISPLAY_NAME
-                    )
-                    contentResolver.query(
-                        contentUri,
-                        projection,
-                        "${MediaStore.MediaColumns._ID} = ?",
-                        arrayOf(mediaId),
-                        null
-                    )?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val dataIdx = cursor.getColumnIndex(MediaStore.MediaColumns.DATA)
-                            if (dataIdx != -1) {
-                                val path = cursor.getString(dataIdx)
-                                if (!path.isNullOrBlank()) return path
-                            }
-                            val relIdx = cursor.getColumnIndex(MediaStore.MediaColumns.RELATIVE_PATH)
-                            val nameIdx = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-                            val rel = if (relIdx != -1) cursor.getString(relIdx) else null
-                            val name = if (nameIdx != -1) cursor.getString(nameIdx) else null
-                            if (!rel.isNullOrBlank()) {
-                                val sub = rel.trimEnd('/')
-                                return "/storage/emulated/0/$sub"
-                            } else if (!name.isNullOrBlank()) {
-                                return "/storage/emulated/0/Download/$name"
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 3. Handle primary storage document tree (e.g. primary:Download/Dantotsu)
-            if (docId.contains("primary:") || uriString.contains("primary:") || uriString.contains("primary%3A")) {
-                val decoded = Uri.decode(docId)
-                val relative = decoded.substringAfter("primary:").substringAfter("primary%3A").trimStart('/')
-                return "/storage/emulated/0/$relative"
-            }
-
-            // 4. Handle SD card volume document tree (e.g. 1234-5678:Download/Dantotsu)
-            if (docId.contains(":")) {
-                val volume = docId.substringBefore(":")
-                val relative = docId.substringAfter(":").trimStart('/')
-                if (volume.matches(Regex("[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}"))) {
-                    return "/storage/$volume/$relative"
-                }
-            }
-
-            // 5. Fallback to DocumentFile display name
-            val docName = docFile?.name
-            if (!docName.isNullOrBlank() && !docName.contains("msd:")) {
-                return "/storage/emulated/0/Download/$docName"
-            }
-
-            defaultPath
-        } catch (e: Exception) {
-            defaultPath
         }
     }
 
@@ -374,72 +283,10 @@ class SettingsDataActivity : AppCompatActivity() {
             ),
 
             // Change Download Directory
-            Settings(
-                type = 1,
-                name = getString(R.string.change_download_directory),
-                desc = getString(R.string.change_download_directory_desc),
-                icon = R.drawable.ic_round_folder_24,
-                onClick = {
-                    val oldUri = PrefManager.getVal<String>(PrefName.DownloadsDir)
-                    context.customAlertDialog().apply {
-                        setTitle(R.string.change_download_directory)
-                        setMessage(R.string.change_download_directory_confirm)
-                        setPosButton(R.string.ok) {
-                            launcher.registerForCallback { success ->
-                                if (success) {
-                                    toast(getString(R.string.please_wait))
-                                    val newUri = PrefManager.getVal<String>(PrefName.DownloadsDir)
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        Injekt.get<DownloadsManager>().moveDownloadsDir(
-                                            context,
-                                            Uri.parse(oldUri),
-                                            Uri.parse(newUri),
-                                        ) { finished, message ->
-                                            if (finished) {
-                                                toast(getString(R.string.success))
-                                                updateStorageInfo()
-                                            } else {
-                                                toast(message)
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    toast(getString(R.string.error))
-                                }
-                            }
-                            launcher.launch()
-                        }
-                        setNegButton(R.string.cancel)
-                        show()
-                    }
-                }
-            ),
+
 
             // Rebuild Download Index
-            Settings(
-                type = 1,
-                name = getString(R.string.rebuild_download_index),
-                desc = getString(R.string.rebuild_download_index_desc),
-                icon = R.drawable.ic_download_24,
-                onClick = {
-                    context.customAlertDialog().apply {
-                        setTitle(R.string.rebuild_download_index)
-                        setMessage(R.string.rebuild_download_index_msg)
-                        setPosButton(R.string.ok) {
-                            toast(getString(R.string.please_wait))
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                val recovered = Injekt.get<DownloadsManager>().rebuildIndexFromDisk()
-                                withContext(Dispatchers.Main) {
-                                    toast(getString(R.string.rebuild_download_index_done, recovered))
-                                    updateStorageInfo()
-                                }
-                            }
-                        }
-                        setNegButton(R.string.cancel)
-                        show()
-                    }
-                }
-            ),
+
 
             // Purge Downloads
             Settings(
