@@ -4,8 +4,6 @@ import ani.dantotsu.Lazier
 import ani.dantotsu.lazyList
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
-import eu.kanade.tachiyomi.extension.anime.model.AnimeExtension
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 
 object AnimeSources : WatchSources() {
@@ -14,8 +12,8 @@ object AnimeSources : WatchSources() {
     var isInitialized = false
 
     suspend fun init(
-        fromExtensions: StateFlow<List<AnimeExtension.Installed>>,
-        extensionManager: eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager? = null
+        fromExtensions: Any? = null,
+        extensionManager: Any? = null
     ) {
         pinnedAnimeSources =
             PrefManager.getNullableVal<List<String>>(PrefName.AnimeSourcesOrder, null)
