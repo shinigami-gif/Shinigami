@@ -204,8 +204,8 @@ class CommentsFragment : Fragment() {
             fun sortComments(sortOrder: String) {
                 val groups = section.groups
                 when (sortOrder) {
-                    "newest" -> groups.sortByDescending { CommentItem.timestampToMillis((it as CommentItem).comment.timestamp) }
-                    "oldest" -> groups.sortBy { CommentItem.timestampToMillis((it as CommentItem).comment.timestamp) }
+                    "newest" -> groups.sortByDescending { CommentItem.timestampToMillis((it as CommentItem).comment.createdAt) }
+                    "oldest" -> groups.sortBy { CommentItem.timestampToMillis((it as CommentItem).comment.createdAt) }
                     "highest_rated" -> groups.sortByDescending { (it as CommentItem).comment.upvotes - it.comment.downvotes }
                     "lowest_rated" -> groups.sortBy { (it as CommentItem).comment.upvotes - it.comment.downvotes }
                 }
@@ -796,16 +796,9 @@ class CommentsFragment : Fragment() {
         section.clear()
         pagesLoaded = 1
 
-        val sortOrder = PrefManager.getVal(PrefName.CommentSortOrder, "newest")
-        val effectiveFilter = getEffectiveFilter()
-        
+        val token = backendToken() ?: return
         val comments = withContext(Dispatchers.IO) {
-            CommentsAPI.getCommentsForId(
-                mediaId,
-                page = 1,
-                tag = effectiveFilter,
-                sort = null
-            )
+            shinigamiCommentsClient.list(token, mediaId.toLong(), page = 1, perPage = 20)
         }
 
         comments?.items?.forEach { comment ->
@@ -843,7 +836,7 @@ class CommentsFragment : Fragment() {
         }
 
         // Traverse up to root parent if this is a reply
-        val commentChain = mutableListOf<Comment>()
+        val commentChain = mutableListOf<ShinigamiComment>()
         commentChain.add(targetComment)
 
         var currentParentId = targetComment.parentCommentId
@@ -887,7 +880,7 @@ class CommentsFragment : Fragment() {
                     val targetSection =
                         if (parent.commentDepth + 1 > parent.MAX_DEPTH) parent.parentSection else parent.repliesSection
                     if (depth >= parent.MAX_DEPTH) {
-                        parent.registerSubComment(comment.commentId)
+                        parent.registerSubComment(comment.id)
                     }
                     val childItem = CommentItem(
                         comment,
@@ -920,7 +913,7 @@ class CommentsFragment : Fragment() {
         if (comments == null) return emptyList()
         return when (PrefManager.getVal(PrefName.CommentSortOrder, "newest")) {
             "newest" -> comments.sortedByDescending { CommentItem.timestampToMillis(it.createdAt) }
-            "oldest" -> comments.sortedBy { CommentItem.timestampToMillis(it.timestamp) }
+            "oldest" -> comments.sortedBy { CommentItem.timestampToMillis(it.createdAt) }
             "highest_rated" -> comments.sortedByDescending { it.upvotes - it.downvotes }
             "lowest_rated" -> comments.sortedBy { it.upvotes - it.downvotes }
             else -> comments
@@ -1012,11 +1005,12 @@ class CommentsFragment : Fragment() {
      */
     fun viewReplyCallback(comment: CommentItem) {
         lifecycleScope.launch {
+            val token = backendToken() ?: return@launch
             val replies = withContext(Dispatchers.IO) {
                 shinigamiCommentsClient.replies(token, comment.comment.id)
             }
 
-            replies?.comments?.forEach {
+            replies.items.forEach {
                 val depth =
                     if (comment.commentDepth + 1 > comment.MAX_DEPTH) comment.commentDepth else comment.commentDepth + 1
                 val section =
@@ -1100,8 +1094,10 @@ class CommentsFragment : Fragment() {
     }
 
     private suspend fun handleEditComment(commentText: String) {
+        val token = backendToken() ?: return
+        val commentId = commentWithInteraction?.comment?.id ?: return
         val success = withContext(Dispatchers.IO) {
-            shinigamiCommentsClient.edit(token, commentWithInteraction?.comment?.id ?: return@withContext null, commentText)
+            shinigamiCommentsClient.edit(token, commentId, commentText)
         }
         if (success != null) {
             updateCommentInSection(success)
@@ -1129,6 +1125,7 @@ class CommentsFragment : Fragment() {
      * @param commentText the text of the comment
      */
     private suspend fun handleNewComment(commentText: String) {
+        val token = backendToken() ?: return
         val success = withContext(Dispatchers.IO) {
             shinigamiCommentsClient.create(
                 token,
@@ -1138,7 +1135,7 @@ class CommentsFragment : Fragment() {
                 tag
             )
         }
-        success?.let {
+        run {
             if (interactionState == InteractionState.REPLY) {
                 if (commentWithInteraction == null) return@let
                 val section =
@@ -1146,7 +1143,7 @@ class CommentsFragment : Fragment() {
                 val depth =
                     if (commentWithInteraction!!.commentDepth + 1 > commentWithInteraction!!.MAX_DEPTH) commentWithInteraction!!.commentDepth else commentWithInteraction!!.commentDepth + 1
                 if (depth >= commentWithInteraction!!.MAX_DEPTH) commentWithInteraction!!.registerSubComment(
-                    it.commentId
+                    it.id
                 )
                 section?.add(
                     if (commentWithInteraction!!.commentDepth + 1 > commentWithInteraction!!.MAX_DEPTH) 0 else section.itemCount,
