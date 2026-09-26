@@ -343,7 +343,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                         if (supportFragmentManager.findFragmentByTag("dialog") == null)
                             MediaListDialogFragment().show(supportFragmentManager, "dialog")
                     } else snackString("Please login to MAL")
-                } else if (Anilist.userid != null) {
+                } else if (!ani.dantotsu.connections.shinigami.ShinigamiSessionStore(this).getToken().isNullOrBlank()) {
                     if (supportFragmentManager.findFragmentByTag("dialog") == null)
                         MediaListDialogFragment().show(supportFragmentManager, "dialog")
                 } else snackString(getString(R.string.please_login_anilist))
