@@ -116,8 +116,7 @@ class MediaInfoFragment : Fragment() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val model: MediaDetailsViewModel by activityViewModels()
-        val offline: Boolean =
-            PrefManager.getVal(PrefName.OfflineMode) || !isOnline(requireContext())
+        val offline: Boolean = !isOnline(requireContext())
         binding.mediaInfoProgressBar.isGone = loaded
         binding.mediaInfoContainer.isVisible = loaded
         val activity = requireActivity() as MediaDetailsActivity
