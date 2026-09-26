@@ -11,14 +11,12 @@ import ani.dantotsu.settings.PlayerSettingsActivity
 import ani.dantotsu.settings.ReaderSettingsActivity
 import ani.dantotsu.settings.SettingsAboutActivity
 import ani.dantotsu.settings.SettingsAccountActivity
-import ani.dantotsu.settings.SettingsAddonActivity
 import ani.dantotsu.settings.SettingsAnimeActivity
 import ani.dantotsu.settings.SettingsCommonActivity
 import ani.dantotsu.settings.SettingsExtensionsActivity
 import ani.dantotsu.settings.SettingsMangaActivity
 import ani.dantotsu.settings.SettingsNotificationActivity
 import ani.dantotsu.settings.SettingsThemeActivity
-import ani.dantotsu.settings.TorrentSettingsActivity
 import ani.dantotsu.settings.UserInterfaceSettingsActivity
 
 object SettingsRegistry {
@@ -447,41 +445,6 @@ object SettingsRegistry {
                 breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.extensions)}",
                 targetActivity = SettingsExtensionsActivity::class.java,
                 highlightKey = context.getString(R.string.NSFWExtention)
-            )
-        )
-
-        // 8. Addons & Torrent Settings
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.torrent_settings),
-                desc = context.getString(R.string.torrent_settings_desc),
-                icon = R.drawable.lan_24,
-                category = context.getString(R.string.addons),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.addons)}",
-                targetActivity = TorrentSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.torrent_settings)
-            )
-        )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.torrent_encryption),
-                desc = context.getString(R.string.torrent_encryption_desc),
-                icon = R.drawable.ic_round_lock_24,
-                category = context.getString(R.string.torrent_settings),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.addons)} > ${context.getString(R.string.torrent_settings)}",
-                targetActivity = TorrentSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.torrent_encryption)
-            )
-        )
-        list.add(
-            SearchableSetting(
-                title = context.getString(R.string.torrent_wifi_only),
-                desc = context.getString(R.string.torrent_wifi_only_desc),
-                icon = R.drawable.lan_24,
-                category = context.getString(R.string.torrent_settings),
-                breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.addons)} > ${context.getString(R.string.torrent_settings)}",
-                targetActivity = TorrentSettingsActivity::class.java,
-                highlightKey = context.getString(R.string.torrent_wifi_only)
             )
         )
 
