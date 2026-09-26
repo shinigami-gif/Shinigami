@@ -209,7 +209,7 @@ class StreamixHttpServer(
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val actor = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
             val targetId = exchange.requestURI.path.removePrefix("/api/v1/users/").removeSuffix("/block")
-            if (exchange.requestMethod.uppercase() != "POST") return@createContext method(exchange, "POST")
+            if (!method(exchange, "POST")) return@createContext
             val enabled = query(exchange, "enabled")?.toBooleanStrictOrNull()
                 ?: return@createContext respond(exchange, 400, mapOf("error" to "enabled is required"))
             val user = runCatching { auth.users.setRelationship(actor.id, targetId, blocked = enabled) }
@@ -962,7 +962,7 @@ class StreamixHttpServer(
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
-            if (!exchange.requestMethod.equals("GET", true)) return@createContext method(exchange, "GET")
+            if (!method(exchange, "GET")) return@createContext
             respond(exchange, 200, mapOf("count" to auth.notificationService.unreadCount(viewer.id)))
         }
 
