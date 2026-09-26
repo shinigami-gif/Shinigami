@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import ani.dantotsu.R
-import ani.dantotsu.media.AddonType
 import ani.dantotsu.media.MediaType
 import ani.dantotsu.media.Type
 import ani.dantotsu.util.Logger
@@ -49,13 +48,11 @@ class ExtensionInstallService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val uri = intent?.data
         val mediaType = intent?.getSerializableExtraCompat<MediaType>(EXTRA_EXTENSION_TYPE)
-        val addonType =
-            intent?.getSerializableExtraCompat<AddonType>(ExtensionInstaller.EXTRA_ADDON_TYPE)
         val id = intent?.getLongExtra(EXTRA_DOWNLOAD_ID, -1)?.takeIf { it != -1L }
         val installerUsed = intent?.getSerializableExtraCompat<BasePreferences.ExtensionInstaller>(
             EXTRA_INSTALLER
         )
-        if (uri == null || (mediaType == null && addonType == null) || id == null || installerUsed == null) {
+        if (uri == null || mediaType == null || id == null || installerUsed == null) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -74,7 +71,7 @@ class ExtensionInstallService : Service() {
                 }
             }
         }
-        installer!!.addToQueue(mediaType ?: addonType!!, id, uri)
+        installer!!.addToQueue(mediaType, id, uri)
         return START_NOT_STICKY
     }
 
@@ -101,9 +98,7 @@ class ExtensionInstallService : Service() {
                 .putExtra(EXTRA_INSTALLER, installer)
             if (type is MediaType) {
                 intent.putExtra(EXTRA_EXTENSION_TYPE, type)
-            } else if (type is AddonType) {
-                intent.putExtra(ExtensionInstaller.EXTRA_ADDON_TYPE, type)
-            }
+
             return intent
         }
     }
