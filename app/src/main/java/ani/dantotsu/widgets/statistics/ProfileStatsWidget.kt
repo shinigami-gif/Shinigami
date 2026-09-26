@@ -113,7 +113,7 @@ class ProfileStatsWidget : AppWidgetProvider() {
                         val chaptersRead = prefs.getInt("chapters_read", 0)
                         
                         renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, userPref, titleTextColor, statsTextColor,
-                            userName, avatarUrl, animeCount, episodesWatched, mangaCount, chaptersRead)
+                            userName, avatarUrl, animeCount, episodesWatched)
                     }
                 } else showLoginCascade(context, appWidgetManager, appWidgetId, backgroundBitmap)
             }
@@ -125,7 +125,6 @@ class ProfileStatsWidget : AppWidgetProvider() {
             titleTextColor: Int, statsTextColor: Int,
             userName: String, avatarUrl: String?,
             animeCount: Int, episodesWatched: Int,
-            mangaCount: Int, chaptersRead: Int
         ) {
             withContext(Dispatchers.Main) {
                 fun buildViews(): RemoteViews =
@@ -164,10 +163,6 @@ class ProfileStatsWidget : AppWidgetProvider() {
                         setTextViewText(R.id.topLeftLabel, context.getString(R.string.anime_watched))
                         setTextViewText(R.id.topRightItem, episodesWatched.toString())
                         setTextViewText(R.id.topRightLabel, context.getString(R.string.episodes_watched_n))
-                        setTextViewText(R.id.bottomLeftItem, mangaCount.toString())
-                        setTextViewText(R.id.bottomLeftLabel, context.getString(R.string.manga_read))
-                        setTextViewText(R.id.bottomRightItem, chaptersRead.toString())
-                        setTextViewText(R.id.bottomRightLabel, context.getString(R.string.chapters_read_n))
                         
                         val intent = Intent(context, ProfileActivity::class.java)
                             .putExtra("userId", userPref.toInt())
