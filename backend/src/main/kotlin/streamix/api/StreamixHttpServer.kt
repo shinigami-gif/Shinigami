@@ -66,10 +66,10 @@ class StreamixHttpServer(
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val reporter = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
-            if (!exchange.requestMethod.equals("POST", true)) return@createContext method(exchange, "POST")
+            if (!method(exchange, "POST")) return@createContext
 
             val request = runCatching {
-                gson.fromJson(bodyText(), CreateSocialReportRequest::class.java)
+                gson.fromJson(exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() }, CreateSocialReportRequest::class.java)
             }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid report request"))
 
             if (request.targetUserId.isNullOrBlank() && request.targetContentId.isNullOrBlank()) {
@@ -196,7 +196,7 @@ class StreamixHttpServer(
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val actor = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
             val targetId = exchange.requestURI.path.removePrefix("/api/v1/users/").removeSuffix("/follow")
-            if (exchange.requestMethod.uppercase() != "POST") return@createContext method(exchange, "POST")
+            if (!method(exchange, "POST")) return@createContext
             val enabled = query(exchange, "enabled")?.toBooleanStrictOrNull()
                 ?: return@createContext respond(exchange, 400, mapOf("error" to "enabled is required"))
             val user = runCatching { auth.users.setRelationship(actor.id, targetId, following = enabled) }
@@ -952,7 +952,7 @@ class StreamixHttpServer(
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
-            if (!exchange.requestMethod.equals("GET", true)) return@createContext method(exchange, "GET")
+            if (!method(exchange, "GET")) return@createContext
             val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
             val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
             respond(exchange, 200, auth.notificationService.list(viewer.id, page, perPage))
