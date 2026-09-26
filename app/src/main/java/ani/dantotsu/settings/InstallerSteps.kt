@@ -49,7 +49,7 @@ class InstallerSteps(
             context,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS
         )
-            .setSmallIcon(R.drawable.ic_download_24)
+            .setSmallIcon(R.drawable.ic_round_info_24)
             .setContentTitle(context.getString(R.string.installation_complete))
             .setContentText(context.getString(R.string.extension_has_been_installed))
             .setPriority(NotificationCompat.PRIORITY_LOW)
