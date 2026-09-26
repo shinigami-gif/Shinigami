@@ -705,6 +705,45 @@ class StreamixHttpServer(
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
         }
 
+        http.createContext(NotificationApiContract.NOTIFICATIONS) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            if (!exchange.requestMethod.equals("GET", true)) return@createContext method(exchange, "GET")
+            val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+            val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+            respond(exchange, 200, auth.notificationService.list(viewer.id, page, perPage))
+        }
+
+        http.createContext(NotificationApiContract.UNREAD_COUNT) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            if (!exchange.requestMethod.equals("GET", true)) return@createContext method(exchange, "GET")
+            respond(exchange, 200, mapOf("count" to auth.notificationService.unreadCount(viewer.id)))
+        }
+
+        http.createContext("/api/v1/notifications/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            val relative = exchange.requestURI.path.removePrefix("/api/v1/notifications/").trim('/')
+            when {
+                relative == "read-all" && exchange.requestMethod.equals("POST", true) -> {
+                    respond(exchange, 200, mapOf("marked" to auth.notificationService.markAllRead(viewer.id)))
+                }
+                relative.endsWith("/read") && exchange.requestMethod.equals("POST", true) -> {
+                    val id = relative.removeSuffix("/read").trim('/')
+                    if (id.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "invalid notification id"))
+                    if (!auth.notificationService.markRead(viewer.id, id)) {
+                        return@createContext respond(exchange, 404, mapOf("error" to "notification not found"))
+                    }
+                    respond(exchange, 200, mapOf("status" to "read"))
+                }
+                else -> respond(exchange, 404, mapOf("error" to "route not found"))
+            }
+        }
+
         http.createContext("/api/v1/anime/") { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val parts = exchange.requestURI.path.removePrefix("/api/v1/anime/").split("/")
