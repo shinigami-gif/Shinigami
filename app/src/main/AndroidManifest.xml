@@ -95,86 +95,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/upcoming_widget_info" />
         </receiver>
-        <activity
-            android:name=".widgets.upcoming.UpcomingWidgetConfigure"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
-        <receiver
-            android:name=".widgets.statistics.ProfileStatsWidget"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/statistics_widget_info" />
-        </receiver>
-        <receiver
-            android:name=".widgets.continue_widget.ContinueWidget"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/continue_widget_info" />
-        </receiver>
-        <receiver android:name=".notifications.IncognitoNotificationClickReceiver" />
-
-        <activity android:name=".others.calc.CalcActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity android:name=".settings.AnilistSettingsActivity"/>
-        <activity android:name=".forum.ForumActivity" />
-        <activity android:name=".forum.ChatActivity" />
-        <activity android:name=".forum.ThreadViewActivity" />
-        <activity android:name=".settings.UserInterfaceSettingsActivity" />
-        <activity android:name=".settings.PlayerSettingsActivity" />
-        <activity android:name=".settings.ReaderSettingsActivity" />
-        <activity android:name=".settings.FAQActivity" />
-        <activity android:name=".settings.DownloadQueueActivity" android:parentActivityName=".settings.SettingsActivity" />
-        <activity
-            android:name=".settings.data.SettingsDataActivity"
-            android:parentActivityName=".settings.SettingsActivity" />
-        <activity
-            android:name=".settings.SettingsActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsAboutActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".home.status.StatusActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsAccountActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsAnimeActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsCommonActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsAddonActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsNotificationActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".settings.SettingsThemeActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".widgets.statistics.ProfileStatsConfigure"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".account.AccountActivity"
@@ -264,36 +184,6 @@
             android:exported="true"
             android:multiprocess="false"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
-
-        <service
-            android:name=".widgets.upcoming.UpcomingRemoteViewsService"
-            android:exported="true"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-        <service
-            android:name="eu.kanade.tachiyomi.extension.util.ExtensionInstallService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name=".download.anime.AnimeDownloaderService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name=".connections.discord.DiscordService"
-            android:exported="false"
-            android:stopWithTask="false"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name="androidx.media3.exoplayer.scheduler.PlatformScheduler$PlatformSchedulerService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".media.anime.AnimePlayerService"
-            android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-            </intent-filter>
-        </service>
 
         <service
             android:name=".media.anime.cast.CastProxyServerService"
