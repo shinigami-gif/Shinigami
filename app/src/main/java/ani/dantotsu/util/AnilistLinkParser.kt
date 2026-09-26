@@ -10,7 +10,9 @@ object AnilistLinkParser {
     enum class MediaType {
         ANIME
     }
-    private val ANIME_URL_PATTERN = Regex("""https://anilist\.co/anime/(\d+)/?\S*""")    fun extractAnilistLinks(text: String): List<AnilistLink> {
+    private val ANIME_URL_PATTERN = Regex("""https://anilist\.co/anime/(\d+)/?\S*""")
+
+    fun extractAnilistLinks(text: String): List<AnilistLink> {
         val links = mutableListOf<AnilistLink>()
 
         ANIME_URL_PATTERN.findAll(text).forEach { matchResult ->
