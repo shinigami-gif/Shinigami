@@ -117,7 +117,7 @@ data class Media(
         cover = apiMedia.coverImage?.large ?: apiMedia.coverImage?.medium,
         banner = apiMedia.bannerImage,
         status = apiMedia.status.toString(),
-        isFav = apiMedia.isFavourite!!,
+        isFav = apiMedia.isFavourite ?: false,
         isAdult = apiMedia.isAdult ?: false,
         isListPrivate = apiMedia.mediaListEntry?.private ?: false,
         userProgress = apiMedia.mediaListEntry?.progress,
