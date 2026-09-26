@@ -33,9 +33,6 @@ class ShinigamiProfileFragment : Fragment() {
         binding.statsEpisodesWatched.text = profile.stats.episodesWatched.toString()
         binding.statsDaysWatched.text = "—"
         binding.statsAnimeMeanScore.text = profile.stats.meanScore?.toString() ?: "—"
-        binding.statsChaptersRead.text = "—"
-        binding.statsVolumeRead.text = "—"
-        binding.statsMangaMeanScore.text = "—"
 
         val bio = profile.user.bio.orEmpty()
         binding.userInfoContainer.isVisible = bio.isNotBlank()
@@ -59,10 +56,6 @@ class ShinigamiProfileFragment : Fragment() {
             }
         }
 
-        binding.profileFavAnimeContainer.visibility = View.GONE
-        binding.profileFavMangaContainer.visibility = View.GONE
-        binding.profileFavCharactersContainer.visibility = View.GONE
-        binding.profileFavStaffContainer.visibility = View.GONE
     }
 
     override fun onDestroyView() {
