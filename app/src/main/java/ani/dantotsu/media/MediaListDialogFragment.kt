@@ -318,7 +318,11 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                                             token = token,
                                             mediaId = media!!.id.toLong(),
                                             state = ShinigamiLibraryWrite(
-                                                status = status.name,
+                                                status = when (status.name) {
+                                                    "CURRENT" -> "WATCHING"
+                                                    "REPEATING" -> "REWATCHING"
+                                                    else -> status.name
+                                                },
                                                 progress = progress ?: 0,
                                                 score = score?.div(10.0),
                                                 isFavorite = media?.isFav ?: false,
