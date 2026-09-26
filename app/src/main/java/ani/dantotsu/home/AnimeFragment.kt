@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.R
 import ani.dantotsu.Refresh
 import ani.dantotsu.bottomBarOrNull
-import ani.dantotsu.connections.anilist.AniMangaSearchResults
+import ani.dantotsu.connections.anilist.AnimeSearchResults
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.anilist.AnilistAnimeViewModel
 import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
@@ -121,7 +121,7 @@ class AnimeFragment : Fragment() {
         var loading = true
         if (model.notSet) {
             model.notSet = false
-            model.aniMangaSearchResults = AniMangaSearchResults(
+            model.animeSearchResults = AniMangaSearchResults(
                 "ANIME",
                 isAdult = false,
                 onList = false,
