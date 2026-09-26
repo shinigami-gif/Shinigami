@@ -95,7 +95,7 @@ class FeedActivity : AppCompatActivity() {
 
     private fun setupQuickActions() {
         binding.socialGlobalChatCard.setOnClickListener {
-            startActivity(Intent(this, ani.dantotsu.forum.ForumActivity::class.java))
+            startActivity(Intent(this, ani.dantotsu.forum.ChatActivity::class.java).putExtra("chat_title", "Global Chat"))
         }
         binding.socialAnimeChatCard.setOnClickListener {
             startActivity(Intent(this, ani.dantotsu.forum.ForumActivity::class.java))
@@ -207,7 +207,7 @@ class FeedActivity : AppCompatActivity() {
                         4 -> {
                             startActivity(
                                 Intent(this@FeedActivity, AccountActivity::class.java)
-                                    .putExtra("userId", Anilist.userid)
+                                    .putExtra("userId", ShinigamiSessionStore(this@FeedActivity).getUserId())
                             )
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                             finish()
