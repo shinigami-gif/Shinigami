@@ -36,6 +36,8 @@ import ani.dantotsu.ZoomOutPageTransformer
 import ani.dantotsu.blurImage
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.mal.MAL
+import ani.dantotsu.database.AnimeStateDatabase
+import ani.dantotsu.database.AnimeStateRepository
 import ani.dantotsu.copyToClipboard
 import ani.dantotsu.databinding.ActivityMediaBinding
 import ani.dantotsu.getThemeColor
@@ -121,6 +123,9 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             }
         }
         this.media = media
+        AnimeStateRepository(AnimeStateDatabase.get(this)).get(media.id)?.let { state ->
+            media.isFav = state.isFavorite
+        }
         if (media.name == "No media found") {
             snackString(media.name)
             finish()
@@ -256,58 +261,38 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         binding.mediaStatus.text = media.status ?: ""
         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
 
-        fun fav(media: Media):  PopImageButton? {
-            //Fav Button
-            return if (Anilist.userid != null && !rescueMode) {
-                if (media.isFav) binding.mediaFav.setImageDrawable(
-                    AppCompatResources.getDrawable(
-                        this,
-                        R.drawable.ic_round_favorite_24
+        fun fav(media: Media): PopImageButton? {
+            val currentUserId = ani.dantotsu.connections.shinigami.ShinigamiSessionStore(this).getUserId()
+            if (currentUserId.isNullOrBlank()) {
+                binding.mediaFav.visibility = View.GONE
+                return null
+            }
+            if (media.isFav) {
+                binding.mediaFav.setImageDrawable(
+                    AppCompatResources.getDrawable(this, R.drawable.ic_round_favorite_24)
+                )
+            }
+            return PopImageButton(
+                scope,
+                binding.mediaFav,
+                R.drawable.ic_round_favorite_24,
+                R.drawable.ic_round_favorite_border_24,
+                R.color.bg_opp,
+                R.color.violet_400,
+                media.isFav
+            ) {
+                media.isFav = it
+                val repository = AnimeStateRepository(AnimeStateDatabase.get(this))
+                val current = repository.get(media.id)
+                repository.upsert(
+                    (current ?: ani.dantotsu.database.AnimeStateRecord(animeId = media.id)).copy(
+                        isFavorite = it,
+                        updatedAt = System.currentTimeMillis()
                     )
                 )
-
-                PopImageButton(
-                    scope,
-                    binding.mediaFav,
-                    R.drawable.ic_round_favorite_24,
-                    R.drawable.ic_round_favorite_border_24,
-                    R.color.bg_opp,
-                    R.color.violet_400,
-                    media.isFav
-                ) {
-                    media.isFav = it
-                    Anilist.mutation.toggleFav(media.anime != null, media.id)
-                    Refresh.all()
-                }
-            } else {
-                binding.mediaFav.visibility = View.GONE
-                null
+                Refresh.all()
             }
         }
-        var isFavSyncRunning = false
-        fun syncMediaFavStateIfNeeded(favButton: PopImageButton?) {
-            if (rescueMode || Anilist.userid == null || favButton == null || media.isFav || isFavSyncRunning) return
-            isFavSyncRunning = true
-            scope.launch {
-                try {
-                    val favType = if (media.anime != null) {
-                        ani.dantotsu.connections.anilist.AnilistMutations.FavType.ANIME
-                    } else {
-                        ani.dantotsu.connections.anilist.AnilistMutations.FavType.MANGA
-                    }
-                    val isUserFav = withContext(Dispatchers.IO) {
-                        Anilist.query.isUserFav(favType, media.id)
-                    }
-                    if (isUserFav) {
-                        media.isFav = true
-                        if (!favButton.clicked) favButton.clicked()
-                    }
-                } finally {
-                    isFavSyncRunning = false
-                }
-            }
-        }
-
         @SuppressLint("ResourceType")
         fun total() {
             val text = SpannableStringBuilder().apply {
