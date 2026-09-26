@@ -51,8 +51,7 @@ class EpisodeAdapter(
     private var type: Int,
     private val media: Media,
     private val fragment: AnimeWatchFragment,
-    var arr: List<Episode> = arrayListOf(),
-    var offlineMode: Boolean = false
+    var arr: List<Episode> = arrayListOf()
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     val context = fragment.requireContext()
 
@@ -277,8 +276,6 @@ class EpisodeAdapter(
                     fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
                 }
             }
-            binding.itemDownload.visibility = View.GONE
-            binding.itemDownloadStatus.visibility = View.GONE
             binding.itemEpisodeDesc.setOnClickListener {
                 binding.itemEpisodeDesc.maxLines = if (binding.itemEpisodeDesc.maxLines == 3) 100 else 3
             }
