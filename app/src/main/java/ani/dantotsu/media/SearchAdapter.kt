@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -26,9 +25,6 @@ import ani.dantotsu.openLinkInBrowser
 import ani.dantotsu.others.imagesearch.ImageSearchActivity
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
-import com.google.android.material.checkbox.MaterialCheckBox.STATE_CHECKED
-import com.google.android.material.checkbox.MaterialCheckBox.STATE_INDETERMINATE
-import com.google.android.material.checkbox.MaterialCheckBox.STATE_UNCHECKED
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -183,7 +179,7 @@ class SearchAdapter(private val activity: SearchActivity, private val type: Sear
             activity.aniMangaResult.apply {
                 search =
                     if (binding.searchBarText.text.toString() != "") binding.searchBarText.text.toString() else null
-                onList = listOnly
+                onList = null
                 isAdult = adult
             }
             if (binding.searchBarText.text.toString().equals("hentai", true)) {
@@ -251,33 +247,6 @@ class SearchAdapter(private val activity: SearchActivity, private val type: Sear
                 searchTitle()
             }
         } else binding.searchAdultCheck.visibility = View.GONE
-        binding.searchList.apply {
-            if (Anilist.userid != null) {
-                visibility = View.VISIBLE
-                checkedState = when (listOnly) {
-                    null -> STATE_UNCHECKED
-                    true -> STATE_CHECKED
-                    false -> STATE_INDETERMINATE
-                }
-
-                addOnCheckedStateChangedListener { _, state ->
-                    listOnly = when (state) {
-                        STATE_CHECKED -> true
-                        STATE_INDETERMINATE -> false
-                        STATE_UNCHECKED -> null
-                        else -> null
-                    }
-                }
-
-                setOnTouchListener { _, event ->
-                    (event.actionMasked == MotionEvent.ACTION_DOWN).also {
-                        if (it) checkedState = (checkedState + 1) % 3
-                        searchTitle()
-                    }
-                }
-            } else visibility = View.GONE
-        }
-
         search = Runnable { searchTitle() }
         requestFocus = Runnable { binding.searchBarText.requestFocus() }
     }
