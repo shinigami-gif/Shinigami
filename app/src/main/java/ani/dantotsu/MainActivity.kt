@@ -458,8 +458,6 @@ class MainActivity : AppCompatActivity() {
                         }.show(supportFragmentManager, "dialog")
                     }
                 }
-            }
-        }
         if (PrefManager.getVal(PrefName.OC)) {
             AudioHelper.run(this, R.raw.audio)
             PrefManager.setVal(PrefName.OC, false)
