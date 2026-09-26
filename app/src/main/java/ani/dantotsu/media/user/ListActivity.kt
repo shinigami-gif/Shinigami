@@ -155,10 +155,7 @@ class ListActivity : AppCompatActivity() {
             if (it) {
                 scope.launch {
                     withContext(Dispatchers.IO) {
-                        model.loadLists(
-                            anime,
-                            intent.getIntExtra("userId", 0)
-                        )
+                        model.loadLists(anime)
                     }
                     live.postValue(false)
                 }
@@ -188,11 +185,7 @@ class ListActivity : AppCompatActivity() {
                     binding.listViewPager.adapter = null
                     scope.launch {
                         withContext(Dispatchers.IO) {
-                            model.loadLists(
-                                anime,
-                                intent.getIntExtra("userId", 0),
-                                sort
-                            )
+                            model.loadLists(anime, sortOrder = sort)
                         }
                     }
                     true
