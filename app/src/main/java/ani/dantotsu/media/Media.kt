@@ -16,6 +16,8 @@ import ani.dantotsu.connections.anilist.api.MediaStreamingEpisode
 import ani.dantotsu.connections.anilist.api.MediaType
 import ani.dantotsu.connections.anilist.api.Query
 import ani.dantotsu.connections.mal.MAL
+import ani.dantotsu.connections.mal.MalAnimeNode
+import ani.dantotsu.connections.mal.JikanMediaData
 import ani.dantotsu.media.anime.Anime
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -192,6 +194,48 @@ data class Media(
             this.tagsIsSpoiler = ArrayList(tagList.map { it.isMediaSpoiler == true })
         }
     }
+
+    constructor(mal: MalAnimeNode, @Suppress("UNUSED_PARAMETER") isAnime: Boolean = true) : this(
+        id = mal.id,
+        idMAL = mal.id,
+        name = mal.alternativeTitles?.en ?: mal.title,
+        nameRomaji = mal.title,
+        userPreferredName = mal.alternativeTitles?.en ?: mal.title,
+        cover = mal.mainPicture?.large ?: mal.mainPicture?.medium,
+        status = mal.status,
+        format = mal.mediaType,
+        source = mal.source,
+        meanScore = mal.mean?.times(10)?.toInt(),
+        popularity = mal.popularity,
+        description = mal.synopsis,
+        genres = ArrayList(mal.genres.orEmpty().map { it.name }),
+        nameMAL = mal.title,
+        startDate = parseIsoDate(mal.startDate),
+        endDate = parseIsoDate(mal.endDate),
+        isAdult = false,
+        anime = Anime(totalEpisodes = mal.numEpisodes)
+    )
+
+    constructor(jikan: JikanMediaData, @Suppress("UNUSED_PARAMETER") isAnime: Boolean = true) : this(
+        id = jikan.malId,
+        idMAL = jikan.malId,
+        name = jikan.titleEnglish ?: jikan.title,
+        nameRomaji = jikan.titleJapanese ?: jikan.title ?: "",
+        userPreferredName = jikan.titleEnglish ?: jikan.titleJapanese ?: jikan.title ?: "",
+        cover = jikan.images?.jpg?.largeImageUrl ?: jikan.images?.jpg?.imageUrl,
+        status = jikan.status,
+        format = jikan.type,
+        source = jikan.source,
+        meanScore = jikan.score?.times(10)?.toInt(),
+        popularity = jikan.popularity,
+        description = jikan.synopsis,
+        genres = ArrayList(jikan.genres.orEmpty().map { it.name }),
+        nameMAL = jikan.title,
+        startDate = parseIsoDate(jikan.aired?.from),
+        endDate = parseIsoDate(jikan.aired?.to),
+        isAdult = false,
+        anime = Anime(totalEpisodes = jikan.episodes)
+    )
 
     constructor(mediaList: MediaList) : this(mediaList.media!!) {
         this.userProgress = mediaList.progress
