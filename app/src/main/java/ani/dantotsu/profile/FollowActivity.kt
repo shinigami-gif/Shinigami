@@ -2,6 +2,7 @@ package ani.dantotsu.profile
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageButton
@@ -10,8 +11,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
-import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.anilist.api.User
 import ani.dantotsu.databinding.ActivityFollowBinding
 import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
@@ -19,7 +20,6 @@ import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
-import ani.dantotsu.toast
 import com.xwray.groupie.GroupieAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 class FollowActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFollowBinding
     val adapter = GroupieAdapter()
-    var users: List<ani.dantotsu.connections.shinigami.ShinigamiUser> = emptyList()
+    var users: List<User>? = null
     private lateinit var selected: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,47 +39,33 @@ class FollowActivity : AppCompatActivity() {
         binding.listToolbar.updateLayoutParams<MarginLayoutParams> { topMargin = statusBarHeight }
         binding.listFrameLayout.updateLayoutParams<MarginLayoutParams> { bottomMargin = navBarHeight }
         setContentView(binding.root)
-
         val layoutType = PrefManager.getVal<Int>(PrefName.FollowerLayout)
         selected = getSelected(layoutType)
         binding.followFilterButton.visibility = View.GONE
         binding.followerGrid.alpha = 0.33f
         binding.followerList.alpha = 0.33f
         selected(selected)
-        binding.listRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.listRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.listRecyclerView.adapter = adapter
         binding.listProgressBar.visibility = View.VISIBLE
         binding.listBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         val title = intent.getStringExtra("title")
-        val userId = intent.getStringExtra("userId")
+        val userID = intent.getIntExtra("userId", 0)
         binding.listTitle.text = title
 
         lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val token = ShinigamiSessionStore(this@FollowActivity).getToken()
-                    ?: throw IllegalStateException("Not signed in")
-                require(!userId.isNullOrBlank()) { "Missing backend user id" }
-
-                val page = when (title) {
-                    "Following" -> ShinigamiBackendClient().getFollowing(token, userId)
-                    "Followers" -> ShinigamiBackendClient().getFollowers(token, userId)
-                    else -> throw IllegalArgumentException("Unknown relationship list")
-                }
-                users = page.items
-
-                withContext(Dispatchers.Main) {
-                    fillList()
-                    binding.listProgressBar.visibility = View.GONE
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    binding.listProgressBar.visibility = View.GONE
-                    toast(e.message ?: "Failed to load users")
-                }
+            val respond: List<User>? = when (title) {
+                "Following" -> Anilist.query.userFollowing(userID)
+                "Followers" -> Anilist.query.userFollowers(userID)
+                else -> null
+            }
+            users = respond
+            withContext(Dispatchers.Main) {
+                fillList()
+                binding.listProgressBar.visibility = View.GONE
             }
         }
-
         binding.followerList.setOnClickListener {
             selected(it as ImageButton)
             PrefManager.setVal(PrefName.FollowerLayout, 0)
@@ -99,25 +85,17 @@ class FollowActivity : AppCompatActivity() {
         adapter.clear()
         val screenWidth = resources.displayMetrics.run { widthPixels / density }
         binding.listRecyclerView.layoutManager = when (getLayoutType(selected)) {
-            0 -> LinearLayoutManager(this)
+            0 -> LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
             1 -> GridLayoutManager(this, (screenWidth / 120f).toInt(), GridLayoutManager.VERTICAL, false)
-            else -> LinearLayoutManager(this)
+            else -> LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         }
-
-        val currentUserId = ShinigamiSessionStore(this).getUserId()
-        users.forEach { user ->
+        users?.forEach { user ->
             adapter.add(
-                ShinigamiFollowerItem(
-                    grid = getLayoutType(selected) == 1,
-                    user = user,
-                    scope = lifecycleScope,
-                    currentUserId = currentUserId
-                ) { clickedUserId ->
-                    startActivity(
-                        Intent(this, ProfileActivity::class.java)
-                            .putExtra("userId", clickedUserId)
-                    )
-                }
+                FollowerItem(
+                    getLayoutType(selected) == 1,
+                    user,
+                    lifecycleScope
+                ) { onUserClick(it) }
             )
         }
     }
@@ -138,5 +116,9 @@ class FollowActivity : AppCompatActivity() {
         binding.followerList -> 0
         binding.followerGrid -> 1
         else -> 0
+    }
+
+    private fun onUserClick(id: Int) {
+        startActivity(Intent(this, ProfileActivity::class.java).putExtra("userId", id))
     }
 }
