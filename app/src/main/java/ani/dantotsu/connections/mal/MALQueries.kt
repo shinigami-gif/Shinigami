@@ -65,20 +65,6 @@ class MALQueries {
             )
         }.parsed<MalRankingResponse>()
     }
-
-    suspend fun getMangaRanking(
-        rankingType: String = "all",
-        limit: Int = 15,
-        offset: Int = 0
-    ): MalRankingResponse? = tryWithSuspend {
-        executeRequest {
-            client.get(
-                "$apiUrl/manga/ranking?ranking_type=$rankingType&limit=$limit&offset=$offset&fields=$rankingFields",
-                clientIdHeader
-            )
-        }.parsed<MalRankingResponse>()
-    }
-
     private val relationFields =
         "%7Bnode%7Bid,title,main_picture,num_episodes,num_chapters,mean,media_type,status,alternative_titles,rating,popularity%7D%7D"
     private val detailFields =
