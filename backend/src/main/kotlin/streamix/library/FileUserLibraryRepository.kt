@@ -84,7 +84,7 @@ class FileUserLibraryRepository(
         }
     }
 
-    private fun StoredEntry.toPublic() = UserAnimeState(
+    private fun StoredEntry.asPublic() = UserAnimeState(
         mediaId = mediaId,
         status = status,
         progress = progress,
