@@ -14,6 +14,8 @@ import ani.dantotsu.databinding.ActivitySocialBinding
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.initActivity
 import ani.dantotsu.statusBarHeight
+import ani.dantotsu.connections.shinigami.ShinigamiChatClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.themes.ThemeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +28,7 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
     private var featureIndex = 0
     private var leaderboardIndex = 0
     private var quickActionIndex = 0
+    private lateinit var conversationAdapter: ShinigamiConversationAdapter
 
     private val featureRunnable = object : Runnable {
         override fun run() {
@@ -99,8 +102,29 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
             LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
         binding.socialFriendsList.adapter = null
         binding.socialMessagesList.layoutManager = LinearLayoutManager(requireContext())
-        binding.socialMessagesList.adapter = null
+        conversationAdapter = ShinigamiConversationAdapter { conversation ->
+            startActivity(
+                android.content.Intent(requireContext(), ani.dantotsu.forum.ChatActivity::class.java)
+                    .putExtra("chat_title", conversation.user.displayName?.takeIf { it.isNotBlank() }
+                        ?: conversation.user.username)
+                    .putExtra("message_user_id", conversation.user.id)
+            )
+        }
+        binding.socialMessagesList.adapter = conversationAdapter
         binding.socialFriendsTitle.text = "Active Friends"
+
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            runCatching {
+                val token = ShinigamiSessionStore(requireContext()).getToken()
+                    ?: throw IllegalStateException("Not signed in")
+                ShinigamiChatClient().conversations(token, 1, 20)
+            }.onSuccess { page ->
+                withContext(Dispatchers.Main) {
+                    conversationAdapter.submit(page.items)
+                }
+            }
+        }
+
         handler.removeCallbacks(featureRunnable)
         handler.removeCallbacks(leaderboardRunnable)
         handler.removeCallbacks(quickActionRunnable)
