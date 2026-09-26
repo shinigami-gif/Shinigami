@@ -115,15 +115,7 @@
         <item>PAUSED</item>
         <item>DROPPED</item>
     </string-array>
-    <string-array name="status_manga">
-        <item>PLANNING</item>
-        <item>READING</item>
-        <item>COMPLETED</item>
-        <item>RE-READING</item>
-        <item>PAUSED</item>
-        <item>DROPPED</item>
-    </string-array>
-    <string name="progress">PROGRESS</string>
+<string name="progress">PROGRESS</string>
     <string name="volume_progress">VOLUME PROGRESS</string>
     <string name="score">SCORE</string>
     <string name="score_suffix">" / 10"</string>
