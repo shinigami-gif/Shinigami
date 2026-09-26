@@ -43,6 +43,18 @@ class AuthService(
         )
     }
 
+    fun signIn(
+        provider: String,
+        credential: String,
+        verifier: ExternalIdentityVerifier
+    ): SessionResponse {
+        require(provider.isNotBlank()) { "auth provider is required" }
+        require(credential.isNotBlank()) { "auth credential is required" }
+        val identity = verifier.verify(provider, credential)
+            ?: throw IllegalArgumentException("invalid authentication credential")
+        return signIn(identity)
+    }
+
     fun currentUser(token: String): ShinigamiUser? {
         val session = sessions.find(token) ?: return null
         if (session.expiresAt.isBefore(Instant.now())) {
