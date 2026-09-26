@@ -534,7 +534,11 @@ class StreamixHttpServer(
                             SendChatMessageRequest::class.java
                         )
                     }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid chat request"))
-                    respond(exchange, 201, auth.chatService.sendGlobal(viewer.id, request.content))
+                    try {
+                        respond(exchange, 201, auth.chatService.sendGlobal(viewer.id, request.content))
+                    } catch (error: IllegalArgumentException) {
+                        respond(exchange, chatErrorStatus(error), mapOf("error" to (error.message ?: "invalid chat message")))
+                    }
                 }
                 else -> method(exchange, "GET")
             }
@@ -563,7 +567,11 @@ class StreamixHttpServer(
                             SendChatMessageRequest::class.java
                         )
                     }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid chat request"))
-                    respond(exchange, 201, auth.chatService.sendAnime(viewer.id, mediaId, request.content))
+                    try {
+                        respond(exchange, 201, auth.chatService.sendAnime(viewer.id, mediaId, request.content))
+                    } catch (error: IllegalArgumentException) {
+                        respond(exchange, chatErrorStatus(error), mapOf("error" to (error.message ?: "invalid chat message")))
+                    }
                 }
                 else -> method(exchange, "GET")
             }
@@ -595,6 +603,9 @@ class StreamixHttpServer(
             val parts = suffix.split("/")
             val otherUserId = parts.firstOrNull()?.takeIf { it.isNotBlank() }
                 ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid user id"))
+            if (auth.users.findById(otherUserId) == null) {
+                return@createContext respond(exchange, 404, mapOf("error" to "user not found"))
+            }
             if (parts.size == 1) {
                 when (exchange.requestMethod.uppercase()) {
                     "GET" -> {
@@ -609,7 +620,11 @@ class StreamixHttpServer(
                                 SendMessageRequest::class.java
                             )
                         }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid message request"))
-                        respond(exchange, 201, auth.chatService.sendMessage(viewer.id, otherUserId, request.content))
+                        try {
+                            respond(exchange, 201, auth.chatService.sendMessage(viewer.id, otherUserId, request.content))
+                        } catch (error: IllegalArgumentException) {
+                            respond(exchange, chatErrorStatus(error), mapOf("error" to (error.message ?: "invalid message")))
+                        }
                     }
                     else -> method(exchange, "GET")
                 }
@@ -699,6 +714,13 @@ class StreamixHttpServer(
         exchange.responseHeaders.set("WWW-Authenticate", "Bearer")
         respond(exchange, 401, mapOf("error" to "authentication required"))
     }
+
+    private fun chatErrorStatus(error: IllegalArgumentException): Int =
+        when {
+            error.message == "messaging is blocked" -> 403
+            error.message == "recipient not found" || error.message == "sender not found" -> 404
+            else -> 400
+        }
 
     private fun method(exchange: HttpExchange, expected: String): Boolean {
         if (exchange.requestMethod.equals(expected, ignoreCase = true)) return true
