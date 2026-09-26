@@ -66,36 +66,6 @@ data class SocialComment(
     val updatedAt: String? = null
 )
 
-data class DELETE_ME(
-    val id: String,
-    val title: String,
-    val body: String,
-    val author: ShinigamiUser,
-    val replyCount: Int = 0,
-    val viewCount: Int = 0,
-    val likeCount: Int = 0,
-    val isLiked: Boolean = false,
-    val isSubscribed: Boolean = false,
-    val isLocked: Boolean = false,
-    val isSticky: Boolean = false,
-    val mediaIds: List<Long> = emptyList(),
-    val createdAt: String,
-    val updatedAt: String? = null
-)
-
-data class DELETE_ME_2(
-    val id: String,
-    val threadId: String,
-    val author: ShinigamiUser,
-    val content: String,
-    val parentCommentId: String? = null,
-    val likeCount: Int = 0,
-    val isLiked: Boolean = false,
-    val isLocked: Boolean = false,
-    val createdAt: String,
-    val updatedAt: String? = null
-)
-
 data class NotificationRef(
     val id: String,
     val type: String,
