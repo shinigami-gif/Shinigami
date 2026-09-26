@@ -244,11 +244,6 @@ class AnimeExtensionManager(
      * @param extension The anime extension to be installed.
      */
     fun installExtension(extension: AnimeExtension.Available): Observable<InstallStep> {
-        ani.dantotsu.parsers.ExtensionRepoMetaHelper.saveInstalledExtensionRepo(
-            extension.pkgName,
-            extension.repository,
-            extension.repoName
-        )
         return installer.downloadAndInstall(
             api.getAnimeApkUrl(extension), extension.pkgName,
             extension.name, MediaType.ANIME
