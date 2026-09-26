@@ -2,6 +2,8 @@ package ani.dantotsu.others
 
 import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,10 +14,6 @@ import ani.dantotsu.BottomSheetDialogFragment
 import ani.dantotsu.FileUrl
 import ani.dantotsu.R
 import ani.dantotsu.databinding.BottomSheetImageBinding
-import ani.dantotsu.media.manga.MangaCache
-import ani.dantotsu.media.manga.mangareader.BaseImageAdapter.Companion.loadBitmap
-import ani.dantotsu.media.manga.mangareader.BaseImageAdapter.Companion.loadBitmapOld
-import ani.dantotsu.media.manga.mangareader.BaseImageAdapter.Companion.mergeBitmap
 import ani.dantotsu.openLinkInBrowser
 import ani.dantotsu.saveImageToDownloads
 import ani.dantotsu.setSafeOnClickListener
@@ -23,11 +21,13 @@ import ani.dantotsu.shareImage
 import ani.dantotsu.snackString
 import ani.dantotsu.toast
 import ani.dantotsu.util.StoragePermissions.Companion.downloadsPermission
+import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
+import com.bumptech.glide.request.RequestOptions
 import com.davemorrissey.labs.subscaleview.ImageSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import kotlinx.coroutines.withContext
 
 class ImageViewDialog : BottomSheetDialogFragment() {
 
@@ -89,31 +89,13 @@ class ImageViewDialog : BottomSheetDialogFragment() {
 
             val preloaded = preloadedBitmap
             preloadedBitmap = null
-            val mangaCache = try { Injekt.get<MangaCache>() } catch (_: Exception) { null }
-
             var bitmap = if (preloaded != null && !preloaded.isRecycled) {
                 preloaded
             } else {
-                mangaCache?.getBitmap(image.url)
+                loadBitmap(context, image, trans1)
             }
-
-            var bitmap2 = if (image2 != null) mangaCache?.getBitmap(image2.url) else null
-
-            if (bitmap == null) {
-                bitmap = context.loadBitmap(image, trans1 ?: listOf())
-                if (bitmap == null) {
-                    bitmap = context.loadBitmapOld(image, trans1 ?: listOf())
-                }
-            }
-            if (image2 != null && bitmap2 == null) {
-                bitmap2 = context.loadBitmap(image2, trans2 ?: listOf())
-                if (bitmap2 == null) {
-                    bitmap2 = context.loadBitmapOld(image2, trans2 ?: listOf())
-                }
-            }
-
-            bitmap =
-                if (bitmap2 != null && bitmap != null) mergeBitmap(bitmap, bitmap2) else bitmap
+            val bitmap2 = image2?.let { loadBitmap(context, it, trans2) }
+            bitmap = if (bitmap2 != null && bitmap != null) mergeBitmap(bitmap, bitmap2) else bitmap
 
             if (bitmap != null) {
                 binding.bottomImageShare.isEnabled = true
@@ -134,6 +116,31 @@ class ImageViewDialog : BottomSheetDialogFragment() {
                 toast(context.getString(R.string.loading_image_failed))
                 binding.bottomImageNo.visibility = View.VISIBLE
                 binding.bottomImageProgress.visibility = View.GONE
+            }
+        }
+    }
+
+    private suspend fun loadBitmap(
+        context: android.content.Context,
+        image: FileUrl,
+        transformations: List<BitmapTransformation>?
+    ): Bitmap? = withContext(Dispatchers.IO) {
+        runCatching {
+            val request = Glide.with(context).asBitmap().load(image.url)
+            if (!transformations.isNullOrEmpty()) {
+                request.apply(RequestOptions().transform(*transformations.toTypedArray()))
+            }
+            request.submit().get()
+        }.getOrNull()
+    }
+
+    private fun mergeBitmap(first: Bitmap, second: Bitmap): Bitmap {
+        val width = maxOf(first.width, second.width)
+        val height = maxOf(first.height, second.height)
+        return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { merged ->
+            Canvas(merged).apply {
+                drawBitmap(first, 0f, 0f, null)
+                drawBitmap(second, first.width.toFloat(), 0f, null)
             }
         }
     }
