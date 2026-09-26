@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.BuildConfig
 import ani.dantotsu.R
 import ani.dantotsu.connections.mal.MAL
+import ani.dantotsu.connections.mal.MalAnimeNode
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.Character
 import ani.dantotsu.media.Studio
