@@ -144,9 +144,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                                 if (adapter.itemCount == 0) {
                                     fail(R.string.stream_selection_empty)
                                 }
-                                if (model.watchSources!!.isDownloadedSource(media?.selected!!.sourceIndex)) {
-                                    adapter.performClick(0)
-                                }
                             }
                         }
                     } else {
