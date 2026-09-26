@@ -51,12 +51,6 @@ data class Media(
     // The general length of each anime episode in minutes
     @SerialName("duration") var duration: Int?,
 
-    // The amount of chapters the manga has when complete
-    @SerialName("chapters") var chapters: Int?,
-
-    // The amount of volumes the manga has when complete
-    @SerialName("volumes") var volumes: Int?,
-
     // Where the media was created. (ISO 3166-1 alpha-2)
     // Originally a "CountryCode"
     @SerialName("countryOfOrigin") var countryOfOrigin: String?,
@@ -193,7 +187,7 @@ data class MediaTitle(
 
 @Serializable
 enum class MediaType {
-    ANIME, MANGA;
+    ANIME;
 
     override fun toString(): String {
         return super.toString().replace("_", " ")
