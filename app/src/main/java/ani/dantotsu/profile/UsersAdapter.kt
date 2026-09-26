@@ -10,7 +10,6 @@ import androidx.viewbinding.ViewBinding
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.databinding.ItemFollowerBinding
 import ani.dantotsu.databinding.ItemFollowerGridBinding
 import ani.dantotsu.loadImage
@@ -83,7 +82,7 @@ class UsersAdapter(private val user: MutableList<User>, private val grid: Boolea
                 b.profileBannerImage.loadImage(user.banner ?: user.pfp)
             }
             b.profileUserName.text = user.name
-            if (rescueMode || user.id == Anilist.userid || user.isFollowing == null) {
+            if (rescueMode || user.isFollowing == null) {
                 b.followStatusChip.isVisible = false
             } else {
                 b.followStatusChip.isVisible = true
