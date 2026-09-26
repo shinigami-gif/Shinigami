@@ -42,6 +42,24 @@ data class UserRelationship(
     val blocked: Boolean
 )
 
+data class UserStats(
+    val animeTotal: Int = 0,
+    val animeWatching: Int = 0,
+    val animeCompleted: Int = 0,
+    val animePlanned: Int = 0,
+    val animePaused: Int = 0,
+    val animeDropped: Int = 0,
+    val episodesWatched: Int = 0,
+    val meanScore: Double? = null
+)
+
+data class UserProfile(
+    val user: ShinigamiUser,
+    val stats: UserStats = UserStats(),
+    val followerCount: Long = 0,
+    val followingCount: Long = 0
+)
+
 data class UserPage(
     val users: List<ShinigamiUser>,
     val page: Int,
