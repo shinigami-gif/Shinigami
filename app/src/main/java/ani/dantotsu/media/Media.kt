@@ -243,44 +243,25 @@ fun Media?.deleteFromList(
     onError: suspend (e: Exception) -> Unit,
     onNotFound: suspend () -> Unit
 ) {
-    val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
     scope.launch {
         withContext(Dispatchers.IO) {
             this@deleteFromList?.let { media ->
-                if (rescueMode) {
-                    
-                    val pending = ani.dantotsu.connections.PendingDeletion(
-                        mediaId = media.id,
-                        idMAL = media.idMAL,
-                        isAnime = media.anime != null,
-                    )
-                    val existing: List<ani.dantotsu.connections.PendingDeletion> =
-                        PrefManager.getVal(PrefName.PendingDeletions, listOf())
-                    val updated = existing.filterNot { it.mediaId == media.id } + pending
-                    AnimeStateRepository(AnimeStateDatabase.get(App.instance!!)).delete(media.id)
-                    PrefManager.setVal(PrefName.PendingDeletions, updated)
-                    val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
-                    PrefManager.setCustomVal("removeList", removeList.minus(media.id.toString()))
-                    try {
-                        MAL.query.deleteList(media.anime != null, media.idMAL)
-                    } catch (_: Exception) { /* MAL delete failed; AniList sync still queued */ }
-                    onSuccess()
-                } else {
-                    try {
-                        val context = App.instance ?: error("Application context is unavailable")
-                        val token = ShinigamiSessionStore(context).getToken()
-                            ?: return@withContext onNotFound()
+                try {
+                    val context = App.instance ?: error("Application context is unavailable")
+                    val token = ShinigamiSessionStore(context).getToken()
+                        ?: return@withContext onNotFound()
+                    if (media.anime != null) {
                         ShinigamiLibraryClient().deleteFromLibrary(token, media.id.toLong())
-                        AnimeStateRepository(AnimeStateDatabase.get(context)).delete(media.id)
-
-                        val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
-                        PrefManager.setCustomVal(
-                            "removeList", removeList.minus(media.id.toString())
-                        )
-                        onSuccess()
-                    } catch (e: Exception) {
-                        onError(e)
                     }
+                    AnimeStateRepository(AnimeStateDatabase.get(context)).delete(media.id)
+
+                    val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
+                    PrefManager.setCustomVal(
+                        "removeList", removeList.minus(media.id.toString())
+                    )
+                    onSuccess()
+                } catch (e: Exception) {
+                    onError(e)
                 }
             }
         }
