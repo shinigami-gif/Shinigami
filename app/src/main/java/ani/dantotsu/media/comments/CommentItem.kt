@@ -161,7 +161,7 @@ class CommentItem(
                 ContextCompat.startActivity(
                     commentsFragment.activity,
                     Intent(commentsFragment.activity, ProfileActivity::class.java)
-                        .putExtra("userId", comment.author.id.toInt()),
+                        .putExtra("userId", comment.author.id),
                     null
                 )
             }
@@ -217,13 +217,13 @@ class CommentItem(
             //fill the icon if the user has liked the comment
             setVoteButtons(viewBinding)
             commentUpVote.setOnClickListener {
-                val voteType = if (comment.userVoteType == 1) 0 else 1
-                val previousVoteType = comment.userVoteType
+                val voteType = if (comment.userVote == 1) 0 else 1
+                val previousVoteType = comment.userVote
                 val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
                 scope.launch {
                     val success = commentsFragment.voteComment(comment.id, voteType)
                     if (success) {
-                        comment.userVoteType = voteType
+                        comment.userVote = voteType
 
                         if (previousVoteType == -1) {
                             comment.downvotes -= 1
@@ -235,13 +235,13 @@ class CommentItem(
             }
 
             commentDownVote.setOnClickListener {
-                val voteType = if (comment.userVoteType == -1) 0 else -1
-                val previousVoteType = comment.userVoteType
+                val voteType = if (comment.userVote == -1) 0 else -1
+                val previousVoteType = comment.userVote
                 val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
                 scope.launch {
                     val success = commentsFragment.voteComment(comment.id, voteType)
                     if (success) {
-                        comment.userVoteType = voteType
+                        comment.userVote = voteType
                         if (previousVoteType == 1) {
                             comment.upvotes -= 1
                         }
@@ -319,7 +319,7 @@ class CommentItem(
     }
 
     private fun setVoteButtons(viewBinding: ItemCommentsBinding) {
-        when (comment.userVoteType) {
+        when (comment.userVote) {
             1 -> {
                 viewBinding.commentUpVote.setImageResource(R.drawable.ic_round_upvote_active_24)
                 viewBinding.commentUpVote.alpha = 1f
