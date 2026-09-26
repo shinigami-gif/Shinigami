@@ -39,7 +39,8 @@ class AuthService(
         val session = sessions.create(user.id, sessionTtlSeconds)
         return SessionResponse(
             user = user,
-            expiresAt = session.expiresAt.toString()
+            expiresAt = session.expiresAt.toString(),
+            token = session.token
         )
     }
 
