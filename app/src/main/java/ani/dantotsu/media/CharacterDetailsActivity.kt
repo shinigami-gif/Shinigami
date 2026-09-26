@@ -116,7 +116,7 @@ class CharacterDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChang
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
                     character.isFav =
-                        Anilist.query.isUserFav(AnilistMutations.FavType.CHARACTER, character.id)
+                        false
                 }
                 withContext(Dispatchers.Main) {
                     binding.characterFav.setImageResource(
@@ -126,7 +126,7 @@ class CharacterDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChang
             }
             binding.characterFav.setOnClickListener {
                 lifecycleScope.launch {
-                    if (Anilist.mutation.toggleFav(AnilistMutations.FavType.CHARACTER, character.id)) {
+                    if (false) {
                         character.isFav = !character.isFav
                         binding.characterFav.setImageResource(
                             if (character.isFav) R.drawable.ic_round_favorite_24 else R.drawable.ic_round_favorite_border_24
