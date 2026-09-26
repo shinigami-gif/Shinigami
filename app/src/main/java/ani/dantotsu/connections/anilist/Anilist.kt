@@ -39,14 +39,7 @@ object Anilist {
     val mutation: AnilistMutations = AnilistMutations()
 
     var token: String? = null
-    var username: String? = null
 
-    var userid: Int? = null
-    var avatar: String? = null
-    var bg: String? = null
-    var episodesWatched: Int? = null
-    var chapterRead: Int? = null
-    var unreadNotificationCount: Int = 0
 
     var genres: ArrayList<String>? = null
     var tags: Map<Boolean, List<String>>? = null
@@ -287,13 +280,7 @@ object Anilist {
 
     fun removeSavedToken() {
         token = null
-        username = null
         adult = false
-        userid = null
-        avatar = null
-        bg = null
-        episodesWatched = null
-        chapterRead = null
         initialized = false
         PrefManager.removeVal(PrefName.AnilistToken)
         PrefManager.removeVal(PrefName.AnilistUserId)
@@ -303,7 +290,6 @@ object Anilist {
         PrefManager.setVal(PrefName.UnreadMediaNotifications, 0)
         PrefManager.setVal(PrefName.UnreadSubscriptionNotifications, 0)
         PrefManager.setVal(PrefName.UnreadCommentNotifications, 0)
-        Anilist.unreadNotificationCount = 0
 
     }
 
