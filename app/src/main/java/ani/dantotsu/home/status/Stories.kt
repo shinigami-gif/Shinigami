@@ -352,7 +352,7 @@ class Stories @JvmOverloads constructor(
                 host?.lifecycleScope?.launch {
                     val media = withContext(Dispatchers.IO) { Anilist.query.getMediaList(listOf(mediaId))?.firstOrNull() }
                     if (media != null && !host.isDestroyed) {
-                        val cover = media.cover?.extraLarge ?: media.cover?.large
+                        val cover = media.cover
                         binding.coverImage.loadImage(cover)
                         blurImage(if (PrefManager.getVal(PrefName.BannerAnimations)) binding.contentImageViewKen else binding.contentImageView, media.banner ?: cover)
                     }
