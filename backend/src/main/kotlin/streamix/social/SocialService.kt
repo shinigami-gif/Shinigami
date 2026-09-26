@@ -23,15 +23,6 @@ class SocialService(
     fun commentReplies(commentId: String, viewerId: String?, page: Int = 1, perPage: Int = 20) =
         page(repository.commentReplies(commentId, viewerId, page, perPage), page, perPage)
 
-    fun forumThreads(query: String?, viewerId: String?, page: Int = 1, perPage: Int = 20) =
-        page(repository.forumThreads(query, page, perPage, viewerId), page, perPage)
-
-    fun forumThread(id: String, viewerId: String?) =
-        repository.forumThread(id, viewerId)
-
-    fun forumComments(threadId: String, viewerId: String?, page: Int = 1, perPage: Int = 20) =
-        page(repository.forumComments(threadId, viewerId, page, perPage), page, perPage)
-
     fun notifications(userId: String, page: Int = 1, perPage: Int = 20) =
         page(repository.notifications(userId, page, perPage), page, perPage)
 
@@ -64,21 +55,6 @@ class SocialService(
 
     fun voteComment(commentId: String, userId: String, vote: Int?) =
         repository.voteComment(commentId, userId, vote)
-
-    fun createForumThread(authorId: String, title: String, body: String, mediaIds: List<Long>) =
-        repository.createForumThread(authorId, title, body, mediaIds)
-
-    fun deleteForumThread(threadId: String, actorId: String) =
-        repository.deleteForumThread(threadId, actorId)
-
-    fun createForumComment(threadId: String, authorId: String, content: String, parentCommentId: String?) =
-        repository.createForumComment(threadId, authorId, content, parentCommentId)
-
-    fun likeThread(threadId: String, userId: String) =
-        repository.toggleThreadLike(threadId, userId)
-
-    fun subscribeThread(threadId: String, userId: String) =
-        repository.toggleThreadSubscription(threadId, userId)
 
     fun markNotificationRead(notificationId: String, userId: String) =
         repository.markNotificationRead(notificationId, userId)
