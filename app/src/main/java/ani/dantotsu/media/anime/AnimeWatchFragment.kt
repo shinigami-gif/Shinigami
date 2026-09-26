@@ -240,14 +240,10 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
             if (loadedEpisodes != null) {
                 val episodes = loadedEpisodes[media.selected!!.sourceIndex]
                 if (episodes != null) {
-                    val currentSourceName = model.watchSources?.get(media.selected!!.sourceIndex)?.name ?: ""
-                    val isTorrentSource = currentSourceName.equals("Torrent", ignoreCase = true) ||
-
                     val metadataPriority = PrefManager.getVal<Int>(PrefName.EpisodeMetadataSource)
                     episodes.forEach { (i, episode) ->
                         val epNum = episode.number
-                        if (!isTorrentSource) {
-                            // 1. Jikan (Lowest for metadata, only source for filler flag)
+                        // 1. Jikan (Lowest for metadata, only source for filler flag)
                             if (media.anime?.fillerEpisodes != null) {
                                 val fillerEp = media.anime!!.fillerEpisodes!![epNum]
                                     ?: media.anime!!.fillerEpisodes!!.getEpisode(epNum)
@@ -292,16 +288,11 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                                 applyAniZip()
                             }
 
-                            // Title fallback order: AniZip English -> Kitsu -> Jikan/MAL -> "Episode X"
-                            val anifyTitle = cleanTitle((media.anime?.anifyEpisodes?.get(epNum) ?: media.anime?.anifyEpisodes?.getEpisode(epNum))?.title)
-                            val kitsuTitle = cleanTitle((media.anime?.kitsuEpisodes?.get(epNum) ?: media.anime?.kitsuEpisodes?.getEpisode(epNum))?.title)
-                            val jikanTitle = cleanTitle((media.anime?.fillerEpisodes?.get(epNum) ?: media.anime?.fillerEpisodes?.getEpisode(epNum))?.title)
-                            episode.title = anifyTitle ?: kitsuTitle ?: jikanTitle ?: buildFallbackEpisodeTitle(i, episode)
-                        } else {
-                            if (episode.title.isNullOrBlank()) {
-                                episode.title = episode.sEpisode?.name ?: buildFallbackEpisodeTitle(i, episode)
-                            }
-                        }
+                        // Title fallback order: AniZip English -> Kitsu -> Jikan/MAL -> "Episode X"
+                        val anifyTitle = cleanTitle((media.anime?.anifyEpisodes?.get(epNum) ?: media.anime?.anifyEpisodes?.getEpisode(epNum))?.title)
+                        val kitsuTitle = cleanTitle((media.anime?.kitsuEpisodes?.get(epNum) ?: media.anime?.kitsuEpisodes?.getEpisode(epNum))?.title)
+                        val jikanTitle = cleanTitle((media.anime?.fillerEpisodes?.get(epNum) ?: media.anime?.fillerEpisodes?.getEpisode(epNum))?.title)
+                        episode.title = anifyTitle ?: kitsuTitle ?: jikanTitle ?: buildFallbackEpisodeTitle(i, episode)
                     }
                     media.anime?.episodes = episodes
                     headerAdapter.options = getScanlators(episodes)
