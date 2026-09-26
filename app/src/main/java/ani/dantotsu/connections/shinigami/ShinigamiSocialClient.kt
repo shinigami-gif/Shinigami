@@ -11,7 +11,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLEncoder
 
 class ShinigamiSocialClient(private val baseUrl: String = ShinigamiBackendConfig.baseUrl, private val http: OkHttpClient = OkHttpClient(), private val gson: Gson = Gson()) {
-    suspend fun feed(token: String, page: Int = 1, perPage: Int = 20) = page(token, "/api/v1/social/feed", page, perPage, ShinigamiActivity::class.java)
+    suspend fun feed(token: String, page: Int = 1, perPage: Int = 20) = fetchPage(token, "/api/v1/social/feed", page, perPage, ShinigamiActivity::class.java)
     suspend fun activities(token: String, page: Int = 1, perPage: Int = 20) = page(token, "/api/v1/social/activities", page, perPage, ShinigamiActivity::class.java)
     suspend fun activity(token: String, activityId: String) = get(token, "/api/v1/social/activities/" + activityId, ShinigamiActivity::class.java)
     suspend fun replies(token: String, activityId: String, page: Int = 1, perPage: Int = 20) = page(token, "/api/v1/social/activities/" + activityId + "/replies", page, perPage, ShinigamiActivityReply::class.java)
@@ -19,14 +19,14 @@ class ShinigamiSocialClient(private val baseUrl: String = ShinigamiBackendConfig
     suspend fun subscribeActivity(token: String, activityId: String) = post(token, "/api/v1/social/activities/" + activityId + "/subscribe", ShinigamiActivity::class.java)
     suspend fun forumThreads(token: String, query: String? = null, page: Int = 1, perPage: Int = 20): ShinigamiSocialPage<ShinigamiForumThread> {
         val q = query?.takeIf { it.isNotBlank() }?.let { "?q=" + URLEncoder.encode(it, "UTF-8") }.orEmpty()
-        return page(token, "/api/v1/social/forum/threads" + q, page, perPage, ShinigamiForumThread::class.java)
+        return fetchPage(token, "/api/v1/social/forum/threads" + q, page, perPage, ShinigamiForumThread::class.java)
     }
     suspend fun forumThread(token: String, threadId: String) = get(token, "/api/v1/social/forum/threads/" + threadId, ShinigamiForumThread::class.java)
     suspend fun forumComments(token: String, threadId: String, page: Int = 1, perPage: Int = 20) = page(token, "/api/v1/social/forum/threads/" + threadId + "/comments", page, perPage, ShinigamiForumComment::class.java)
     suspend fun likeThread(token: String, threadId: String) = post(token, "/api/v1/social/forum/threads/" + threadId + "/like", ShinigamiForumThread::class.java)
     suspend fun subscribeThread(token: String, threadId: String) = post(token, "/api/v1/social/forum/threads/" + threadId + "/subscribe", ShinigamiForumThread::class.java)
 
-    private suspend fun <T> page(token: String, path: String, page: Int, perPage: Int, type: Class<T>): ShinigamiSocialPage<T> = withContext(Dispatchers.IO) {
+    private suspend fun <T> fetchPage(token: String, path: String, page: Int, perPage: Int, type: Class<T>): ShinigamiSocialPage<T> = withContext(Dispatchers.IO) {
         val separator = if (path.contains("?")) "&" else "?"
         val response = http.newCall(Request.Builder().url(baseUrl + path + separator + "page=" + page + "&perPage=" + perPage).header("Authorization", "Bearer " + token).get().build()).execute()
         response.use {
