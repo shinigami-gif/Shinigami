@@ -17,34 +17,23 @@ import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.snackString
 import ani.dantotsu.util.ActivityMarkdownCreator
 
-fun sortUserStatusList(context: android.content.Context, users: List<User>): ArrayList<User> {
+fun sortUserStatusList(users: List<User>): ArrayList<User> {
     if (users.isEmpty()) return arrayListOf()
     val watchedActivity = PrefManager.getCustomVal<Set<String>>("activities", emptySet())
         .mapNotNull { it.toIntOrNull() }.toSet()
-
-    val currentUser = users.firstOrNull { it.id == ShinigamiSessionStore(itemView.context).getUserId() }
-    val otherUsers = users.filter { it.id != ShinigamiSessionStore(b.root.context).getUserId() }
-
-    val sortedOthers = otherUsers.sortedWith(
+    return ArrayList(users.sortedWith(
         compareBy<User> { user ->
             user.activity.isNotEmpty() && user.activity.all { watchedActivity.contains(it.id) }
         }.thenByDescending { user ->
             user.activity.maxOfOrNull { it.createdAt } ?: 0
         }
-    )
-
-    val result = ArrayList<User>()
-    if (currentUser != null) {
-        result.add(currentUser)
-    }
-    result.addAll(sortedOthers)
-    return result
+    ))
 }
 
 class UserStatusAdapter(userList: ArrayList<User>) :
     RecyclerView.Adapter<UserStatusAdapter.UsersViewHolder>() {
 
-    private val user: ArrayList<User> = ArrayList(userList)
+    private val user: ArrayList<User> = sortUserStatusList(userList)
 
     inner class UsersViewHolder(val binding: ItemUserStatusBinding) :
         RecyclerView.ViewHolder(binding.root) {
