@@ -15,12 +15,10 @@ import ani.dantotsu.DatePickerFragment
 import ani.dantotsu.InputFilterMinMax
 import ani.dantotsu.R
 import ani.dantotsu.Refresh
-import ani.dantotsu.connections.PendingProgressUpdate
 import ani.dantotsu.connections.shinigami.ShinigamiLibraryClient
 import ani.dantotsu.connections.shinigami.ShinigamiLibraryWrite
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.anilist.api.FuzzyDate
-import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.BottomSheetMediaListBinding
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.settings.saving.PrefManager
