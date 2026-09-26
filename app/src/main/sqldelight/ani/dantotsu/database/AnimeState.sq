@@ -29,6 +29,12 @@ FROM AnimeState
 WHERE isFavorite = 1
 ORDER BY updatedAt DESC;
 
+selectPlanned:
+SELECT *
+FROM AnimeState
+WHERE listStatus = 'PLANNING'
+ORDER BY updatedAt DESC;
+
 upsert:
 INSERT OR REPLACE INTO AnimeState(
     animeId,
