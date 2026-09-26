@@ -45,6 +45,7 @@ ffmpeg-kit = { module = "com.antonkarpenko:ffmpeg-kit-https", version.ref = "ffm
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version = "9.11.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # AndroidX Core
