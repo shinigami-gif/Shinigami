@@ -72,13 +72,6 @@ fun characterInformation(includeMediaInfo: Boolean) = """
               romaji
               userPreferred
           }
-          mediaListEntry {
-              progress
-              progressVolumes
-              private
-              score(format: POINT_100)
-              status
-          }
         }
       }
     }""".prepare() else ""
@@ -114,13 +107,6 @@ fun studioInformation(page: Int, perPage: Int) = """
               english
               romaji
               userPreferred
-          }
-          mediaListEntry {
-              progress
-              progressVolumes
-              private
-              score(format: POINT_100)
-              status
           }
         }
       }
@@ -179,13 +165,6 @@ fun staffInformation(page: Int, perPage: Int) = """
               english
               romaji
               userPreferred
-          }
-          mediaListEntry {
-              progress
-              progressVolumes
-              private
-              score(format: POINT_100)
-              status
           }
         }
       }
@@ -253,13 +232,6 @@ title {
   userPreferred
 }
 description
-mediaListEntry {
-  progress
-  progressVolumes
-  private
-  score(format: POINT_100)
-  status
-}
 """.prepare()
 
 fun fullMediaInformation(id: Int) = """
@@ -270,28 +242,6 @@ fun fullMediaInformation(id: Int) = """
       thumbnail
       url
       site
-    }
-    mediaListEntry {
-      id
-      status
-      score(format: POINT_100)
-      progress
-      progressVolumes
-      private
-      notes
-      repeat
-      customLists
-      updatedAt
-      startedAt {
-        year
-        month
-        day
-      }
-      completedAt {
-        year
-        month
-        day
-      }
     }
     reviews(perPage: 3, sort: SCORE_DESC) {
       nodes {
