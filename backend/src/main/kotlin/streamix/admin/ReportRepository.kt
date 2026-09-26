@@ -9,4 +9,5 @@ interface ReportRepository {
     fun create(report: AdminReport): AdminReport
     fun update(report: AdminReport): AdminReport
     fun count(status: ReportStatus? = null): Long
+    fun countForUser(userId: String): Long
 }
