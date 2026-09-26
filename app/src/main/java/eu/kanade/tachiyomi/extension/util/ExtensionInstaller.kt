@@ -350,10 +350,6 @@ class ExtensionInstaller(private val context: Context) {
                         cursor.getString(
                             cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_DESCRIPTION),
                         )
-                    ) ?: AddonType.fromText(
-                        cursor.getString(
-                            cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_DESCRIPTION),
-                        )
                     ) ?: return
 
                     installApk(type, id, fileUri)
