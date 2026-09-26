@@ -161,9 +161,6 @@ class Query {
     }
 
     @Serializable
-
-
-    @Serializable
     data class ToggleFollow(
         @SerialName("data")
         val data: Data?
