@@ -22,7 +22,7 @@ data class StatusUser(
     val name: String,
     val avatarUrl: String?,
     val activities: List<ShinigamiActivity>
-) : java.io.Serializable
+)
 
 fun sortUserStatusList(users: List<StatusUser>): ArrayList<StatusUser> {
     if (users.isEmpty()) return arrayListOf()
