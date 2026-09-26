@@ -93,21 +93,22 @@ class ProfileStatsWidget : AppWidgetProvider() {
                         val user = profile.user
                         prefs.edit()
                             .putLong("last_update", System.currentTimeMillis())
-                            .putString("user_name", user.displayName ?: user.username)
+                            .putString("user_id", user.id)
+                             .putString("user_name", user.displayName ?: user.username)
                             .putString("avatar_url", user.avatarUrl ?: "")
                             .putInt("anime_count", profile.stats.animeTotal)
                             .putInt("episodes_watched", profile.stats.episodesWatched)
                             .apply()
 
                         renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, user.id, titleTextColor, statsTextColor,
-                            user.displayName ?: user.username, profile.stats.animeTotal, profile.stats.episodesWatched)
+                            user.displayName ?: user.username, user.avatarUrl, profile.stats.animeTotal, profile.stats.episodesWatched)
                     } else {
                         val userName = prefs.getString("user_name", "") ?: ""
                         val avatarUrl = prefs.getString("avatar_url", "")
                         val animeCount = prefs.getInt("anime_count", 0)
                         val episodesWatched = prefs.getInt("episodes_watched", 0)
 
-                        renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, userPref, titleTextColor, statsTextColor,
+                        renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, prefs.getString("user_id", "") ?: "", titleTextColor, statsTextColor,
                             userName, avatarUrl, animeCount, episodesWatched)
                     }
                 } else showLoginCascade(context, appWidgetManager, appWidgetId, backgroundBitmap)
@@ -156,7 +157,7 @@ class ProfileStatsWidget : AppWidgetProvider() {
                         setTextViewText(R.id.topRightLabel, context.getString(R.string.episodes_watched_n))
                         
                         val intent = Intent(context, ProfileActivity::class.java)
-                            .putExtra("userId", userPref.toInt())
+                            .putExtra("userId", userPref)
                         val pendingIntent = PendingIntent.getActivity(
                             context, 0, intent, PendingIntent.FLAG_IMMUTABLE
                         )
