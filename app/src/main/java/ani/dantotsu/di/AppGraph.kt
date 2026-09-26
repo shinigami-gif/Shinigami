@@ -7,7 +7,6 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import ani.dantotsu.App
 import ani.dantotsu.MainActivity
-import ani.dantotsu.addons.download.DownloadAddonManager
 import ani.dantotsu.di.injekt.MetroInteropModule
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
@@ -35,7 +34,6 @@ interface AppGraph {
     val basePreferences: BasePreferences
     val networkHelper: NetworkHelper
     val javaScriptEngine: JavaScriptEngine
-    val downloadAddonManager: DownloadAddonManager
     val json: Json
     val protoBuf: ProtoBuf
     val metroInteropModule: MetroInteropModule
