@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import ani.dantotsu.loadImage
 import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.ActivityEditProfileBinding
