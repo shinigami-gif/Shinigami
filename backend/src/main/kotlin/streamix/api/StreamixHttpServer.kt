@@ -220,17 +220,19 @@ class StreamixHttpServer(
             val mediaId = parts.firstOrNull()?.toLongOrNull()
                 ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid mediaId"))
 
-            val existing = {
+            fun findExisting(): UserAnimeState? =
                 auth.libraryService.find(user.id, mediaId)
-                    ?: return@createContext respond(exchange, 404, mapOf("error" to "library item not found"))
-            }
 
             fun body(): String =
                 exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
 
             when {
                 parts.size == 1 -> when (exchange.requestMethod.uppercase()) {
-                    "GET" -> respond(exchange, 200, existing())
+                    "GET" -> {
+                        val state = findExisting()
+                            ?: return@createContext respond(exchange, 404, mapOf("error" to "library item not found"))
+                        respond(exchange, 200, state)
+                    }
                     "PUT" -> {
                         val request = runCatching {
                             gson.fromJson(body(), UpsertLibraryRequest::class.java)
@@ -258,14 +260,16 @@ class StreamixHttpServer(
                 parts.size == 2 && parts[1] == "status" && exchange.requestMethod.equals("PUT", true) -> {
                     val request = runCatching { gson.fromJson(body(), LibraryStatusRequest::class.java) }.getOrNull()
                         ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid status request"))
-                    val current = existing()
+                    val current = findExisting()
+                        ?: return@createContext respond(exchange, 404, mapOf("error" to "library item not found"))
                     respond(exchange, 200, auth.libraryService.upsert(user.id, current.copy(status = request.status, updatedAt = null)))
                 }
                 parts.size == 2 && parts[1] == "progress" && exchange.requestMethod.equals("PUT", true) -> {
                     val request = runCatching { gson.fromJson(body(), LibraryProgressRequest::class.java) }.getOrNull()
                         ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid progress request"))
                     if (request.progress < 0) return@createContext respond(exchange, 400, mapOf("error" to "progress must be non-negative"))
-                    val current = existing()
+                    val current = findExisting()
+                        ?: return@createContext respond(exchange, 404, mapOf("error" to "library item not found"))
                     respond(exchange, 200, auth.libraryService.upsert(user.id, current.copy(progress = request.progress, updatedAt = null)))
                 }
                 parts.size == 2 && parts[1] == "score" && exchange.requestMethod.equals("PUT", true) -> {
@@ -273,7 +277,8 @@ class StreamixHttpServer(
                         ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid score request"))
                     if (request.score != null && (request.score.isNaN() || request.score.isInfinite() || request.score < 0.0 || request.score > 100.0))
                         return@createContext respond(exchange, 400, mapOf("error" to "score must be between 0 and 100"))
-                    val current = existing()
+                    val current = findExisting()
+                        ?: return@createContext respond(exchange, 404, mapOf("error" to "library item not found"))
                     respond(exchange, 200, auth.libraryService.upsert(user.id, current.copy(score = request.score, updatedAt = null)))
                 }
                 else -> respond(exchange, 404, mapOf("error" to "route not found"))
