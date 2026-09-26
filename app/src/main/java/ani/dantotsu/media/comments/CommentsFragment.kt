@@ -66,7 +66,6 @@ class CommentsFragment : Fragment() {
     var totalPages = 1
     private var userProgress: Int? = null
     private var totalEpisodesOrChapters: Int? = null
-    private var isAnime: Boolean = true
     private var commentsLoaded = false
     private var isAutoFilterOn = false
     private var isSpoilerMode = false
@@ -163,12 +162,9 @@ class CommentsFragment : Fragment() {
         val model: MediaDetailsViewModel by activityViewModels()
         model.getMedia().observe(viewLifecycleOwner) { newMedia ->
             if (newMedia != null && newMedia.id != 0) {
-                isAnime = newMedia.anime != null
                 userProgress = newMedia.userProgress
                 totalEpisodesOrChapters = if (isAnime)
                     newMedia.anime?.totalEpisodes
-                else
-                    newMedia.manga?.totalChapters
                 updateCurrentProgressButton()
 
                 if (!commentsLoaded || newMedia.id != this.mediaId) {
@@ -302,12 +298,12 @@ class CommentsFragment : Fragment() {
             if (progress <= 0) return@setOnLongClickListener false
             val total = totalEpisodesOrChapters ?: progress
             val maxEp = maxOf(total, progress)
-            val label = if (isAnime) "Ep" else "Ch"
+            val label = "Ep"
 
             val items = Array(maxEp) { i -> "$label ${i + 1}" }
             val currentSelection = if (filterTag != null) filterTag!! - 1 else progress - 1
             activity.customAlertDialog().apply {
-                setTitle("Filter by ${if (isAnime) "Episode" else "Chapter"}")
+                setTitle("Filter by ${"Episode"}")
                 singleChoiceItems(items, currentSelection) { selected ->
                     filterTag = selected + 1
                     isAutoFilterOn = true
@@ -691,7 +687,7 @@ class CommentsFragment : Fragment() {
             return
         }
 
-        val label = if (isAnime) "episode" else "chapter"
+        val label = "episode"
         val total = totalEpisodesOrChapters
         val defaultProgress = userProgress ?: 0
 
