@@ -852,7 +852,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             return
         }
 
-        if (!incognito && showProgressDialog && Anilist.userid != null &&
+        if (!incognito && showProgressDialog &&
             (if (media.isAdult) PrefManager.getVal(PrefName.UpdateForHPlayer) else true)
         ) {
             customAlertDialog().apply {
