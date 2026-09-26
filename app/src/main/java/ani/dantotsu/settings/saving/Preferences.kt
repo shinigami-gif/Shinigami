@@ -35,7 +35,6 @@ enum class PrefName(val data: Pref) {
     InstalledExtensionRepos(Pref(Location.General, String::class, "{}")),
     AnimeSourcesOrder(Pref(Location.General, List::class, listOf<String>())),
     SortedAnimeSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
-    SortedMangaSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
     SortedCharacterSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
     SortedStaffSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
     SortedStudioSH(Pref(Location.General, List::class, listOf<SearchHistory>())),
@@ -46,12 +45,10 @@ enum class PrefName(val data: Pref) {
     SubscriptionNotificationInterval(Pref(Location.General, Int::class, 2)),
     UseAlarmManager(Pref(Location.General, Boolean::class, false)),
     IncludeAnimeList(Pref(Location.General, Boolean::class, true)),
-    IncludeMangaList(Pref(Location.General, Boolean::class, true)),
     AdultOnly(Pref(Location.General, Boolean::class, false)),
     CommentsEnabled(Pref(Location.General, Int::class, 0)),
     EnableSocks5Proxy(Pref(Location.General, Boolean::class, false)),
     ProxyAuthEnabled(Pref(Location.General, Boolean::class, false)),
-    AniMangaSearchDirect(Pref(Location.General, Boolean::class, true)),
     AutoSelectResolutionPriority(Pref(Location.General, Boolean::class, true)),
     PreferredDownloadResolutions(
         Pref(
@@ -77,7 +74,6 @@ enum class PrefName(val data: Pref) {
     DarkMode(Pref(Location.UI, Int::class, 0)),
     ShowYtButton(Pref(Location.UI, Boolean::class, true)),
     AnimeDefaultView(Pref(Location.UI, Int::class, 0)),
-    MangaDefaultView(Pref(Location.UI, Int::class, 0)),
     BlurBanners(Pref(Location.UI, Boolean::class, true)),
     BlurRadius(Pref(Location.UI, Float::class, 2f)),
     BlurSampling(Pref(Location.UI, Float::class, 2f)),
