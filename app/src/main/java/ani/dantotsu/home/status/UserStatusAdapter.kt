@@ -17,7 +17,7 @@ import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.snackString
 import ani.dantotsu.util.ActivityMarkdownCreator
 
-fun sortUserStatusList(users: List<User>): ArrayList<User> {
+fun sortUserStatusList(context: android.content.Context, users: List<User>): ArrayList<User> {
     if (users.isEmpty()) return arrayListOf()
     val watchedActivity = PrefManager.getCustomVal<Set<String>>("activities", emptySet())
         .mapNotNull { it.toIntOrNull() }.toSet()
@@ -44,7 +44,7 @@ fun sortUserStatusList(users: List<User>): ArrayList<User> {
 class UserStatusAdapter(userList: ArrayList<User>) :
     RecyclerView.Adapter<UserStatusAdapter.UsersViewHolder>() {
 
-    private val user: ArrayList<User> = sortUserStatusList(userList)
+    private val user: ArrayList<User> = ArrayList(userList)
 
     inner class UsersViewHolder(val binding: ItemUserStatusBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -65,7 +65,7 @@ class UserStatusAdapter(userList: ArrayList<User>) :
                 )
             }
             itemView.setOnLongClickListener {
-                if (user[bindingAdapterPosition].id == Anilist.userid) {
+                if (user[bindingAdapterPosition].id == ShinigamiSessionStore(context).getUserId()) {
                     ContextCompat.startActivity(
                         itemView.context,
                         Intent(itemView.context, ActivityMarkdownCreator::class.java)
