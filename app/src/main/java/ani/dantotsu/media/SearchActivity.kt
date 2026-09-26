@@ -21,10 +21,13 @@ import ani.dantotsu.connections.anilist.CharacterSearchResults
 import ani.dantotsu.connections.anilist.StaffSearchResults
 import ani.dantotsu.connections.anilist.StudioSearchResults
 import ani.dantotsu.connections.anilist.UserSearchResults
+import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiUser
 import ani.dantotsu.databinding.ActivitySearchBinding
 import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
-import ani.dantotsu.profile.UsersAdapter
+import ani.dantotsu.profile.ShinigamiUsersAdapter
 import ani.dantotsu.px
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -48,7 +51,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var characterAdaptor: CharacterAdapter
     private lateinit var studioAdaptor: StudioAdapter
     private lateinit var staffAdaptor: AuthorAdapter
-    private lateinit var usersAdapter: UsersAdapter
+    private lateinit var usersAdapter: ShinigamiUsersAdapter
 
     private lateinit var progressAdapter: ProgressAdapter
     private lateinit var concatAdapter: ConcatAdapter
@@ -59,6 +62,9 @@ class SearchActivity : AppCompatActivity() {
     lateinit var studioResult: StudioSearchResults
     lateinit var staffResult: StaffSearchResults
     lateinit var userResult: UserSearchResults
+    private val shinigamiUsers = mutableListOf<ShinigamiUser>()
+    private var shinigamiUserPage = 1
+    private var shinigamiUserHasNext = false
 
     lateinit var updateChips: (() -> Unit)
 
@@ -173,7 +179,7 @@ class SearchActivity : AppCompatActivity() {
                     )
                 }
                 userResult = model.userSearchResults
-                usersAdapter = UsersAdapter(model.userSearchResults.results, grid = true)
+                usersAdapter = ShinigamiUsersAdapter(shinigamiUsers, grid = true)
             }
         }
 
@@ -228,7 +234,13 @@ class SearchActivity : AppCompatActivity() {
             RecyclerView.OnScrollListener() {
             override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
                 if (!v.canScrollVertically(1)) {
-                    if (model.hasNextPage(searchType) && model.resultsIsNotEmpty(searchType) && !loading) {
+                    if (searchType == SearchType.USER) {
+                        if (shinigamiUserHasNext && shinigamiUsers.isNotEmpty() && !loading) {
+                            scope.launch(Dispatchers.IO) {
+                                loadShinigamiUsers(userResult.search, shinigamiUserPage + 1)
+                            }
+                        }
+                    } else if (model.hasNextPage(searchType) && model.resultsIsNotEmpty(searchType) && !loading) {
                         scope.launch(Dispatchers.IO) {
                             model.loadNextPage(searchType)
                         }
@@ -330,24 +342,7 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
 
-            SearchType.USER -> {
-                model.getSearch<UserSearchResults>(searchType).observe(this) {
-                    if (it != null) {
-                        model.userSearchResults.apply {
-                            search = it.search
-                            page = it.page
-                            hasNextPage = it.hasNextPage
-                        }
-
-                        val prev = model.userSearchResults.results.size
-                        val newResults = it.results.distinctBy { it.id }.filter { newItem -> model.userSearchResults.results.none { oldItem -> oldItem.id == newItem.id } }
-                        model.userSearchResults.results.addAll(newResults)
-                        usersAdapter.notifyItemRangeInserted(prev, newResults.size)
-
-                        progressAdapter.bar?.isVisible = it.hasNextPage
-                    }
-                }
-            }
+            SearchType.USER -> Unit
         }
 
         binding.searchRecyclerView.post { runInitialSearchActions(notSet) }
@@ -381,8 +376,11 @@ class SearchActivity : AppCompatActivity() {
             }
 
             SearchType.USER -> {
-                usersAdapter.notifyItemRangeRemoved(0, model.userSearchResults.results.size)
-                model.userSearchResults.results.clear()
+                val size = shinigamiUsers.size
+                shinigamiUsers.clear()
+                shinigamiUserPage = 1
+                shinigamiUserHasNext = false
+                if (size > 0) usersAdapter.notifyItemRangeRemoved(0, size)
             }
         }
         progressAdapter.bar?.visibility = View.GONE
@@ -393,8 +391,14 @@ class SearchActivity : AppCompatActivity() {
     private var loading = false
     fun search() {
         headerAdaptor.setHistoryVisibility(false)
-        val size = model.size(searchType)
-        model.clearResults(searchType)
+        val size = if (searchType == SearchType.USER) shinigamiUsers.size else model.size(searchType)
+        if (searchType == SearchType.USER) {
+            shinigamiUsers.clear()
+            shinigamiUserPage = 1
+            shinigamiUserHasNext = false
+        } else {
+            model.clearResults(searchType)
+        }
         binding.searchRecyclerView.post {
             when (searchType) {
                 SearchType.ANIME, SearchType.MANGA -> {
@@ -414,7 +418,7 @@ class SearchActivity : AppCompatActivity() {
                 }
 
                 SearchType.USER -> {
-                    usersAdapter.notifyItemRangeRemoved(0, size)
+                    if (size > 0) usersAdapter.notifyItemRangeRemoved(0, size)
                 }
             }
         }
@@ -426,9 +430,51 @@ class SearchActivity : AppCompatActivity() {
             delay(500)
             try {
                 loading = true
-                model.loadSearch(searchType)
+                if (searchType == SearchType.USER) {
+                    loadShinigamiUsers(userResult.search, 1)
+                } else {
+                    model.loadSearch(searchType)
+                }
             } finally {
                 loading = false
+            }
+        }
+    }
+
+    private suspend fun loadShinigamiUsers(query: String?, page: Int) {
+        val token = ShinigamiSessionStore(this).getToken()
+        if (token.isNullOrBlank()) {
+            withContext(Dispatchers.Main) {
+                shinigamiUserHasNext = false
+                progressAdapter.bar?.isVisible = false
+            }
+            return
+        }
+        val cleanQuery = query?.trim().orEmpty()
+        if (cleanQuery.isBlank()) {
+            withContext(Dispatchers.Main) {
+                shinigamiUserHasNext = false
+                progressAdapter.bar?.isVisible = false
+            }
+            return
+        }
+        runCatching {
+            ShinigamiBackendClient().searchUsers(token, cleanQuery, page = page, perPage = 30)
+        }.onSuccess { result ->
+            withContext(Dispatchers.Main) {
+                val existing = shinigamiUsers.mapTo(HashSet()) { it.id }
+                val newUsers = result.items.filter { existing.add(it.id) }
+                val previous = shinigamiUsers.size
+                shinigamiUsers.addAll(newUsers)
+                shinigamiUserPage = result.page
+                shinigamiUserHasNext = result.hasNextPage
+                if (newUsers.isNotEmpty()) usersAdapter.notifyItemRangeInserted(previous, newUsers.size)
+                progressAdapter.bar?.isVisible = result.hasNextPage
+            }
+        }.onFailure {
+            withContext(Dispatchers.Main) {
+                shinigamiUserHasNext = false
+                progressAdapter.bar?.isVisible = false
             }
         }
     }
