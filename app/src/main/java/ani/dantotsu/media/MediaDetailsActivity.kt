@@ -35,6 +35,7 @@ import ani.dantotsu.Refresh
 import ani.dantotsu.ZoomOutPageTransformer
 import ani.dantotsu.blurImage
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.database.AnimeStateDatabase
 import ani.dantotsu.database.AnimeStateRepository
@@ -346,7 +347,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                 } else if (!ani.dantotsu.connections.shinigami.ShinigamiSessionStore(this).getToken().isNullOrBlank()) {
                     if (supportFragmentManager.findFragmentByTag("dialog") == null)
                         MediaListDialogFragment().show(supportFragmentManager, "dialog")
-                } else snackString(getString(R.string.please_login_anilist))
+                } else snackString("Please login to Shinigami")
             }
             binding.mediaAddToList.setOnLongClickListener {
                 PrefManager.setCustomVal(
