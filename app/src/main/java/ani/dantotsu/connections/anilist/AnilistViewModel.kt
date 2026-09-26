@@ -625,12 +625,12 @@ class AnilistSearch : ViewModel() {
     private suspend fun loadAnimeSearch(r: AnimeSearchResults) {
         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
         if (rescueMode) {
-            val isAnime = r.type == "ANIME"
+            val isAnime = true
 
             if (!r.search.isNullOrBlank() && true) {
                 val malRes = tryWithSuspend {
-                    if (isAnime) MAL.query.searchAnime(r.search!!, limit = 25)
-                    else MAL.query.searchManga(r.search!!, limit = 25)
+                    MAL.query.searchAnime(r.search!!, limit = 25)
+                    MAL.query.searchAnime(r.search!!, limit = 25)
                 }
                 animeSearchResult.postValue(AnimeSearchResults(
                     type = r.type,
@@ -649,7 +649,7 @@ class AnilistSearch : ViewModel() {
                 return
             }
 
-            val jikanType = if (isAnime) "anime" else "manga"
+            val jikanType = "anime"
             val jikanStatus = when (r.status?.uppercase()) {
                 "RELEASING", "AIRING" -> "airing"
                 "FINISHED", "COMPLETE" -> "complete"
@@ -689,7 +689,7 @@ class AnilistSearch : ViewModel() {
                 }
             }
 
-            val year = if (isAnime) r.seasonYear else r.startYear
+            val year = r.seasonYear
             val (startDate, endDate) = if (year != null) "$year-01-01" to "$year-12-31" else null to null
             val res = MAL.jikan.search(
                 query = r.search ?: "",
