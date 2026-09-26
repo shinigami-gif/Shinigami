@@ -98,7 +98,7 @@ class FeedActivity : AppCompatActivity() {
             startActivity(Intent(this, ani.dantotsu.forum.ChatActivity::class.java).putExtra("chat_title", "Global Chat"))
         }
         binding.socialAnimeChatCard.setOnClickListener {
-            startActivity(Intent(this, ani.dantotsu.forum.ForumActivity::class.java))
+            startActivity(Intent(this, ani.dantotsu.forum.ChatActivity::class.java).putExtra("chat_title", "Global Chat"))
         }
         binding.socialLeaderboardCard.setOnClickListener {
             binding.socialScroll.smoothScrollTo(0, binding.socialLeaderboardHeader.top)
