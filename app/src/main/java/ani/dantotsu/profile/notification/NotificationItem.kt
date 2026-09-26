@@ -40,7 +40,7 @@ class NotificationItem(
     companion object {
         fun iconFor(type: String): Int = when (type.uppercase()) {
             "EPISODE_NEW" -> R.drawable.ic_round_play_arrow_24
-            "MESSAGE" -> R.drawable.ic_round_message_24
+            "MESSAGE" -> R.drawable.ic_round_send_24
             "FOLLOW" -> R.drawable.ic_round_person_24
             "MENTION", "REPLY" -> R.drawable.ic_round_comment_24
             "MODERATION", "ANNOUNCEMENT" -> R.drawable.ic_round_notifications_active_24
