@@ -19,6 +19,8 @@ private data class StoredUser(
     val isFollowing: Boolean,
     val isFollower: Boolean,
     val isBlocked: Boolean,
+    val followingUserIds: Set<String> = emptySet(),
+    val blockedUserIds: Set<String> = emptySet(),
     val isAdmin: Boolean,
     val isModerator: Boolean,
     val createdAt: String?,
@@ -133,6 +135,43 @@ class FileUserRepository(
         )
         write(users.map { if (it.id == user.id) updated else it })
         updated.toPublic()
+    }
+
+    override fun setRelationship(userId: String, targetUserId: String, following: Boolean?, blocked: Boolean?): ShinigamiUser = synchronized(lock) {
+        require(userId != targetUserId) { "cannot modify relationship with self" }
+        val users = read()
+        val current = users.firstOrNull { it.id == userId } ?: error("user not found")
+        users.firstOrNull { it.id == targetUserId } ?: error("target user not found")
+        val updated = current.copy(
+            followingUserIds = following?.let { enabled ->
+                if (enabled) current.followingUserIds + targetUserId else current.followingUserIds - targetUserId
+            } ?: current.followingUserIds,
+            blockedUserIds = blocked?.let { enabled ->
+                if (enabled) current.blockedUserIds + targetUserId else current.blockedUserIds - targetUserId
+            } ?: current.blockedUserIds
+        )
+        write(users.map { if (it.id == userId) updated else it })
+        updated.asPublic()
+    }
+
+    override fun relationship(userId: String, targetUserId: String): UserRelationship = synchronized(lock) {
+        val users = read()
+        val current = users.firstOrNull { it.id == userId } ?: error("user not found")
+        val target = users.firstOrNull { it.id == targetUserId } ?: error("target user not found")
+        UserRelationship(
+            userId = targetUserId,
+            following = targetUserId in current.followingUserIds,
+            follower = userId in target.followingUserIds,
+            blocked = targetUserId in current.blockedUserIds
+        )
+    }
+
+    override fun countFollowing(userId: String): Long = synchronized(lock) {
+        read().firstOrNull { it.id == userId }?.followingUserIds?.size?.toLong() ?: 0L
+    }
+
+    override fun countFollowers(userId: String): Long = synchronized(lock) {
+        read().count { userId in it.followingUserIds }.toLong()
     }
 
     private fun read(): List<StoredUser> {
