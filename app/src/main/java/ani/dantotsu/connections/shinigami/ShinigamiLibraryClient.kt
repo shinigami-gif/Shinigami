@@ -28,6 +28,22 @@ class ShinigamiLibraryClient(
         }
     }
 
+    suspend fun updateProgress(token: String, mediaId: Long, progress: Int) = withContext(Dispatchers.IO) {
+        val body = gson.toJson(mapOf("progress" to progress))
+            .toRequestBody("application/json; charset=utf-8".toMediaType())
+        val request = Request.Builder()
+            .url(ShinigamiBackendConfig.baseUrl + "/api/v1/users/me/library/" + mediaId + "/progress")
+            .header("Authorization", "Bearer " + token)
+            .put(body)
+            .build()
+        http.newCall(request).execute().use {
+            val responseBody = it.body?.string().orEmpty()
+            if (!it.isSuccessful) {
+                throw IllegalStateException("Library progress update failed: HTTP " + it.code + " " + responseBody)
+            }
+        }
+    }
+
     suspend fun deleteFromLibrary(token: String, mediaId: Long) = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url(ShinigamiBackendConfig.baseUrl + "/api/v1/users/me/library/" + mediaId)
