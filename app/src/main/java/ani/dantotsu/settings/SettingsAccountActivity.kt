@@ -3,7 +3,6 @@ package ani.dantotsu.settings
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updateLayoutParams
@@ -21,9 +20,6 @@ import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.startMainActivity
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
-import ani.dantotsu.others.CustomBottomDialog
-import io.noties.markwon.Markwon
-import io.noties.markwon.SoftBreakAddsNewLinePlugin
 import kotlinx.coroutines.launch
 
 class SettingsAccountActivity : AppCompatActivity() {
@@ -50,20 +46,6 @@ class SettingsAccountActivity : AppCompatActivity() {
 
             accountSettingsBack.setOnClickListener {
                 onBackPressedDispatcher.onBackPressed()
-            }
-
-            settingsAccountHelp.setOnClickListener {
-                CustomBottomDialog.newInstance().apply {
-                    setTitleText(context.getString(R.string.account_help))
-                    addView(
-                        TextView(context).apply {
-                            val markWon = Markwon.builder(context)
-                                .usePlugin(SoftBreakAddsNewLinePlugin.create())
-                                .build()
-                            markWon.setMarkdown(this, context.getString(R.string.full_account_help))
-                        }
-                    )
-                }.show(supportFragmentManager, "dialog")
             }
 
             fun reload() {
@@ -111,16 +93,6 @@ class SettingsAccountActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Legacy MAL/Discord views are intentionally hidden while their integrations
-                    // are removed from the product.
-                    settingsMALLoginRequired.visibility = View.GONE
-                    settingsMALLogin.visibility = View.GONE
-                    settingsMALUsername.visibility = View.GONE
-                    settingsMALAvatar.visibility = View.GONE
-                    settingsDiscordLogin.visibility = View.GONE
-                    settingsDiscordUsername.visibility = View.GONE
-                    settingsDiscordAvatar.visibility = View.GONE
-                    settingsPresenceSwitcher.visibility = View.GONE
                 }
             }
 
