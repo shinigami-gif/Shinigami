@@ -1,9 +1,7 @@
 package ani.dantotsu.settings.saving
 
 import android.graphics.Color
-import ani.dantotsu.connections.comments.AuthResponse
 import ani.dantotsu.media.SearchHistory
-import ani.dantotsu.notifications.comment.CommentStore
 import ani.dantotsu.notifications.subscription.SubscriptionStore
 import ani.dantotsu.settings.saving.internal.Location
 import ani.dantotsu.settings.saving.internal.Pref
@@ -46,7 +44,6 @@ enum class PrefName(val data: Pref) {
     UseAlarmManager(Pref(Location.General, Boolean::class, false)),
     IncludeAnimeList(Pref(Location.General, Boolean::class, true)),
     AdultOnly(Pref(Location.General, Boolean::class, false)),
-    CommentsEnabled(Pref(Location.General, Int::class, 0)),
     EnableSocks5Proxy(Pref(Location.General, Boolean::class, false)),
     ProxyAuthEnabled(Pref(Location.General, Boolean::class, false)),
     AutoSelectResolutionPriority(Pref(Location.General, Boolean::class, true)),
@@ -102,7 +99,6 @@ enum class PrefName(val data: Pref) {
     ListGrid(Pref(Location.UI, Boolean::class, true)),
     PopularAnimeList(Pref(Location.UI, Boolean::class, true)),
     AnimeListSortOrder(Pref(Location.UI, String::class, "score")),
-    CommentSortOrder(Pref(Location.UI, String::class, "newest")),
     FollowerLayout(Pref(Location.UI, Int::class, 0)),
     ShowNotificationRedDot(Pref(Location.UI, Boolean::class, true)),
     HideSpoilerTags(Pref(Location.UI, Boolean::class, true)),
@@ -181,9 +177,6 @@ enum class PrefName(val data: Pref) {
     TagsListIsAdult(Pref(Location.Irrelevant, Set::class, setOf<String>())),
     TagsListNonAdult(Pref(Location.Irrelevant, Set::class, setOf<String>())),
     MakeDefault(Pref(Location.Irrelevant, Boolean::class, true)),
-    FirstComment(Pref(Location.Irrelevant, Boolean::class, true)),
-    CommentAuthResponse(Pref(Location.Irrelevant, AuthResponse::class, "")),
-    CommentTokenExpiry(Pref(Location.Irrelevant, Long::class, 0L)),
     LogToFile(Pref(Location.Irrelevant, Boolean::class, false)),
     TrackMemoryLeaks(Pref(Location.Irrelevant, Boolean::class, false)),
     DailyLeakCount(Pref(Location.Irrelevant, Int::class, 0)),
