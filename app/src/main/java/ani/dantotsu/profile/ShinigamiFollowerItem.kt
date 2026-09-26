@@ -3,7 +3,6 @@ package ani.dantotsu.profile
 import android.text.SpannableString
 import android.view.View
 import androidx.core.view.isGone
-import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
 import ani.dantotsu.blurImage
 import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
@@ -26,6 +25,9 @@ class ShinigamiFollowerItem(
     private val currentUserId: String?,
     val clickCallback: (String) -> Unit
 ) : BindableItem<androidx.viewbinding.ViewBinding>() {
+
+    private var following = user.isFollowing
+    private var follower = user.isFollower
 
     override fun bind(viewBinding: androidx.viewbinding.ViewBinding, position: Int) {
         val username = SpannableString(user.displayName?.takeIf { it.isNotBlank() } ?: user.username)
@@ -51,9 +53,9 @@ class ShinigamiFollowerItem(
 
         fun followText(): String = button.context.getString(
             when {
-                user.isFollowing && user.isFollower -> R.string.mutual
-                user.isFollowing -> R.string.unfollow
-                user.isFollower -> R.string.follows_you
+                following && follower -> R.string.mutual
+                following -> R.string.unfollow
+                follower -> R.string.follows_you
                 else -> R.string.follow
             }
         )
@@ -64,9 +66,10 @@ class ShinigamiFollowerItem(
                 try {
                     val token = ShinigamiSessionStore(button.context).getToken()
                         ?: throw IllegalStateException("Not signed in")
-                    val updated = ShinigamiBackendClient().setFollow(token, user.id, !user.isFollowing)
+                    val updated = ShinigamiBackendClient().setFollow(token, user.id, !following)
+                    following = updated.isFollowing
+                    follower = updated.isFollower
                     withContext(Dispatchers.Main) {
-                        userStateFollow(updated)
                         button.text = followText()
                         snackString(R.string.success)
                     }
@@ -77,12 +80,6 @@ class ShinigamiFollowerItem(
                 }
             }
         }
-    }
-
-    private fun userStateFollow(updated: ShinigamiUser) {
-        user.isFollowing = updated.isFollowing
-        user.isFollower = updated.isFollower
-        user.isBlocked = updated.isBlocked
     }
 
     override fun getLayout(): Int =
