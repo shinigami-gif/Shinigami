@@ -8,6 +8,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import ani.dantotsu.R
 import ani.dantotsu.MainActivity
+import ani.dantotsu.loadImage
 import ani.dantotsu.connections.shinigami.ShinigamiBackendClient
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.media.CalendarActivity
