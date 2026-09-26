@@ -205,15 +205,6 @@ class SettingsDialogFragment : BottomSheetDialogFragment() {
                 // Ensure fragment is added and activity is not null
                 if (currentActivity != null && isAdded) {
                     when (pageType) {
-                        PageType.MANGA -> {
-                            val intent = Intent(currentActivity, NoInternet::class.java)
-                            intent.putExtra(
-                                "FRAGMENT_CLASS_NAME",
-                                OfflineMangaFragment::class.java.name
-                            )
-                            startActivity(intent)
-                        }
-
                         PageType.ANIME -> {
                             val intent = Intent(currentActivity, NoInternet::class.java)
                             intent.putExtra(
