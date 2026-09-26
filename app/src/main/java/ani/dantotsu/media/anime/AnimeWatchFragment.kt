@@ -199,8 +199,7 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                 if (!loaded) {
                     model.watchSources = if (media.isAdult) HAnimeSources else AnimeSources
 
-                    val offlineMode =
-                        model.watchSources!!.isDownloadedSource(media.selected!!.sourceIndex)
+                    val offlineMode = false
 
                     headerAdapter = AnimeWatchAdapter(it, this, model.watchSources!!)
                     headerAdapter.scanlatorSelectionListener = this
@@ -461,52 +460,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                 headerAdapter.subscribeButton(true)
                 reload()
             }
-        }
-    }
-
-    //implement Multi download
-    fun multiDownload(episodeNumber: String? = null, n: Int) {
-        val selected = media.userProgress
-        val episodes = media.anime?.episodes?.values?.toList()
-
-        val progressEpisodeIndex =
-            if(episodeNumber == null){
-                (episodes?.indexOfFirst {
-                    MediaNameAdapter.findEpisodeNumber(it.number)?.toInt() == selected
-                } ?: 0) + 1
-            }
-            else{
-                (episodes?.indexOfFirst {
-                    it.number == episodeNumber
-                } ?: 0)
-            }
-
-        if (progressEpisodeIndex < 0 || n < 1 || episodes == null) return
-
-        val endIndex = minOf(progressEpisodeIndex + n, episodes.size)
-
-        val listOfEpisodesToDownload = episodes.subList(progressEpisodeIndex, endIndex)
-
-        val episodesToDownload: ArrayList<String> = arrayListOf()
-        listOfEpisodesToDownload.forEach {
-            episodesToDownload.add(it.number)
-        }
-
-        onAnimeEpisodesDownload(episodesToDownload)
-    }
-
-    fun multiDelete(episodeNumber: String? = null, n: Int){
-        val episodes = media.anime?.episodes?.values?.toList()
-        val progressEpisodeIndex = episodes?.indexOfFirst { it.number == episodeNumber } ?: 0
-
-        if (progressEpisodeIndex < 0 || n < 1 || episodes == null) return
-
-        val endIndex = minOf(progressEpisodeIndex + n, episodes.size)
-
-        val episodesToDelete = episodes.subList(progressEpisodeIndex, endIndex)
-
-        for (episode in episodesToDelete) {
-            onAnimeEpisodeRemoveDownloadClick(episode.number)
         }
     }
 
