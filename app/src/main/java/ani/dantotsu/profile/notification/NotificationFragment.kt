@@ -5,274 +5,109 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ani.dantotsu.R
-import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.anilist.api.Notification
+import ani.dantotsu.connections.shinigami.ShinigamiNotification
+import ani.dantotsu.connections.shinigami.ShinigamiNotificationClient
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.FragmentNotificationsBinding
+import ani.dantotsu.forum.ChatActivity
 import ani.dantotsu.media.MediaDetailsActivity
-import ani.dantotsu.notifications.comment.CommentStore
-import ani.dantotsu.notifications.subscription.SubscriptionStore
 import ani.dantotsu.profile.ProfileActivity
-import ani.dantotsu.profile.activity.FeedActivity
-import ani.dantotsu.profile.notification.NotificationFragment.Companion.NotificationType.COMMENT
-import ani.dantotsu.profile.notification.NotificationFragment.Companion.NotificationType.MEDIA
-import ani.dantotsu.profile.notification.NotificationFragment.Companion.NotificationType.ONE
-import ani.dantotsu.profile.notification.NotificationFragment.Companion.NotificationType.SUBSCRIPTION
-import ani.dantotsu.profile.notification.NotificationFragment.Companion.NotificationType.USER
-import ani.dantotsu.settings.saving.PrefManager
-import ani.dantotsu.settings.saving.PrefName
 import com.xwray.groupie.GroupieAdapter
-import eu.kanade.tachiyomi.util.system.getSerializableCompat
 import kotlinx.coroutines.launch
 
-
 class NotificationFragment : Fragment() {
-    private lateinit var type: NotificationType
-    private var getID: Int = -1
     private var _binding: FragmentNotificationsBinding? = null
     private val binding get() = _binding!!
-    private var adapter: GroupieAdapter = GroupieAdapter()
-    private var currentPage = 1
+    private val adapter = GroupieAdapter()
+    private var page = 1
     private var hasNextPage = false
-    private var countResetCallback: ((NotificationType, Boolean) -> Unit)? = null
+    private val client = ShinigamiNotificationClient()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding?.notificationRecyclerView?.adapter = null
-        _binding = null
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        arguments?.let {
-            getID = it.getInt("id")
-            type = it.getSerializableCompat<NotificationType>("type") as NotificationType
-        }
         binding.notificationRecyclerView.adapter = adapter
-        binding.notificationRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.notificationProgressBar.isVisible = true
         binding.emptyTextView.text = getString(R.string.nothing_here)
-        viewLifecycleOwner.lifecycleScope.launch {
-            getList()
-            resetCountIfNeeded()
 
-            _binding?.notificationProgressBar?.isVisible = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            loadPage(true)
+            binding.notificationProgressBar.isVisible = false
         }
         binding.notificationSwipeRefresh.setOnRefreshListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                adapter.clear()
-                currentPage = 1
-                resetCountIfNeeded()
-                getList()
-                _binding?.notificationSwipeRefresh?.isRefreshing = false
+                loadPage(true)
+                binding.notificationSwipeRefresh.isRefreshing = false
             }
         }
-        binding.notificationRecyclerView.addOnScrollListener(object :
-            RecyclerView.OnScrollListener() {
+        binding.notificationRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (shouldLoadMore()) {
+                if (!hasNextPage || binding.notificationRefresh.isVisible) return
+                val manager = recyclerView.layoutManager as? LinearLayoutManager ?: return
+                if (manager.findLastVisibleItemPosition() >= adapter.itemCount - 1) {
                     viewLifecycleOwner.lifecycleScope.launch {
-                        _binding?.notificationRefresh?.isVisible = true
-                        getList()
-                        _binding?.notificationRefresh?.isVisible = false
+                        binding.notificationRefresh.isVisible = true
+                        loadPage(false)
+                        binding.notificationRefresh.isVisible = false
                     }
                 }
             }
         })
-
     }
-    private fun resetCountIfNeeded() {
-        if (type == ONE) return
 
-        when (type) {
-            USER -> {
-                PrefManager.setVal(PrefName.UnreadUserNotifications, 0)
-            }
-            MEDIA -> {
-                PrefManager.setVal(PrefName.UnreadMediaNotifications, 0)
-            }
-            SUBSCRIPTION -> {
-                PrefManager.setVal(PrefName.UnreadSubscriptionNotifications, 0)
-            }
-            COMMENT -> {
-                PrefManager.setVal(PrefName.UnreadCommentNotifications, 0)
-            }
-            ONE -> {}
+    private suspend fun loadPage(reset: Boolean) {
+        val token = ShinigamiSessionStore(requireContext()).getToken() ?: return
+        if (reset) {
+            page = 1
+            hasNextPage = false
+            adapter.clear()
         }
-
-        countResetCallback?.invoke(type, true)
-    }
-    private suspend fun getList() {
-        val list = when (type) {
-            ONE -> getNotificationsFiltered(false) { it.id == getID }
-            MEDIA -> getNotificationsFiltered(type = true) { it.media != null || it.notificationType == ani.dantotsu.connections.anilist.api.NotificationType.MEDIA_DELETION.value }
-            USER -> getNotificationsFiltered { it.media == null && it.notificationType != ani.dantotsu.connections.anilist.api.NotificationType.RELATED_MEDIA_ADDITION.value }
-            SUBSCRIPTION -> getSubscriptions()
-            COMMENT -> getComments()
-        }
-
-        
-        adapter.addAll(list.map { NotificationItem(it, type, adapter, ::onClick) })
-        if (adapter.itemCount == 0) {
-            binding.emptyTextView.isVisible = true
-        }
+        val result = runCatching { client.list(token, page, 30) }.getOrNull() ?: return
+        page = result.page + 1
+        hasNextPage = result.hasNextPage
+        adapter.addAll(result.items.map { NotificationItem(it, ::onNotificationClick) })
+        binding.emptyTextView.isVisible = adapter.itemCount == 0
     }
 
-    private suspend fun getNotificationsFiltered(
-        reset: Boolean = true,
-        type: Boolean? = null,
-        filter: (Notification) -> Boolean
-    ): List<Notification> {
-        val userId =
-            Anilist.userid ?: PrefManager.getVal<String>(PrefName.AnilistUserId).toIntOrNull() ?: 0
-        val res = Anilist.query.getNotifications(userId, currentPage, reset, type)?.data?.page
-        currentPage = res?.pageInfo?.currentPage?.plus(1) ?: 1
-        hasNextPage = res?.pageInfo?.hasNextPage ?: false
-        return res?.notifications?.filter(filter) ?: listOf()
-    }
-
-    private fun getSubscriptions(): List<Notification> {
-        val list = PrefManager.getNullableVal<List<SubscriptionStore>>(
-            PrefName.SubscriptionNotificationStore,
-            null
-        ) ?: listOf()
-
-        return list
-            .sortedByDescending { (it.time / 1000L).toInt() }
-            .filter { it.image != null } // to remove old data
-            .map {
-                Notification(
-                    it.type,
-                    System.currentTimeMillis().toInt(),
-                    commentId = it.mediaId,
-                    mediaId = it.mediaId,
-                    notificationType = it.type,
-                    context = it.title + ": " + it.content,
-                    createdAt = (it.time / 1000L).toInt(),
-                    image = it.image,
-                    banner = it.banner ?: it.image
-                )
-            }
-    }
-
-    private fun getComments(): List<Notification> {
-        val list = PrefManager.getNullableVal<List<CommentStore>>(
-            PrefName.CommentNotificationStore,
-            null
-        ) ?: listOf()
-        return list
-            .sortedByDescending { (it.time / 1000L).toInt() }
-            .map {
-                Notification(
-                    it.type.toString(),
-                    System.currentTimeMillis().toInt(),
-                    commentId = it.commentId,
-                    notificationType = it.type.toString(),
-                    mediaId = it.mediaId,
-                    context = it.title + "\n" + it.content,
-                    createdAt = (it.time / 1000L).toInt(),
-                )
-            }
-    }
-
-    private fun shouldLoadMore(): Boolean {
-        val layoutManager =
-            (binding.notificationRecyclerView.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-        val adapter = binding.notificationRecyclerView.adapter
-
-        return hasNextPage && !binding.notificationRefresh.isVisible && adapter?.itemCount != 0 &&
-                layoutManager == (adapter!!.itemCount - 1) &&
-                !binding.notificationRecyclerView.canScrollVertically(1)
-    }
-
-    fun onClick(id: Int, optional: Int?, type: NotificationClickType) {
-        val intent = when (type) {
-            NotificationClickType.USER -> Intent(
-                requireContext(),
-                ProfileActivity::class.java
-            ).apply {
-                putExtra("userId", id)
-            }
-
-            NotificationClickType.MEDIA -> Intent(
-                requireContext(),
-                MediaDetailsActivity::class.java
-            ).apply {
-                putExtra("mediaId", id)
-            }
-
-            NotificationClickType.ACTIVITY -> Intent(
-                requireContext(),
-                FeedActivity::class.java
-            ).apply {
-                putExtra("activityId", id)
-            }
-
-            NotificationClickType.COMMENT -> Intent(
-                requireContext(),
-                MediaDetailsActivity::class.java
-            ).apply {
-                putExtra("FRAGMENT_TO_LOAD", "COMMENTS")
-                putExtra("mediaId", id)
-                putExtra("commentId", optional ?: -1)
-            }
-
-            NotificationClickType.THREAD -> Intent(
-                requireContext(),
-                ani.dantotsu.forum.ThreadViewActivity::class.java
-            ).apply {
-                putExtra("threadId", id)
-            }
-
-            NotificationClickType.UNDEFINED -> null
-        }
-
-        intent?.let {
-            ContextCompat.startActivity(requireContext(), it, null)
-        }
-    }
-    override fun onResume() {
-        super.onResume()
-        if (_binding != null) {
-            binding.root.requestLayout()
-        }
-    }
-    fun onVisible() {
-        resetCountIfNeeded()
-    }
-    companion object {
-        enum class NotificationClickType { USER, MEDIA, ACTIVITY, COMMENT, THREAD, UNDEFINED }
-        enum class NotificationType { MEDIA, USER, SUBSCRIPTION, COMMENT, ONE }
-
-        fun newInstance(
-            type: NotificationType, 
-            id: Int = -1,
-            countResetCallback: ((NotificationType, Boolean) -> Unit)? = null
-        ): NotificationFragment {
-            return NotificationFragment().apply {
-                this.countResetCallback = countResetCallback
-                arguments = Bundle().apply {
-                    putSerializable("type", type)
-                    putInt("id", id)
+    private fun onNotificationClick(notification: ShinigamiNotification) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val token = ShinigamiSessionStore(requireContext()).getToken() ?: return@launch
+            runCatching { client.markRead(token, notification.id) }
+            when (notification.targetType) {
+                "anime", "episode" -> notification.mediaId?.let {
+                    startActivity(Intent(requireContext(), MediaDetailsActivity::class.java).apply {
+                        putExtra("mediaId", it.toInt())
+                    })
+                }
+                "message" -> notification.targetId?.let {
+                    startActivity(Intent(requireContext(), ChatActivity::class.java).apply {
+                        putExtra("chat_title", notification.actor?.displayName ?: notification.actor?.username ?: "Message")
+                        putExtra("message_user_id", it)
+                    })
+                }
+                "profile" -> notification.targetId?.let {
+                    startActivity(Intent(requireContext(), ProfileActivity::class.java).apply {
+                        putExtra("userId", it)
+                    })
                 }
             }
         }
     }
 
+    override fun onDestroyView() {
+        binding.notificationRecyclerView.adapter = null
+        _binding = null
+        super.onDestroyView()
+    }
 }
