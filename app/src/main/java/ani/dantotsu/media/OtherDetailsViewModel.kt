@@ -20,7 +20,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import ani.dantotsu.media.anime.Anime
-import ani.dantotsu.media.manga.Manga
 
 class OtherDetailsViewModel : ViewModel() {
     companion object {
@@ -219,26 +218,7 @@ class OtherDetailsViewModel : ViewModel() {
                         }
                     }
 
-                    jikanData.manga.forEach { role ->
-                        role.manga?.let { mangaEntry ->
-                            val positionKey = role.position?.ifBlank { "Other" } ?: "Other"
-                            val title = "$positionKey (Manga)"
-                            if (!yearMedia.containsKey(title)) yearMedia[title] = arrayListOf()
-                            val media = Media(
-                                id = mangaEntry.malId,
-                                idMAL = mangaEntry.malId,
-                                name = mangaEntry.title,
-                                nameRomaji = mangaEntry.title ?: "",
-                                userPreferredName = mangaEntry.title ?: "",
-                                cover = mangaEntry.images?.jpg?.largeImageUrl ?: mangaEntry.images?.jpg?.imageUrl,
-                                isAdult = false,
-                                format = "MANGA",
-                                manga = Manga()
-                            )
-                            media.relation = role.position
-                            yearMedia[title]?.add(media)
-                        }
-                    }
+
 
                     val voiceMediaMap = mutableMapOf<Int, Media>()
                     jikanData.voices.forEach { voice ->
