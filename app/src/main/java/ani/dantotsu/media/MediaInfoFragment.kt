@@ -945,29 +945,6 @@ class MediaInfoFragment : Fragment() {
                     }
                 }
 
-                if (!media.review.isNullOrEmpty()) {
-                    ItemTitleRecyclerBinding.inflate(
-                        LayoutInflater.from(context),
-                        parent,
-                        false
-                    ).apply {
-                        val adapter = GroupieAdapter()
-                        media.review!!.forEach { adapter.add(ReviewAdapter(it)) }
-                        itemTitle.setText(R.string.reviews)
-                        itemRecycler.adapter = adapter
-                        itemRecycler.layoutManager = LinearLayoutManager(requireContext())
-                        itemMore.visibility = View.VISIBLE
-                        itemMore.setSafeOnClickListener {
-                            startActivity(
-                                Intent(requireContext(), ReviewActivity::class.java)
-                                    .putExtra("mediaId", media.id)
-                            )
-                        }
-                        root.tag = "dynamic_view"
-                        parent.addView(root)
-                    }
-                }
-
                 if (!media.relations.isNullOrEmpty() && !offline) {
                     ItemTitleRecyclerBinding.inflate(
                         LayoutInflater.from(context),
