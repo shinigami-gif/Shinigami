@@ -133,33 +133,6 @@ class Query {
     }
 
     @Serializable
-    data class HomePageMedia(
-        @SerialName("data")
-        val data: Data?
-    ) {
-        @Serializable
-        data class Data(
-            @SerialName("currentAnime") val currentAnime: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("repeatingAnime") val repeatingAnime: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("favoriteAnime") val favoriteAnime: ani.dantotsu.connections.anilist.api.User?,
-            @SerialName("plannedAnime") val plannedAnime: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("currentManga") val currentManga: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("repeatingManga") val repeatingManga: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("favoriteManga") val favoriteManga: ani.dantotsu.connections.anilist.api.User?,
-            @SerialName("plannedManga") val plannedManga: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("recommendationQuery") val recommendationQuery: ani.dantotsu.connections.anilist.api.Page?,
-            @SerialName("recommendationQueryNew") val recommendationQueryNew: ani.dantotsu.connections.anilist.api.Page? = null,
-            @SerialName("recommendationPlannedQueryAnime") val recommendationPlannedQueryAnime: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("recommendationPlannedQueryManga") val recommendationPlannedQueryManga: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("missingSequelsCompletedQuery") val missingSequelsCompletedQuery: ani.dantotsu.connections.anilist.api.MediaListCollection?,
-            @SerialName("missingSequelsAllListQuery") val missingSequelsAllListQuery: ani.dantotsu.connections.anilist.api.MediaListCollection? = null,
-            @SerialName("Page1") val page1: ActivityPage?,
-            @SerialName("Page2") val page2: ActivityPage?,
-            @SerialName("MyActivities") val myActivities: ActivityPage? = null
-        )
-    }
-
-    @Serializable
     data class RecommendationsResponse(
         @SerialName("data")
         val data: Data?
@@ -168,18 +141,6 @@ class Query {
         data class Data(
             @SerialName("recRating") val recRating: ani.dantotsu.connections.anilist.api.Page?,
             @SerialName("recNew") val recNew: ani.dantotsu.connections.anilist.api.Page? = null
-        )
-    }
-
-    @Serializable
-    data class ProfilePageMedia(
-        @SerialName("data")
-        val data: Data?
-    ) {
-        @Serializable
-        data class Data(
-            @SerialName("favoriteAnime") val favoriteAnime: ani.dantotsu.connections.anilist.api.User?,
-            @SerialName("favoriteManga") val favoriteManga: ani.dantotsu.connections.anilist.api.User?
         )
     }
 
@@ -249,64 +210,6 @@ class Query {
             val user: ani.dantotsu.connections.anilist.api.User?
         ) : java.io.Serializable
     }
-
-    @Serializable
-    data class UserProfileResponse(
-        @SerialName("data")
-        val data: Data
-    ) : java.io.Serializable {
-        @Serializable
-        data class Data(
-            @SerialName("followerPage")
-            val followerPage: UserProfilePage?,
-            @SerialName("followingPage")
-            val followingPage: UserProfilePage?,
-            @SerialName("user")
-            val user: UserProfile?
-        ) : java.io.Serializable
-    }
-
-    @Serializable
-    data class UserProfilePage(
-        @SerialName("pageInfo")
-        val pageInfo: PageInfo,
-    ) : java.io.Serializable
-
-    @Serializable
-    data class Following(
-        @SerialName("data")
-        val data: Data
-    ) : java.io.Serializable {
-        @Serializable
-        data class Data(
-            @SerialName("Page")
-            val page: FollowingPage?
-        ) : java.io.Serializable
-    }
-
-    @Serializable
-    data class Follower(
-        @SerialName("data")
-        val data: Data
-    ) : java.io.Serializable {
-        @Serializable
-        data class Data(
-            @SerialName("Page")
-            val page: FollowerPage?
-        ) : java.io.Serializable
-    }
-
-    @Serializable
-    data class FollowerPage(
-        @SerialName("followers")
-        val followers: List<ani.dantotsu.connections.anilist.api.User>?
-    ) : java.io.Serializable
-
-    @Serializable
-    data class FollowingPage(
-        @SerialName("following")
-        val following: List<ani.dantotsu.connections.anilist.api.User>?
-    ) : java.io.Serializable
 
     @Serializable
     data class ReviewsResponse(
