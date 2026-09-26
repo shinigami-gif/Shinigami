@@ -65,7 +65,7 @@ abstract class BaseParser {
     abstract suspend fun search(query: String): List<ShowResponse>
 
     /**
-     * The function app uses to auto find the anime/manga using Media data provided by anilist
+     * The function app uses to auto find the anime using Media data provided by anilist
      *
      * Isn't necessary to override, but recommended, if you want to improve auto search results
      * **/
@@ -294,7 +294,7 @@ abstract class BaseParser {
     fun encode(input: String): String = URLEncoder.encode(input, "utf-8").replace("+", "%20")
     fun decode(input: String): String = URLDecoder.decode(input, "utf-8")
 
-    val defaultImage = "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/default.jpg"
+    val defaultImage = "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg"
 }
 
 
