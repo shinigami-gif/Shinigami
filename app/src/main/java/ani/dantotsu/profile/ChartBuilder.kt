@@ -30,7 +30,7 @@ class ChartBuilder {
         }
 
         enum class MediaType {
-            ANIME, MANGA
+            ANIME
         }
 
         data class ChartPacket(
@@ -290,7 +290,7 @@ class ChartBuilder {
         private fun getTypeName(statType: StatType, mediaType: MediaType): String {
             return when (statType) {
                 StatType.COUNT -> "Count"
-                StatType.TIME -> if (mediaType == MediaType.ANIME) "Hours Watched" else "Chapters Read"
+                StatType.TIME -> "Hours Watched"
                 StatType.AVG_SCORE -> "Mean Score"
             }
         }
