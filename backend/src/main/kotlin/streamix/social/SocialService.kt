@@ -20,6 +20,9 @@ class SocialService(
     fun comments(mediaId: Long, viewerId: String?, parentCommentId: String?, page: Int = 1, perPage: Int = 20) =
         page(repository.comments(mediaId, viewerId, parentCommentId, page, perPage), page, perPage)
 
+    fun commentReplies(commentId: String, viewerId: String?, page: Int = 1, perPage: Int = 20) =
+        page(repository.commentReplies(commentId, viewerId, page, perPage), page, perPage)
+
     fun forumThreads(query: String?, viewerId: String?, page: Int = 1, perPage: Int = 20) =
         page(repository.forumThreads(query, page, perPage, viewerId), page, perPage)
 
