@@ -166,13 +166,13 @@ enum class PrefName(val data: Pref) {
     AutoSelectServer(Pref(Location.Player, Boolean::class, false)),
 
     // Data Saver
-    DataSaverMode(Pref(Location.Reader, Int::class, 0)), // 0=NONE, 1=BANDWIDTH_HERO, 2=WSRV_NL
-    DataSaverImageQuality(Pref(Location.Reader, Int::class, 80)),
-    DataSaverImageFormatJpeg(Pref(Location.Reader, Boolean::class, false)), // false=WebP, true=JPEG
-    DataSaverIgnoreJpeg(Pref(Location.Reader, Boolean::class, false)),
-    DataSaverIgnoreGif(Pref(Location.Reader, Boolean::class, true)),
-    DataSaverServer(Pref(Location.Reader, String::class, "https://bandwidth-hero-proxy-nu-nine.vercel.app/")), // For Bandwidth Hero server URL
-    DataSaverColorBW(Pref(Location.Reader, Boolean::class, false)),
+    DataSaverMode(Pref(Location.General, Int::class, 0)), // 0=NONE, 1=BANDWIDTH_HERO, 2=WSRV_NL
+    DataSaverImageQuality(Pref(Location.General, Int::class, 80)),
+    DataSaverImageFormatJpeg(Pref(Location.General, Boolean::class, false)), // false=WebP, true=JPEG
+    DataSaverIgnoreJpeg(Pref(Location.General, Boolean::class, false)),
+    DataSaverIgnoreGif(Pref(Location.General, Boolean::class, true)),
+    DataSaverServer(Pref(Location.General, String::class, "https://bandwidth-hero-proxy-nu-nine.vercel.app/")), // For Bandwidth Hero server URL
+    DataSaverColorBW(Pref(Location.General, Boolean::class, false)),
 
     //Irrelevant
     Incognito(Pref(Location.Irrelevant, Boolean::class, false)),
