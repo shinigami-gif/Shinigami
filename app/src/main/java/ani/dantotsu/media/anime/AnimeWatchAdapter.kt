@@ -187,7 +187,6 @@ class AnimeWatchAdapter(
         binding.mediaSourceTitle.isSelected = true
         binding.mediaSource.setOnItemClickListener { _, _, i, _ ->
             val actualIndex = watchSources.names.indexOf(displayNames[i])
-            val isOffline = watchSources.isDownloadedSource(actualIndex)
             fragment.onSourceChange(actualIndex).apply {
                 binding.mediaSourceTitle.text = showUserText
                 showUserTextListener = { MainScope().launch { binding.mediaSourceTitle.text = it } }
@@ -199,7 +198,7 @@ class AnimeWatchAdapter(
                 setLanguageList(0, actualIndex)
             }
             subscribeButton(false)
-            fragment.loadEpisodes(actualIndex, isOffline)
+            fragment.loadEpisodes(actualIndex, true)
         }
 
         binding.mediaSourceLanguage.setOnItemClickListener { _, _, i, _ ->
