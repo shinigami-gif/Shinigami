@@ -10,6 +10,7 @@ import streamix.library.UserLibraryService
 import streamix.notification.FileNotificationRepository
 import streamix.notification.NotificationRepository
 import streamix.notification.NotificationService
+import streamix.notification.NotificationEventPublisher
 import streamix.social.FileSocialRepository
 import streamix.social.SocialRepository
 import streamix.social.SocialService
@@ -55,5 +56,6 @@ class AuthRuntime(
         gson
     )
     val notificationService: NotificationService = NotificationService(notification)
+    val notificationEvents: NotificationEventPublisher = NotificationEventPublisher(notificationService)
     val chatService: ChatService = ChatService(chat, notificationService)
 }
