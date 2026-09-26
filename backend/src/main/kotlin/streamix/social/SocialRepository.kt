@@ -21,6 +21,7 @@ interface SocialRepository {
     fun commentReplies(commentId: String, viewerId: String?, page: Int, perPage: Int): List<SocialComment>
     fun createComment(mediaId: Long, authorId: String, content: String, parentCommentId: String?): SocialComment
     fun deleteComment(commentId: String, actorId: String): Boolean
+    fun editComment(commentId: String, actorId: String, content: String): SocialComment?
     fun voteComment(commentId: String, userId: String, vote: Int?): SocialComment?
 
     fun forumThreads(query: String?, page: Int, perPage: Int, viewerId: String?): List<ForumThreadRef>
