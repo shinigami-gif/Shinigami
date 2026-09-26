@@ -104,9 +104,6 @@ object SettingsRegistry {
             )
         )
 
-        )
-
-        )
         list.add(
             SearchableSetting(
                 title = context.getString(R.string.app_lock),
