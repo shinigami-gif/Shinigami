@@ -11,6 +11,7 @@ object UserApiContract {
     const val LOGOUT = "/api/v1/auth/logout"
 
     const val ME = "/api/v1/users/me"
+    const val UPDATE_ME = "/api/v1/users/me/profile"
     const val PROFILE = "/api/v1/users/{userId}"
     const val SEARCH = "/api/v1/users/search"
 
@@ -72,4 +73,13 @@ data class SessionResponse(
     val user: ShinigamiUser,
     val expiresAt: String? = null,
     val token: String? = null
+)
+
+
+data class UpdateProfileRequest(
+    val username: String,
+    val displayName: String? = null,
+    val bio: String? = null,
+    val avatarUrl: String? = null,
+    val bannerUrl: String? = null
 )
