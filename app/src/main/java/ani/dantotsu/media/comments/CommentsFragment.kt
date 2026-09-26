@@ -585,13 +585,6 @@ class CommentsFragment : Fragment() {
 
     }
 
-    private fun chapterMatchesTag(chapterNumber: String, tag: String): Boolean {
-        if (chapterNumber == tag) return true
-
-        val chapterValue = MediaNameAdapter.findChapterNumber(chapterNumber)
-        val tagValue = MediaNameAdapter.findChapterNumber(tag)
-        return chapterValue != null && tagValue != null && chapterValue == tagValue
-    }
 
     /**
      * Loads and displays the comments
