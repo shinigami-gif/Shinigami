@@ -148,16 +148,6 @@ class SettingsActivity : AppCompatActivity() {
                         },
                         isActivity = true
                     ),
-                    Settings(
-                        type = 1,
-                        name = getString(R.string.manga),
-                        desc = getString(R.string.manga_desc),
-                        icon = R.drawable.ic_round_import_contacts_24,
-                        onClick = {
-                            startActivity(Intent(context, SettingsMangaActivity::class.java))
-                        },
-                        isActivity = true
-                    ),
                     /*
                     Settings(
                         type = 1,
