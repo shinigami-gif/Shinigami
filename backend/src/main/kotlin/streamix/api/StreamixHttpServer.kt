@@ -36,20 +36,20 @@ class StreamixHttpServer(
 
         http.createContext(UserApiContract.SESSION) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
-            when {
-                method(exchange, "GET") -> {
+            when (exchange.requestMethod.uppercase()) {
+                "GET" -> {
                     val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
                     val user = auth.auth.currentUser(token)
                         ?: return@createContext unauthorized(exchange)
                     respond(exchange, 200, SessionResponse(user = user))
                 }
-                method(exchange, "POST") -> {
+                "POST" -> {
                     val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
                     auth.auth.currentUser(token)
                         ?: return@createContext unauthorized(exchange)
                     respond(exchange, 200, mapOf("status" to "active"))
                 }
-                else -> Unit
+                else -> method(exchange, "GET")
             }
         }
 
@@ -58,7 +58,7 @@ class StreamixHttpServer(
             if (!method(exchange, "POST")) return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             auth.auth.logout(token)
-            respond(exchange, 204, emptyMap<String, Any>())
+            respond(exchange, 200, mapOf("status" to "logged_out"))
         }
 
         http.createContext(UserApiContract.ME) { exchange ->
