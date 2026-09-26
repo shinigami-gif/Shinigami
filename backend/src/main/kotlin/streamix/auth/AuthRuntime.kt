@@ -4,6 +4,9 @@ import com.google.gson.Gson
 import streamix.library.FileUserLibraryRepository
 import streamix.library.UserLibraryRepository
 import streamix.library.UserLibraryService
+import streamix.social.FileSocialRepository
+import streamix.social.SocialRepository
+import streamix.social.SocialService
 import java.nio.file.Path
 
 /**
@@ -37,4 +40,6 @@ class AuthRuntime(
     val userService: UserService = UserService(users)
     val library: UserLibraryRepository = FileUserLibraryRepository(dataRoot.resolve("user-library.json"), gson)
     val libraryService: UserLibraryService = UserLibraryService(library)
+    val social: SocialRepository = FileSocialRepository(dataRoot.resolve("social"), users, gson)
+    val socialService: SocialService = SocialService(social)
 }
