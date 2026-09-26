@@ -19,14 +19,12 @@ import ani.dantotsu.databinding.ItemRepoBinding
 import ani.dantotsu.media.MediaType
 import ani.dantotsu.parsers.ExtensionRepoMeta
 import ani.dantotsu.parsers.ExtensionRepoMetaHelper
-import ani.dantotsu.parsers.novel.NovelExtensionManager
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.util.customAlertDialog
 import com.xwray.groupie.GroupieAdapter
 import com.xwray.groupie.viewbinding.BindableItem
 import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
-import eu.kanade.tachiyomi.extension.manga.MangaExtensionManager
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -159,8 +157,6 @@ class AddRepositoryBottomSheet : BottomSheetDialogFragment() {
 
         binding.repositoryInput.hint = when (mediaType) {
             MediaType.ANIME -> getString(R.string.anime_add_repository)
-            MediaType.MANGA -> getString(R.string.manga_add_repository)
-            MediaType.NOVEL -> getString(R.string.novel_add_repository)
         }
 
         binding.addButton.setOnClickListener {
@@ -208,16 +204,11 @@ class AddRepositoryBottomSheet : BottomSheetDialogFragment() {
 
     private fun isValidUrl(input: String): String? {
         if (input.startsWith("http://") || input.startsWith("https://")) {
-            if (mediaType == MediaType.NOVEL) {
-                if (!input.removeSuffix("/").endsWith(".json")) {
-                    return "URL must end with a .json file"
-                }
-            } else {
+
                 val clean = input.removeSuffix("/")
                 if (!clean.endsWith("index.min.json") && !clean.endsWith("repo.json") && !clean.endsWith("index.json") && !clean.endsWith("index.pb")) {
                     return "URL must end with repo.json or index.json or index.min.json or index.pb"
                 }
-            }
             return null
         }
 
@@ -294,27 +285,6 @@ class AddRepositoryBottomSheet : BottomSheetDialogFragment() {
                     }
                 }
 
-                MediaType.MANGA -> {
-                    val manga =
-                        PrefManager.getVal<Set<String>>(PrefName.MangaExtensionRepos)
-                            .plus(validLink)
-                    PrefManager.setVal(PrefName.MangaExtensionRepos, manga)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        ExtensionRepoMetaHelper.getMeta(validLink)
-                        Injekt.get<MangaExtensionManager>().findAvailableExtensions()
-                    }
-                }
-
-                MediaType.NOVEL -> {
-                    val novel =
-                        PrefManager.getVal<Set<String>>(PrefName.NovelExtensionRepos)
-                            .plus(validLink)
-                    PrefManager.setVal(PrefName.NovelExtensionRepos, novel)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        ExtensionRepoMetaHelper.getMeta(validLink)
-                        Injekt.get<NovelExtensionManager>().findAvailableExtensions()
-                    }
-                }
             }
         }
 
