@@ -243,33 +243,6 @@ class AnilistQueries {
                         if (fetchedMedia.reviews?.nodes != null) {
                             media.review = fetchedMedia.reviews!!.nodes as ArrayList<Query.Review>
                         }
-                        if (fetchedMedia.mediaListEntry != null) {
-                            fetchedMedia.mediaListEntry?.apply {
-                                media.userProgress = progress
-                                media.userProgressVolumes = progressVolumes
-                                media.isListPrivate = private ?: false
-                                media.notes = notes
-                                media.userListId = id
-                                media.userScore = score?.toInt() ?: 0
-                                media.userStatus = status?.toString()
-                                media.inCustomListsOf = customLists?.toMutableMap()
-                                media.userRepeat = repeat ?: 0
-                                media.userUpdatedAt = updatedAt?.toString()?.toLong()?.times(1000)
-                                media.userCompletedAt = completedAt ?: FuzzyDate()
-                                media.userStartedAt = startedAt ?: FuzzyDate()
-                            }
-                        } else {
-                            media.isListPrivate = false
-                            media.userStatus = null
-                            media.userListId = null
-                            media.userProgress = null
-                            media.userProgressVolumes = null
-                            media.userScore = 0
-                            media.userRepeat = 0
-                            media.userUpdatedAt = null
-                            media.userCompletedAt = FuzzyDate()
-                            media.userStartedAt = FuzzyDate()
-                        }
 
                         if (media.anime != null) {
                             media.anime.episodeDuration = fetchedMedia.duration
@@ -737,7 +710,6 @@ class AnilistQueries {
         if (response?.media != null) {
             val responseArray = arrayListOf<Media>()
             response.media?.forEach { i ->
-                val userStatus = i.mediaListEntry?.status.toString()
                 val genresArr = arrayListOf<String>()
                 if (i.genres != null) {
                     i.genres?.forEach { genre ->
@@ -746,7 +718,7 @@ class AnilistQueries {
                 }
                 val media = Media(i)
                 if (!hd) media.cover = i.coverImage?.large
-                media.relation = if (onList == true) userStatus else null
+                media.relation = null
                 media.genres = genresArr
                 responseArray.add(media)
             }
