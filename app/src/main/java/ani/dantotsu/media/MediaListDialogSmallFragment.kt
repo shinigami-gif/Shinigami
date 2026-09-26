@@ -14,10 +14,8 @@ import ani.dantotsu.DatePickerFragment
 import ani.dantotsu.InputFilterMinMax
 import ani.dantotsu.R
 import ani.dantotsu.Refresh
-import ani.dantotsu.connections.PendingProgressUpdate
 import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.connections.anilist.api.FuzzyDate
-import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.BottomSheetMediaListSmallBinding
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.others.getSerialized
@@ -200,40 +198,25 @@ class MediaListDialogSmallFragment : BottomSheetDialogFragment() {
                     val status = statuses[statusStrings.indexOf(statusText).coerceAtLeast(0)]
                     val startD = media.userStartedAt
                     val endD = media.userCompletedAt
-                    val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-                    if (rescueMode) {
-                        val pending = PendingProgressUpdate(
-                            mediaId = media.id,
-                            idMAL = media.idMAL,
-                            isAnime = media.anime != null,
-                            progress = progress ?: 0,
-                            status = status,
-                            score = score,
-                            isPrivate = media.isListPrivate,
-                        )
-                        val existing: List<PendingProgressUpdate> =
-                            PrefManager.getVal(PrefName.PendingProgressUpdates, listOf())
-                        val updated = existing.filterNot { it.mediaId == media.id } + pending
-                        PrefManager.setVal(PrefName.PendingProgressUpdates, updated)
-                    } else {
-                        Anilist.mutation.editList(
-                            mediaID = media.id,
-                            progress = progress,
-                            progressVolumes = progressVolumes,
-                            score = score,
-                            status = status,
-                            private = media.isListPrivate
+                    val token = ShinigamiSessionStore(requireContext()).getToken()
+                        ?: throw IllegalStateException("Shinigami session is missing")
+                    if (media.anime != null) {
+                        ShinigamiLibraryClient().upsert(
+                            token = token,
+                            mediaId = media.id.toLong(),
+                            state = ShinigamiLibraryWrite(
+                                status = when (status) {
+                                    "CURRENT" -> "WATCHING"
+                                    "REPEATING" -> "REWATCHING"
+                                    else -> status
+                                },
+                                progress = progress ?: 0,
+                                score = score?.div(10.0),
+                                isFavorite = media.isFav
+                            )
                         )
                     }
-                    MAL.query.editList(
-                        media.idMAL,
-                        media.anime != null,
-                        progress,
-                        score,
-                        status,
-                        start = startD,
-                        end = endD
-                    )
+
                 }
                 if (remove == true) {
                     PrefManager.setCustomVal("removeList", removeList.plus(media.id.toString()))
