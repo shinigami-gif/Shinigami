@@ -17,7 +17,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import tachiyomi.core.preference.PreferenceStore
-import tachiyomi.domain.source.anime.service.AnimeSourceManager
 
 @OptIn(ExperimentalSerializationApi::class)
 @DependencyGraph(
@@ -37,7 +36,6 @@ interface AppGraph {
     val networkHelper: NetworkHelper
     val javaScriptEngine: JavaScriptEngine
     val downloadAddonManager: DownloadAddonManager
-    val animeSourceManager: AnimeSourceManager
     val json: Json
     val protoBuf: ProtoBuf
     val metroInteropModule: MetroInteropModule

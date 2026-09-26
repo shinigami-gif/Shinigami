@@ -13,7 +13,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import tachiyomi.core.preference.PreferenceStore
-import tachiyomi.domain.source.anime.service.AnimeSourceManager
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -28,7 +27,6 @@ class MetroInteropModule(
     private val networkHelper: NetworkHelper,
     private val javaScriptEngine: JavaScriptEngine,
     private val downloadAddonManager: DownloadAddonManager,
-    private val animeSourceManager: AnimeSourceManager,
     private val databaseProvider: StandaloneDatabaseProvider,
     private val json: Json,
     private val protoBuf: ProtoBuf,
@@ -49,7 +47,6 @@ class MetroInteropModule(
 
         addSingleton(downloadAddonManager)
 
-        addSingleton(animeSourceManager)
 
         addSingleton(json)
         addSingleton(protoBuf)
