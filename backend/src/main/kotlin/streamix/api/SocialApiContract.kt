@@ -21,11 +21,6 @@ object SocialApiContract {
     const val COMMENT_REPLIES = "/api/v1/social/comments/{commentId}/replies"
     const val COMMENT_VOTE = "/api/v1/social/comments/{commentId}/vote"
 
-    const val FORUM_THREADS = "/api/v1/social/forum/threads"
-    const val FORUM_THREAD = "/api/v1/social/forum/threads/{threadId}"
-    const val THREAD_COMMENTS = "/api/v1/social/forum/threads/{threadId}/comments"
-    const val THREAD_LIKE = "/api/v1/social/forum/threads/{threadId}/like"
-    const val THREAD_SUBSCRIBE = "/api/v1/social/forum/threads/{threadId}/subscribe"
 
     const val NOTIFICATIONS = "/api/v1/social/notifications"
     const val NOTIFICATION_READ = "/api/v1/social/notifications/{notificationId}/read"
@@ -71,7 +66,7 @@ data class SocialComment(
     val updatedAt: String? = null
 )
 
-data class ForumThreadRef(
+data class DELETE_ME(
     val id: String,
     val title: String,
     val body: String,
@@ -88,7 +83,7 @@ data class ForumThreadRef(
     val updatedAt: String? = null
 )
 
-data class ForumCommentRef(
+data class DELETE_ME_2(
     val id: String,
     val threadId: String,
     val author: ShinigamiUser,
