@@ -108,7 +108,7 @@ class AnilistQueries {
 
         val idsString = ids.joinToString(",")
         val response = executeQuery<Query.MediaList>(
-            """{Page(page:1,perPage:50){media(id_in:[${idsString}],isAdult:false){id mediaListEntry{progress private score(format:POINT_100) status} idMal type isAdult popularity status(version:2) chapters episodes nextAiringEpisode{episode} meanScore isFavourite format bannerImage coverImage{large} title{english romaji userPreferred} startDate{year}}}}""",
+            """{Page(page:1,perPage:50){media(id_in:[${idsString}],isAdult:false){id idMal type isAdult popularity status(version:2) chapters episodes nextAiringEpisode{episode} meanScore isFavourite format bannerImage coverImage{large} title{english romaji userPreferred} startDate{year}}}}""",
             force = true
         )
         val fetchedMediaList = response?.data?.page?.media ?: return null
@@ -512,7 +512,7 @@ class AnilistQueries {
     }
 
     private fun recommendationQuery(sort: String = "RATING_DESC", page: Int = 1, perPage: Int = 50): String {
-        return """ Page(page: $page, perPage:$perPage) { $standardPageInformation recommendations(sort: $sort, onList: true) { rating userRating mediaRecommendation { id idMal isAdult mediaListEntry { progress progressVolumes private score(format:POINT_100) status } chapters volumes isFavourite format episodes nextAiringEpisode {episode} popularity meanScore isFavourite format title {english romaji userPreferred } type status(version: 2) bannerImage coverImage { large } description genres tags { name isMediaSpoiler } } } } """
+        return """ Page(page: $page, perPage:$perPage) { $standardPageInformation recommendations(sort: $sort, onList: false) { rating userRating mediaRecommendation { id idMal isAdult mediaListEntry { progress progressVolumes private score(format:POINT_100) status } chapters volumes isFavourite format episodes nextAiringEpisode {episode} popularity meanScore isFavourite format title {english romaji userPreferred } type status(version: 2) bannerImage coverImage { large } description genres tags { name isMediaSpoiler } } } } """
     }
 
     suspend fun getRecommendations(page: Int, perPage: Int = 50): Pair<ArrayList<Media>, Boolean> {
@@ -556,287 +556,47 @@ class AnilistQueries {
         return Pair(list, hasNext)
     }
 
-    private fun missingSequelsCompletedSourceQuery(): String {
-        return """ MediaListCollection( userId: ${Anilist.userid}, type: ANIME, status: COMPLETED, sort: UPDATED_TIME_DESC ) { lists { entries { media { id relations { edges { relationType(version: 2) node { id } } } } } } } """.trimIndent()
-    }
-
-    private fun missingSequelsAllListSourceQuery(): String {
-        return """ MediaListCollection( userId: ${Anilist.userid}, type: ANIME ) { lists { entries { media { id } } } } """.trimIndent()
-    }
-
-    private val batchSize = 50
-    private fun missingSequelsLookupQuery(ids: List<Int>): String {
-        val idsString = ids.joinToString(",")
-        return """ { Page(page: 1, perPage: $batchSize) { media( id_in: [$idsString], type: ANIME, status_in: [RELEASING, FINISHED], onList: false ) { id mediaListEntry { progress progressVolumes private score(format: POINT_100) status } idMal type isAdult popularity status(version: 2) chapters volumes episodes nextAiringEpisode { episode } meanScore isFavourite format bannerImage coverImage { large } title { english romaji userPreferred } startDate { year } } } } """.trimIndent()
-    }
-
-    private suspend fun fetchMissingSequelMedia(ids: Set<Int>): ArrayList<Media> {
-        if (ids.isEmpty()) return arrayListOf()
-        val response = executeQuery<Query.Page>(missingSequelsLookupQuery(ids.toList()))
-        val mediaList = response?.data?.page?.media?.mapNotNull { media ->
-            if (media.mediaListEntry == null) Media(media) else null
-        } ?: emptyList()
-        return ArrayList(mediaList)
-    }
-
-    private fun continueMediaQuery(type: String, status: String): String {
-        return """ MediaListCollection(userId: ${Anilist.userid}, type: $type, status: $status , sort: UPDATED_TIME ) { lists { entries { progress private score(format:POINT_100) status updatedAt media { id idMal type isAdult status chapters episodes nextAiringEpisode {episode} meanScore isFavourite format bannerImage coverImage{large} title { english romaji userPreferred } } } } } """
-    }
-
     suspend fun initHomePage(): Map<String, ArrayList<Media>> {
+        val toShow = PrefManager.getVal<List<Boolean>>(PrefName.HomeLayout)
         val removeList = PrefManager.getCustomVal<Set<String>>("removeList", emptySet())
             .mapNotNull { it.toIntOrNull() }.toSet()
-        val hidePrivate = PrefManager.getVal<Boolean>(PrefName.HidePrivate)
-        val removedMedia = ArrayList<Media>()
-        val toShow = PrefManager.getVal<List<Boolean>>(PrefName.HomeLayout).toMutableList()
+        val repository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
 
-        val queries = mutableListOf<String>()
-        if (toShow.getOrNull(0) == true) {
-            queries.add("""currentAnime: ${continueMediaQuery("ANIME", "CURRENT")}""")
-            queries.add("""repeatingAnime: ${continueMediaQuery("ANIME", "REPEATING")}""")
-        }
-        if (toShow.getOrNull(1) == true) queries.add("""favoriteAnime: ${favMediaQuery(true, 1)}""")
-        if (toShow.getOrNull(2) == true) queries.add(
-            """plannedAnime: ${
-                continueMediaQuery(
-                    "ANIME",
-                    "PLANNING"
-                )
-            }"""
-        )
-        if (toShow.getOrNull(3) == true) {
-            queries.add("""currentManga: ${continueMediaQuery("MANGA", "CURRENT")}""")
-            queries.add("""repeatingManga: ${continueMediaQuery("MANGA", "REPEATING")}""")
-        }
-        if (toShow.getOrNull(4) == true) queries.add(
-            """favoriteManga: ${
-                favMediaQuery(
-                    false,
-                    1
-                )
-            }"""
-        )
-        if (toShow.getOrNull(5) == true) queries.add(
-            """plannedManga: ${
-                continueMediaQuery(
-                    "MANGA",
-                    "PLANNING"
-                )
-            }"""
-        )
-        if (toShow.getOrNull(6) == true) {
-            queries.add("""recommendationQuery: ${recommendationQuery("RATING_DESC", 1, 50)}""")
-            queries.add("""recommendationQueryNew: ${recommendationQuery("ID_DESC", 1, 50)}""")
-        }
-        if (toShow.getOrNull(8) == true) {
-            queries.add("""missingSequelsCompletedQuery: ${missingSequelsCompletedSourceQuery()}""")
-            queries.add("""missingSequelsAllListQuery: ${missingSequelsAllListSourceQuery()}""")
-        }
-        if (queries.isEmpty() && toShow.getOrNull(8) != true) {
-            return mutableMapOf("hidden" to arrayListOf())
-        }
-
-        val response = if (queries.isEmpty()) {
-            null
-        } else {
-            val query = "{${queries.joinToString(",")}}"
-            executeQuery<Query.HomePageMedia>(query, show = true)
-        }
-        if (queries.isNotEmpty() && response == null) {
-            return emptyMap()
+        suspend fun loadLocalMedia(states: List<ani.dantotsu.database.AnimeStateRecord>): ArrayList<Media> {
+            val ids = states.map { it.animeId }.distinct()
+            if (ids.isEmpty()) return arrayListOf()
+            val result = arrayListOf<Media>()
+            ids.chunked(50).forEach { chunk ->
+                getMediaList(chunk)?.let { result.addAll(it) }
+            }
+            val byId = result.associateBy { it.id }
+            return ArrayList(states.mapNotNull { state ->
+                byId[state.animeId]?.apply {
+                    state.applyTo(this)
+                    cameFromContinue = true
+                }
+            }.filter { it.id !in removeList })
         }
 
         val returnMap = mutableMapOf<String, ArrayList<Media>>()
-        val localStateRepository = AnimeStateRepository(AnimeStateDatabase.get(App.instance!!))
-
-        suspend fun localize(media: Media): Media {
-            val localState = localStateRepository.get(media.id)
-            if (localState != null) {
-                localState.applyTo(media)
-            } else {
-                localStateRepository.upsert(media.toAnimeStateRecord())
-            }
-            return media
+        if (toShow.getOrNull(0) == true) {
+            returnMap["currentAnime"] = loadLocalMedia(repository.continueWatching())
         }
-
-        suspend fun processMedia(
-            type: String,
-            currentMedia: List<MediaList>?,
-            repeatingMedia: List<MediaList>?
-        ) {
-            val subMap = mutableMapOf<Int, Media>()
-            val returnArray = arrayListOf<Media>()
-
-            (currentMedia ?: emptyList()).forEach { entry ->
-                val media = localize(Media(entry))
-                if (media.id !in removeList && (!hidePrivate || !media.isListPrivate)) {
-                    media.cameFromContinue = true
-                    subMap[media.id] = media
-                } else {
-                    removedMedia.add(media)
-                }
-            }
-
-            (repeatingMedia ?: emptyList()).forEach { entry ->
-                val media = localize(Media(entry))
-                if (media.id !in removeList && (!hidePrivate || !media.isListPrivate)) {
-                    media.cameFromContinue = true
-                    subMap[media.id] = media
-                } else {
-                    removedMedia.add(media)
-                }
-            }
-            @Suppress("UNCHECKED_CAST")
-            val list = PrefManager.getNullableCustomVal(
-                "continue${type}List",
-                listOf<Int>(),
-                List::class.java
-            ) as List<Int>
-            if (list.isNotEmpty()) {
-                list.reversed().forEach { id ->
-                    subMap[id]?.let { returnArray.add(it) }
-                }
-
-                subMap.values
-                    .filter { it !in returnArray }
-                    .sortedByDescending { it.userUpdatedAt ?: 0L }
-                    .forEach { returnArray.add(it) }
-
-            } else {
-                returnArray.addAll(
-                    subMap.values.sortedByDescending { it.userUpdatedAt ?: 0L }
-                )
-            }
-            returnMap["current$type"] = returnArray
+        if (toShow.getOrNull(1) == true) {
+            returnMap["favoriteAnime"] = loadLocalMedia(repository.favorites())
         }
-
-        if (toShow.getOrNull(0) == true) processMedia(
-            "Anime",
-            response?.data?.currentAnime?.lists?.flatMap { it.entries ?: emptyList() }?.reversed(),
-            response?.data?.repeatingAnime?.lists?.flatMap { it.entries ?: emptyList() }?.reversed()
-        )
-        if (toShow.getOrNull(2) == true) processMedia(
-            "AnimePlanned",
-            response?.data?.plannedAnime?.lists?.flatMap { it.entries ?: emptyList() }?.reversed(),
-            null
-        )
-        if (toShow.getOrNull(3) == true) processMedia(
-            "Manga",
-            response?.data?.currentManga?.lists?.flatMap { it.entries ?: emptyList() }?.reversed(),
-            response?.data?.repeatingManga?.lists?.flatMap { it.entries ?: emptyList() }?.reversed()
-        )
-        if (toShow.getOrNull(5) == true) processMedia(
-            "MangaPlanned",
-            response?.data?.plannedManga?.lists?.flatMap { it.entries ?: emptyList() }?.reversed(),
-            null
-        )
-
-        suspend fun processFavorites(type: String, favorites: List<MediaEdge>?) {
-            val returnArray = arrayListOf<Media>()
-            favorites?.forEach { edge ->
-                edge.node?.let {
-                    val media = localize(Media(it).apply { isFav = true })
-                    if (media.id !in removeList && (!hidePrivate || !media.isListPrivate)) {
-                        returnArray.add(media)
-                    } else {
-                        removedMedia.add(media)
-                    }
-                }
-            }
-            returnMap["favorite$type"] = returnArray
+        if (toShow.getOrNull(2) == true) {
+            val planned = repository.planned().map { it.copy(lastWatchedAt = it.updatedAt) }
+            returnMap["currentAnimePlanned"] = loadLocalMedia(planned)
         }
-
-        if (toShow.getOrNull(1) == true) processFavorites(
-            "Anime",
-            response?.data?.favoriteAnime?.favourites?.anime?.edges
-        )
-        if (toShow.getOrNull(4) == true) processFavorites(
-            "Manga",
-            response?.data?.favoriteManga?.favourites?.manga?.edges
-        )
-
         if (toShow.getOrNull(6) == true) {
-            val subMap = mutableMapOf<Int, Media>()
-            response?.data?.recommendationQuery?.recommendations?.forEach {
-                it.mediaRecommendation?.let { json ->
-                    val media = localize(Media(json))
-                    if (media.userStatus == null) {
-                        media.relation = json.type?.toString()
-                        subMap[media.id] = media
-                    }
-                }
-            }
-            response?.data?.recommendationQueryNew?.recommendations?.forEach {
-                it.mediaRecommendation?.let { json ->
-                    val media = localize(Media(json))
-                    if (media.userStatus == null) {
-                        media.relation = json.type?.toString()
-                        subMap[media.id] = media
-                    }
-                }
-            }
-            val list = ArrayList(subMap.values).apply { sortByDescending { it.meanScore } }
-            returnMap["recommendations"] = list
+            val (recommendations, _) = getRecommendations(1, 50)
+            returnMap["recommendations"] = recommendations
         }
-
-        if (toShow.getOrNull(8) == true) {
-            val completedEntries =
-                response?.data?.missingSequelsCompletedQuery?.lists?.flatMap { it.entries ?: emptyList() }
-            val allAnimeEntries =
-                response?.data?.missingSequelsAllListQuery?.lists?.flatMap { it.entries ?: emptyList() }
-
-            val sequelIds = mutableSetOf<Int>()
-            completedEntries?.forEach { entry ->
-                entry.media?.relations?.edges?.forEach { edge ->
-                    if (edge.relationType?.name == "SEQUEL") {
-                        edge.node?.id?.let { sequelIds.add(it) }
-                    }
-                }
-            }
-            val allAnimeIds = allAnimeEntries?.mapNotNull { it.media?.id }?.toSet() ?: emptySet()
-            val filteredSequelIds = sequelIds - allAnimeIds
-
-            val sequels = if (filteredSequelIds.isNotEmpty()) fetchMissingSequelMedia(filteredSequelIds) else arrayListOf()
-            val visibleSequels = arrayListOf<Media>()
-            sequels.forEach { sequel ->
-                if (sequel.id !in removeList && (!hidePrivate || !sequel.isListPrivate)) {
-                    visibleSequels.add(sequel)
-                } else {
-                    removedMedia.add(sequel)
-                }
-            }
-            returnMap["missingSequels"] = visibleSequels
-        }
-
-        val allOrders = listOf(
-            "continueAnimeList",
-            "continueAnimePlannedList",
-            "continueMangaList",
-            "continueMangaPlannedList"
-        ).flatMap {
-            PrefManager.getNullableCustomVal(it, listOf<Int>(), List::class.java) as List<*>
-        }
-
-        val hiddenList = removedMedia.distinctBy { it.id }
-        val sortedHidden = arrayListOf<Media>()
-
-        if (allOrders.isNotEmpty()) {
-            allOrders.reversed().forEach { id ->
-                hiddenList.find { it.id == id }?.let { sortedHidden.add(it) }
-            }
-            hiddenList
-                .filter { it !in sortedHidden }
-                .sortedByDescending { it.userUpdatedAt ?: 0L }
-                .forEach { sortedHidden.add(it) }
-        } else {
-            sortedHidden.addAll(hiddenList.sortedByDescending { it.userUpdatedAt ?: 0L })
-        }
-
-        returnMap["hidden"] = sortedHidden
+        returnMap["missingSequels"] = arrayListOf()
+        returnMap["hidden"] = arrayListOf()
         return returnMap
     }
-
-
     private suspend fun bannerImage(type: String): String? {
         if (PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
             if (MAL.token != null) {
