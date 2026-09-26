@@ -53,11 +53,6 @@ class AnilistQueries {
         val cachedAt: Long
     ) : Serializable
 
-    private data class UserStatusCache(
-        val users: ArrayList<User>,
-        val cachedAt: Long
-    ) : Serializable
-
     private data class HomePageCache(
         val data: Map<String, ArrayList<Media>>,
         val cachedAt: Long
