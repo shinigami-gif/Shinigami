@@ -3,15 +3,11 @@ package ani.dantotsu.notifications.subscription
 import ani.dantotsu.R
 import ani.dantotsu.currContext
 import ani.dantotsu.media.Media
-import ani.dantotsu.media.MediaNameAdapter
 import ani.dantotsu.media.Selected
 import ani.dantotsu.parsers.AnimeParser
 import ani.dantotsu.parsers.AnimeSources
 import ani.dantotsu.parsers.BaseParser
 import ani.dantotsu.parsers.Episode
-import ani.dantotsu.parsers.MangaChapter
-import ani.dantotsu.parsers.MangaParser
-import ani.dantotsu.parsers.MangaSources
 import ani.dantotsu.parsers.ShowResponse
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -83,47 +79,6 @@ class SubscriptionHelper {
             }
         }
 
-        fun getMangaParser(id: Int): MangaParser {
-            val sources = MangaSources
-            Logger.log("getMangaParser size: ${sources.list.size}")
-            val selected = loadSelected(id)
-            if (selected.sourceIndex >= sources.list.size) {
-                selected.sourceIndex = 0
-                saveSelected(id, selected)
-            }
-            return sources[selected.sourceIndex]
-        }
-
-        suspend fun getChapter(
-            parser: MangaParser,
-            subscribeMedia: SubscribeMedia
-        ): MangaChapter? {
-            val selected = loadSelected(subscribeMedia.id)
-            val chp = withTimeoutOrNull(10 * 1000) {
-                tryWithSuspend {
-                    val show = parser.loadSavedShowResponse(subscribeMedia.id)
-                        ?: forceLoadShowResponse(subscribeMedia, selected, parser)
-                        ?: throw Exception(
-                            currContext()?.getString(
-                                R.string.failed_to_load_data,
-                                subscribeMedia.id
-                            )
-                        )
-                    show.sManga?.let {
-                        parser.getLatestChapter(
-                            show.link, show.extra,
-                            it, selected.latest
-                        )
-                    }
-                }
-            }
-
-            return chp?.apply {
-                selected.latest = MediaNameAdapter.findChapterNumber(number) ?: 0f
-                saveSelected(subscribeMedia.id, selected)
-            }
-        }
-
         private suspend fun forceLoadShowResponse(
             subscribeMedia: SubscribeMedia,
             selected: Selected,
@@ -147,7 +102,6 @@ class SubscriptionHelper {
         }
 
         data class SubscribeMedia(
-            val isAnime: Boolean,
             val isAdult: Boolean,
             val id: Int,
             val name: String,
@@ -194,7 +148,6 @@ class SubscriptionHelper {
             if (subscribed) {
                 if (!data.containsKey(media.id)) {
                     val new = SubscribeMedia(
-                        media.anime != null,
                         media.isAdult,
                         media.id,
                         media.userPreferredName,
