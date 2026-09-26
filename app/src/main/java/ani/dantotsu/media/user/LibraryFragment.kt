@@ -80,7 +80,7 @@ class LibraryFragment : Fragment(R.layout.activity_list) {
                     PrefManager.setVal(PrefName.AnimeListSortOrder, pair.second)
                     binding.listProgressBar.visibility = View.VISIBLE
                     binding.listViewPager.adapter = null
-                    viewLifecycleOwner.lifecycleScope.launch { withContext(Dispatchers.IO) { model.loadLists(true, ani.dantotsu.connections.anilist.Anilist.userid ?: 0, pair.second) } }
+                    viewLifecycleOwner.lifecycleScope.launch { withContext(Dispatchers.IO) { model.loadLists(true, sortOrder = pair.second) } }
                     true
                 }
             }
