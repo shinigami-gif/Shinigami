@@ -8,8 +8,6 @@ import android.content.IntentFilter
 import android.net.Uri
 import androidx.annotation.CallSuper
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import ani.dantotsu.addons.download.DownloadAddonManager
-import ani.dantotsu.media.AddonType
 import ani.dantotsu.media.MediaType
 import ani.dantotsu.media.Type
 import ani.dantotsu.parsers.novel.NovelExtensionManager
@@ -28,7 +26,6 @@ abstract class Installer(private val service: Service) {
     private val animeExtensionManager: AnimeExtensionManager by injectLazy()
     private val mangaExtensionManager: MangaExtensionManager by injectLazy()
     private val novelExtensionManager: NovelExtensionManager by injectLazy()
-    private val downloadAddonManager: DownloadAddonManager by injectLazy()
 
     private var waitingInstall = AtomicReference<Entry>(null)
     private val queue = Collections.synchronizedList(mutableListOf<Entry>())
@@ -73,11 +70,6 @@ abstract class Installer(private val service: Service) {
                 MediaType.MANGA -> mangaExtensionManager.setInstalling(entry.downloadId)
                 MediaType.NOVEL -> novelExtensionManager.setInstalling(entry.downloadId)
             }
-        } else {
-            when (entry.type) {
-                AddonType.DOWNLOAD -> downloadAddonManager.setInstalling(entry.downloadId)
-                else -> {}
-            }
         }
     }
 
@@ -117,14 +109,6 @@ abstract class Installer(private val service: Service) {
                         completedEntry.downloadId,
                         resultStep
                     )
-                }
-            } else {
-                when (completedEntry.type) {
-                    AddonType.DOWNLOAD -> downloadAddonManager.updateInstallStep(
-                        completedEntry.downloadId,
-                        resultStep
-                    )
-                    else -> {}
                 }
             }
             checkQueue()
@@ -177,14 +161,6 @@ abstract class Installer(private val service: Service) {
                         InstallStep.Error
                     )
                 }
-            } else {
-                when (it.type) {
-                    AddonType.DOWNLOAD -> downloadAddonManager.updateInstallStep(
-                        it.downloadId,
-                        InstallStep.Error
-                    )
-                    else -> {}
-                }
             }
         }
         queue.clear()
@@ -224,14 +200,6 @@ abstract class Installer(private val service: Service) {
                         downloadId,
                         InstallStep.Idle
                     )
-                }
-            } else {
-                when (toCancel.type) {
-                    AddonType.DOWNLOAD -> downloadAddonManager.updateInstallStep(
-                        downloadId,
-                        InstallStep.Idle
-                    )
-                    else -> {}
                 }
             }
         }
