@@ -15,7 +15,6 @@ import ani.dantotsu.getThemeColor
 import ani.dantotsu.initActivity
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
-import ani.dantotsu.connections.anilist.Anilist
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -69,10 +68,10 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
         binding.socialHeader.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = statusBarHeight }
 
         binding.socialGlobalChatCard.setOnClickListener {
-            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ForumActivity::class.java).putExtra("forum_title", "Global Chat"))
+            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ChatActivity::class.java).putExtra("chat_title", "Global Chat"))
         }
         binding.socialAnimeChatCard.setOnClickListener {
-            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ForumActivity::class.java).putExtra("forum_title", "Anime Chat"))
+            startActivity(android.content.Intent(requireContext(), ani.dantotsu.forum.ChatActivity::class.java).putExtra("chat_title", "Anime Chat"))
         }
         binding.socialLeaderboardCard.setOnClickListener {
             binding.socialScroll.smoothScrollTo(0, binding.socialLeaderboardHeader.top)
@@ -93,42 +92,21 @@ class SocialFragment : Fragment(ani.dantotsu.R.layout.activity_social) {
             }
         )
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            val activities = withContext(Dispatchers.IO) {
-                Anilist.query.getFeed(userId = null, global = true, page = 1, activityId = null)
-                    ?.data?.page?.activities.orEmpty()
-                    .filter { Anilist.adult || it.media?.isAdult != true }.take(24)
-            }
-            val users = activities.mapNotNull {
-                val user = it.user ?: it.messenger ?: return@mapNotNull null
-                SocialLeaderboardUser(user.id, user.name ?: "User", user.avatar?.medium,
-                    ((it.likeCount ?: 0) * 10) + ((it.replyCount ?: 0) * 20) + 100)
-            }.distinctBy { it.id }.take(12)
-            val pages = listOf("Community","Anime Fans","Watch Together","Social").mapIndexed { page,title ->
-                SocialLeaderboardPage(title, users.map { it.copy(points = it.points + (12-page)*15) })
-            }
-            binding.socialFeaturePager.adapter = SocialFeatureAdapter(listOf(
-                SocialFeature("Watch Together", "Create a room, invite friends, and enjoy anime together.",
-                    activities.firstOrNull()?.media?.bannerImage ?: activities.firstOrNull()?.media?.coverImage?.large)
-            ))
-            binding.socialLeaderboardPager.adapter = SocialLeaderboardAdapter(pages)
-            val activityItems = activities.filter { it.typename == "ListActivity" || it.typename == "TextActivity" }.take(3)
-            binding.socialActivityList.layoutManager = LinearLayoutManager(requireContext())
-            binding.socialActivityList.adapter = SocialActivityAdapter(activityItems)
-            val friendUsers = users.take(8)
-            binding.socialFriendsList.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
-            binding.socialFriendsList.adapter = SocialFriendAdapter(friendUsers)
-            binding.socialFriendsTitle.text = "Active Friends   • " + friendUsers.size + " online"
-            val messages = activities.filter { it.typename == "MessageActivity" || it.typename == "TextActivity" }.take(3)
-            binding.socialMessagesList.layoutManager = LinearLayoutManager(requireContext())
-            binding.socialMessagesList.adapter = SocialMessageAdapter(messages)
-            handler.removeCallbacks(featureRunnable)
-            handler.removeCallbacks(leaderboardRunnable)
-            handler.removeCallbacks(quickActionRunnable)
-            handler.postDelayed(featureRunnable, 4000)
-            handler.postDelayed(leaderboardRunnable, 4000)
-            handler.postDelayed(quickActionRunnable, 0)
-        }
+        binding.socialLeaderboardPager.adapter = SocialLeaderboardAdapter(emptyList())
+        binding.socialActivityList.layoutManager = LinearLayoutManager(requireContext())
+        binding.socialActivityList.adapter = null
+        binding.socialFriendsList.layoutManager =
+            LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
+        binding.socialFriendsList.adapter = null
+        binding.socialMessagesList.layoutManager = LinearLayoutManager(requireContext())
+        binding.socialMessagesList.adapter = null
+        binding.socialFriendsTitle.text = "Active Friends"
+        handler.removeCallbacks(featureRunnable)
+        handler.removeCallbacks(leaderboardRunnable)
+        handler.removeCallbacks(quickActionRunnable)
+        handler.postDelayed(featureRunnable, 4000)
+        handler.postDelayed(leaderboardRunnable, 4000)
+        handler.postDelayed(quickActionRunnable, 0)
     }
 
     override fun onDestroyView() {
