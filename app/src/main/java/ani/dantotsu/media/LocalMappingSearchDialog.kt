@@ -69,7 +69,7 @@ class LocalMappingSearchDialog : BottomSheetDialogFragment() {
             scope.launch {
                 val results = withContext(Dispatchers.IO) {
                     tryWithSuspend {
-                        Anilist.query.searchAniManga(
+                        Anilist.query.searchAnime(
                             type = "ANIME",
                             search = binding.searchBarText.text.toString()
                         )
