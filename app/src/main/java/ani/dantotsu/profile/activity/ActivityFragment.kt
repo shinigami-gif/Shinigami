@@ -70,7 +70,7 @@ class ActivityFragment : Fragment() {
         }
         binding.titleImage.visibility = when (type) {
             ActivityType.OTHER_USER -> View.VISIBLE
-            ActivityType.USER, ActivityType.GLOBAL -> if (Anilist.token != null) View.VISIBLE else View.GONE
+            ActivityType.USER, ActivityType.GLOBAL -> if (!ShinigamiSessionStore(requireContext()).getToken().isNullOrBlank()) View.VISIBLE else View.GONE
             else -> View.GONE
         }
         
@@ -151,8 +151,8 @@ class ActivityFragment : Fragment() {
 
     private fun handleTitleImageClick() {
         shouldRefreshOnResume = true
-        val isUserActivity = type == ActivityType.USER || type == ActivityType.GLOBAL || userId == null || userId == Anilist.userid
-        val targetUserId = if (isUserActivity) Anilist.userid else userId
+        val isUserActivity = type == ActivityType.USER || type == ActivityType.GLOBAL || userId == null || userId == currentUserId()
+        val targetUserId = if (isUserActivity) currentUserId() else userId
         val intent = Intent(context, ActivityMarkdownCreator::class.java).apply {
             putExtra("type", if (isUserActivity) "activity" else "message")
             if (targetUserId != null) {
