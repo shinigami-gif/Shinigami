@@ -49,7 +49,7 @@ class ShinigamiBackendClient(
     suspend fun updateProfile(token: String, username: String, bio: String?): ShinigamiUser =
         withContext(Dispatchers.IO) {
             val payload = gson.toJson(mapOf("username" to username, "bio" to bio))
-            execute(
+            executeUser(
                 Request.Builder()
                     .url("$baseUrl/api/v1/users/me/profile")
                     .header("Authorization", "Bearer $token")
