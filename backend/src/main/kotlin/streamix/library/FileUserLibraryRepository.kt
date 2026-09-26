@@ -38,7 +38,7 @@ class FileUserLibraryRepository(
     }
 
     override fun find(userId: String, mediaId: Long): UserAnimeState? = synchronized(lock) {
-        read().firstOrNull { it.userId == userId && it.mediaId == mediaId }?.toPublic()
+        read().firstOrNull { it.userId == userId && it.mediaId == mediaId }?.asPublic()
     }
 
     override fun upsert(userId: String, state: UserAnimeState): UserAnimeState = synchronized(lock) {
@@ -56,7 +56,7 @@ class FileUserLibraryRepository(
         )
         val updated = entries.filterNot { it.userId == userId && it.mediaId == state.mediaId } + stored
         write(updated)
-        stored.toPublic()
+        stored.asPublic()
     }
 
     override fun delete(userId: String, mediaId: Long) = synchronized(lock) {
