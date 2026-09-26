@@ -575,16 +575,14 @@ class CommentsFragment : Fragment() {
         val model: MediaDetailsViewModel by activityViewModels()
         val currentMedia = model.getMedia().value ?: return
 
-        if (isAnime) {
+        {
             val ep = currentMedia.anime?.episodes?.getEpisode(tag)
             if (ep != null) {
                 model.onEpisodeClick(currentMedia, tag, childFragmentManager, true)
             } else {
                 snackString("Episode $tag not found for this provider")
             }
-        } else {
-            snackString("Chapter reading is not supported")
-        }
+
     }
 
     private fun chapterMatchesTag(chapterNumber: String, tag: String): Boolean {
