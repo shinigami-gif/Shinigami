@@ -138,8 +138,8 @@ class SettingsNotificationActivity : AppCompatActivity() {
                                         return@launch
                                     }
 
-                                    val animeLists = Anilist.query.getMediaLists(true, userId)
-                                    val mangaLists = Anilist.query.getMediaLists(false, userId)
+                                    val animeLists = mutableMapOf<String, ArrayList<Media>>()
+                                    val mangaLists = mutableMapOf<String, ArrayList<Media>>()
 
                                     val selectableLists = linkedMapOf<String, ArrayList<Media>>()
                                     fun addSelectableLists(prefix: String, lists: MutableMap<String, ArrayList<Media>>) {
@@ -219,8 +219,8 @@ class SettingsNotificationActivity : AppCompatActivity() {
                                         return@launch
                                     }
 
-                                    val animeLists = Anilist.query.getMediaLists(true, userId)
-                                    val mangaLists = Anilist.query.getMediaLists(false, userId)
+                                    val animeLists = mutableMapOf<String, ArrayList<Media>>()
+                                    val mangaLists = mutableMapOf<String, ArrayList<Media>>()
                                     val animeAll = animeLists["All"] ?: arrayListOf()
                                     val mangaAll = mangaLists["All"] ?: arrayListOf()
 
