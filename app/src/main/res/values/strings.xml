@@ -208,7 +208,7 @@
     <string name="version_current">Version %1$s</string>
     <string name="version_current_outdated">Version %1$s (Outdated)</string>
     <string-array name="tips">
-        <item>You can Long Click an episode/chapter to Mark it as Read.</item>
+        <item>You can Long Click an episode to Mark it as Watched.</item>
         <item>Long Clicking Shows can directly open List Editor.</item>
         <item>There are few more easter eggs hidden in the App.</item>
         <item>Challenge: Go to the very bottom of the Popular Anime</item>
@@ -218,7 +218,6 @@
         <item>OMG LOOK! YOU FOUND AN EASTER EGG!?</item>
         <item>You know who else likes this Animation?</item>
         <item>MAL support? bruh.</item>
-        <item>Novels? more like NO vels.</item>
         <item>Long Click the logo to check for App Update</item>
     </string-array>
 
@@ -661,7 +660,7 @@
     <string name="answer_9">You can enable NSFW content by enabling 18+ contents from this [link](https://anilist.co/settings/media). You also have to enable NSFW extensions in \`Settings > Extensions > NSFW extensions\` </string>
 
     <string name="question_10">How to import my MAL/Kitsu lists to Anilist?</string>
-    <string name="answer_10">Here is how you do it,\n\nExport:\n\n1. Go to this [link](https://malscraper.azurewebsites.net).\n2. Give your Kitsu/MAL username and download your anime list. (They will be in XML format)\nNote: You have to write the username of the tracker you selected\n\nImport:\n\n1. After exporting your anime list from Kitsu/MAL, now go [here](https://anilist.co/settings/import) \n2. Select/drop the anime XML file on the box above.\n|→Select/drop the manga XML file on the box below.</string>
+    <string name="answer_10">Here is how you do it,\n\nExport:\n\n1. Go to this [link](https://malscraper.azurewebsites.net).\n2. Give your Kitsu/MAL username and download your anime list. (They will be in XML format)\nNote: You have to write the username of the tracker you selected\n\nImport:\n\n1. After exporting your anime list from Kitsu/MAL, now go [here](https://anilist.co/settings/import) \n2. Select/drop the anime XML file on the box above.\n</string>
 
     <string name="question_11">How to import my Anilist/Kitsu lists to MAL?</string>
     <string name="answer_11">Here is how you do it,\n\nExport:\n\n1. Go to this [link](https://malscraper.azurewebsites.net/). \n2. Give your Anilist username/Kitsu ID in the \'Username/Kitsu User ID\' box. \n3. Select list type and enable \'update_on_import\'. \n4. Download the file; it will be in .xml format. Be sure to download your Anime list.\n\nImport:\n1. To import it in your MAL account, go to this [link](https://myanimelist.net/import.php) and choose \'MyAnimeList Import\' as import type. \n2. Press on \'Choose File\'and select the downloaded anime list XML file. \n3. Press on \'Import Data\'. \nCongratulations, you just imported the selected list to your MAL account.</string>
