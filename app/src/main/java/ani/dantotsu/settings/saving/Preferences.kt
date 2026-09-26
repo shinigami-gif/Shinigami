@@ -165,40 +165,6 @@ enum class PrefName(val data: Pref) {
     UseAdditionalCodec(Pref(Location.Player, Boolean::class, false)),
     AutoSelectServer(Pref(Location.Player, Boolean::class, false)),
 
-    //Reader
-    ShowSource(Pref(Location.Reader, Boolean::class, true)),
-    ShowSystemBars(Pref(Location.Reader, Boolean::class, false)),
-    AutoDetectWebtoon(Pref(Location.Reader, Boolean::class, true)),
-    AskIndividualReader(Pref(Location.Reader, Boolean::class, true)),
-    ChapterZeroReader(Pref(Location.Reader, Boolean::class, true)),
-    UpdateForHReader(Pref(Location.Reader, Boolean::class, false)),
-    Direction(Pref(Location.Reader, Int::class, 0)),
-    LayoutReader(Pref(Location.Reader, Int::class, 2)),
-    DualPageModeReader(Pref(Location.Reader, Int::class, 1)),
-    OverScrollMode(Pref(Location.Reader, Boolean::class, true)),
-    TrueColors(Pref(Location.Reader, Boolean::class, false)),
-    Rotation(Pref(Location.Reader, Boolean::class, true)),
-    Padding(Pref(Location.Reader, Boolean::class, true)),
-    HideScrollBar(Pref(Location.Reader, Boolean::class, false)),
-    HidePageNumbers(Pref(Location.Reader, Boolean::class, false)),
-    HorizontalScrollBar(Pref(Location.Reader, Boolean::class, true)),
-    KeepScreenOn(Pref(Location.Reader, Boolean::class, false)),
-    VolumeButtonsReader(Pref(Location.Reader, Boolean::class, false)),
-    WrapImages(Pref(Location.Reader, Boolean::class, false)),
-    LongClickImage(Pref(Location.Reader, Boolean::class, true)),
-    CropBorders(Pref(Location.Reader, Boolean::class, false)),
-    CropBorderThreshold(Pref(Location.Reader, Int::class, 10)),
-    OneHandZoom(Pref(Location.Reader, Boolean::class, true)),
-    AutoScroll(Pref(Location.Reader, Boolean::class, false)),
-    AutoScrollSpeed(Pref(Location.Reader, Float::class, 3.0f)),
-    ReaderBackgroundColor(Pref(Location.Reader, Int::class, 0)), // 0=Auto, 1=Black, 2=Gray, 3=White
-    DefaultRotation(Pref(Location.Reader, Int::class, 0)), // 0=Free, 1=Portrait, 2=Landscape
-    ContinuousSidePadding(Pref(Location.Reader, Int::class, 0)), // Percentage (0-25%)
-    EInkFlashPageChange(Pref(Location.Reader, Boolean::class, false)),
-    ImageQuality(Pref(Location.Reader, Int::class, 0)), // 0=FAST, 1=BALANCED, 2=LANCZOS
-    PagePreloadAmount(Pref(Location.Reader, Int::class, 3)),
-    AlwaysShowChapterTransition(Pref(Location.Reader, Boolean::class, false)),
-    
     // Data Saver
     DataSaverMode(Pref(Location.Reader, Int::class, 0)), // 0=NONE, 1=BANDWIDTH_HERO, 2=WSRV_NL
     DataSaverImageQuality(Pref(Location.Reader, Int::class, 80)),
@@ -207,23 +173,6 @@ enum class PrefName(val data: Pref) {
     DataSaverIgnoreGif(Pref(Location.Reader, Boolean::class, true)),
     DataSaverServer(Pref(Location.Reader, String::class, "https://bandwidth-hero-proxy-nu-nine.vercel.app/")), // For Bandwidth Hero server URL
     DataSaverColorBW(Pref(Location.Reader, Boolean::class, false)),
-
-    //Novel Reader
-    CurrentThemeName(Pref(Location.NovelReader, String::class, "Default")),
-    LayoutNovel(Pref(Location.NovelReader, Int::class, 0)),
-    DualPageModeNovel(Pref(Location.NovelReader, Int::class, 1)),
-    LineHeight(Pref(Location.NovelReader, Float::class, 1.4f)),
-    Margin(Pref(Location.NovelReader, Float::class, 0.06f)),
-    Justify(Pref(Location.NovelReader, Boolean::class, true)),
-    Hyphenation(Pref(Location.NovelReader, Boolean::class, true)),
-    UseDarkThemeNovel(Pref(Location.NovelReader, Boolean::class, false)),
-    UseOledThemeNovel(Pref(Location.NovelReader, Boolean::class, false)),
-    Invert(Pref(Location.NovelReader, Boolean::class, false)),
-    MaxInlineSize(Pref(Location.NovelReader, Int::class, 720)),
-    MaxBlockSize(Pref(Location.NovelReader, Int::class, 1440)),
-    HorizontalScrollBarNovel(Pref(Location.NovelReader, Boolean::class, true)),
-    KeepScreenOnNovel(Pref(Location.NovelReader, Boolean::class, false)),
-    VolumeButtonsNovel(Pref(Location.NovelReader, Boolean::class, false)),
 
     //Irrelevant
     Incognito(Pref(Location.Irrelevant, Boolean::class, false)),
