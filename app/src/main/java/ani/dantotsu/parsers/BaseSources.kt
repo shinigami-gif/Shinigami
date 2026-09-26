@@ -4,12 +4,9 @@ import ani.dantotsu.Lazier
 import ani.dantotsu.media.Media
 import ani.dantotsu.media.anime.Episode
 import ani.dantotsu.media.anime.EpisodeStorage
-import ani.dantotsu.media.manga.ChapterStorage
-import ani.dantotsu.media.manga.MangaChapter
 import ani.dantotsu.tryWithSuspend
 import ani.dantotsu.util.Logger
 import eu.kanade.tachiyomi.animesource.model.SAnime
-import eu.kanade.tachiyomi.source.model.SManga
 
 abstract class WatchSources : BaseSources() {
 
@@ -92,101 +89,6 @@ abstract class WatchSources : BaseSources() {
             EpisodeStorage.saveEpisodes(sourceKey, showLink, map)
         }
         return map
-    }
-}
-
-abstract class MangaReadSources : BaseSources() {
-
-    override operator fun get(i: Int): MangaParser {
-        return (list.getOrNull(i) ?: list.firstOrNull())?.get?.value as? MangaParser
-            ?: EmptyMangaParser()
-    }
-
-    suspend fun loadChaptersFromMedia(
-        i: Int,
-        media: Media,
-        invalidate: Boolean = false,
-        onCachedLoaded: ((MutableMap<String, MangaChapter>) -> Unit)? = null
-    ): MutableMap<String, MangaChapter> {
-        return tryWithSuspend(true) {
-            val parser = get(i)
-            val sourceKey = parser.saveName.ifBlank { parser.name }
-
-            var cached: MutableMap<String, MangaChapter>? = null
-            if (!invalidate) {
-                val savedResponse = parser.loadSavedShowResponse(media.id)
-                if (savedResponse != null && savedResponse.link.isNotBlank()) {
-                    cached = ChapterStorage.loadChapters(sourceKey, savedResponse.link)
-                    if (!cached.isNullOrEmpty()) {
-                        onCachedLoaded?.invoke(cached)
-                    }
-                }
-            }
-
-            val res = parser.autoSearch(media) ?: return@tryWithSuspend (cached ?: mutableMapOf())
-            if (cached.isNullOrEmpty() && !invalidate) {
-                cached = ChapterStorage.loadChapters(sourceKey, res.link)
-                if (!cached.isNullOrEmpty()) {
-                    onCachedLoaded?.invoke(cached)
-                }
-            }
-
-            val loaded = tryWithSuspend(true) {
-                loadChapters(i, res)
-            } ?: mutableMapOf()
-
-            if (loaded.isNotEmpty()) {
-                ChapterStorage.saveChapters(sourceKey, res.link, loaded)
-                loaded
-            } else {
-                cached ?: loaded
-            }
-        } ?: mutableMapOf()
-    }
-
-    suspend fun loadChapters(i: Int, show: ShowResponse): MutableMap<String, MangaChapter> {
-        val map = mutableMapOf<String, MangaChapter>()
-        val parser = get(i)
-        val sManga = show.sManga ?: SManga.create().apply {
-            url = show.link
-            title = show.name
-            thumbnail_url = show.coverUrl.url
-        }
-
-        tryWithSuspend(true) {
-            parser.loadChapters(show.link, show.extra, sManga).forEach {
-                map["${it.number}-${it.scanlator}"] = MangaChapter(it)
-            }
-        }
-        if (map.isNotEmpty()) {
-            val sourceKey = parser.saveName.ifBlank { parser.name }
-            ChapterStorage.saveChapters(sourceKey, show.link, map)
-        }
-        return map
-    }
-}
-
-abstract class NovelReadSources : BaseSources() {
-    override operator fun get(i: Int): NovelParser? {
-        return if (list.isNotEmpty()) {
-            (list.getOrNull(i) ?: list[0]).get.value as NovelParser
-        } else {
-            return EmptyNovelParser()
-        }
-    }
-
-}
-
-class EmptyNovelParser : NovelParser() {
-
-    override val volumeRegex: Regex = Regex("")
-
-    override suspend fun loadBook(link: String, extra: Map<String, String>?): Book {
-        return Book("", "", null, emptyList())  // Return an empty Book object or some default value
-    }
-
-    override suspend fun search(query: String): List<ShowResponse> {
-        return listOf() // Return an empty list or some default value
     }
 }
 
