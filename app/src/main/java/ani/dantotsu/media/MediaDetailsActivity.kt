@@ -300,16 +300,16 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                     append(getString(R.string.watched_num))
                     val colorSecondary =
                         getThemeColor(com.google.android.material.R.attr.colorSecondary)
-                    bold { color(colorSecondary) { append("\${media.userProgress}") } }
+                    bold { color(colorSecondary) { append("${media.userProgress}") } }
                     append(getString(R.string.episodes_out_of))
                 } else {
                     append(getString(R.string.episodes_total_of))
                 }
                 if (media.anime?.nextAiringEpisode != null) {
-                    bold { color(white) { append("\${media.anime!!.nextAiringEpisode}") } }
+                    bold { color(white) { append("${media.anime!!.nextAiringEpisode}") } }
                     append(" / ")
                 }
-                bold { color(white) { append("\${media.anime?.totalEpisodes ?: "??"}") } }
+                bold { color(white) { append("${media.anime?.totalEpisodes ?: "??"}") } }
             }
             binding.mediaTotal.text = text
         }
