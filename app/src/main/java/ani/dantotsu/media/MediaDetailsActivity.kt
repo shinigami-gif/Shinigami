@@ -114,9 +114,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                     if (animeNode != null) {
                         media = Media(animeNode, true)
                     } else {
-                        val mangaNode = MAL.query.getMangaDetails(id)
-                        media = if (mangaNode != null) Media(mangaNode, false)
-                        else emptyMedia()
+                        media = emptyMedia()
                     }
                 } else {
                     media = Anilist.query.getMedia(id, false) ?: emptyMedia()
@@ -404,7 +402,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         viewPager.adapter = ViewPagerAdapter(
             supportFragmentManager,
             lifecycle,
-            SupportedMedia.ANIME,
             media,
             intent.getIntExtra("commentId", -1)
         )
@@ -500,15 +497,10 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         }
     }
 
-    private enum class SupportedMedia {
-        ANIME, MANGA, NOVEL
-    }
-
     // ViewPager
     private class ViewPagerAdapter(
         fragmentManager: FragmentManager,
         lifecycle: Lifecycle,
-        private val mediaType: SupportedMedia,
         private val media: Media,
         private val commentId: Int
     ) :
@@ -518,9 +510,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
         override fun createFragment(position: Int): Fragment = when (position) {
             0 -> MediaInfoFragment()
-            1 -> when (mediaType) {
-                SupportedMedia.ANIME -> AnimeWatchFragment()
-            }
+            1 -> AnimeWatchFragment()
 
             2 -> { // Index 2
                 if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1 && !PrefManager.getVal<Boolean>(PrefName.RescueMode)) {
