@@ -20,6 +20,7 @@ data class CreateActivityRequest(
 
 data class CreateReplyRequest(val text: String)
 data class CreateCommentRequest(val mediaId: Long, val content: String, val parentCommentId: String? = null)
+data class UpdateCommentRequest(val content: String)
 data class VoteCommentRequest(val vote: Int?)
 data class CreateForumThreadRequest(val title: String, val body: String, val mediaIds: List<Long> = emptyList())
 data class CreateForumCommentRequest(val content: String, val parentCommentId: String? = null)
@@ -472,11 +473,23 @@ class StreamixHttpServer(
                     val commentId = parts.getOrNull(1)?.takeIf { it.isNotBlank() }
                         ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid comment id"))
                     when (parts.drop(2).joinToString("/")) {
-                        "" -> if (exchange.requestMethod.equals("DELETE", true)) {
-                            if (!auth.socialService.deleteComment(commentId, viewer.id))
-                                return@createContext respond(exchange, 404, mapOf("error" to "comment not found"))
-                            respond(exchange, 200, mapOf("status" to "deleted"))
-                        } else method(exchange, "DELETE")
+                        "" -> when {
+                            exchange.requestMethod.equals("DELETE", true) -> {
+                                if (!auth.socialService.deleteComment(commentId, viewer.id))
+                                    return@createContext respond(exchange, 404, mapOf("error" to "comment not found"))
+                                respond(exchange, 200, mapOf("status" to "deleted"))
+                            }
+                            exchange.requestMethod.equals("PUT", true) -> {
+                                val request = runCatching { gson.fromJson(bodyText(), UpdateCommentRequest::class.java) }.getOrNull()
+                                    ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid comment request"))
+                                if (request.content.isBlank())
+                                    return@createContext respond(exchange, 400, mapOf("error" to "content is required"))
+                                val result = auth.socialService.editComment(commentId, viewer.id, request.content)
+                                    ?: return@createContext respond(exchange, 404, mapOf("error" to "comment not found"))
+                                respond(exchange, 200, result)
+                            }
+                            else -> respond(exchange, 405, mapOf("error" to "method not allowed"))
+                        }
                         "vote" -> if (exchange.requestMethod.equals("POST", true)) {
                             val request = runCatching { gson.fromJson(bodyText(), VoteCommentRequest::class.java) }.getOrNull()
                                 ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid vote request"))
