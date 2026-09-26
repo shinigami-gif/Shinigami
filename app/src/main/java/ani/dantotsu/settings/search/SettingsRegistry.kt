@@ -13,7 +13,6 @@ import ani.dantotsu.settings.SettingsAccountActivity
 import ani.dantotsu.settings.SettingsAnimeActivity
 import ani.dantotsu.settings.SettingsCommonActivity
 import ani.dantotsu.settings.SettingsExtensionsActivity
-import ani.dantotsu.settings.SettingsMangaActivity
 import ani.dantotsu.settings.SettingsNotificationActivity
 import ani.dantotsu.settings.SettingsThemeActivity
 import ani.dantotsu.settings.UserInterfaceSettingsActivity
