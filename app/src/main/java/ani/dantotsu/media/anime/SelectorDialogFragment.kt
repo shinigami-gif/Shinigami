@@ -273,7 +273,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                             }
 
                             fun load() {
-                                val size =                    ep.extractors?.find { it.server.name == selected }?.videos?.size
+                                val size = ep.extractors?.find { it.server.name == selected }?.videos?.size
 
                                 if (size != null && size >= media!!.selected!!.video) {
                                     val currentKey = media!!.anime!!.selectedEpisode ?: actualKey
