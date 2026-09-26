@@ -19,6 +19,7 @@ import ani.dantotsu.connections.shinigami.ShinigamiChatMessage
 import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.databinding.ActivityForumBinding
 import ani.dantotsu.initActivity
+import ani.dantotsu.getThemeColor
 import ani.dantotsu.navBarHeight
 import ani.dantotsu.statusBarHeight
 import ani.dantotsu.themes.ThemeManager
@@ -70,7 +71,7 @@ class ChatActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         }
         sendButton = com.google.android.material.button.MaterialButton(this).apply {
-            text = getString(R.string.send)
+            text = "Send"
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
