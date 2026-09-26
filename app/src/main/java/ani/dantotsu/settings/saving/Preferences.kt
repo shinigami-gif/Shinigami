@@ -228,6 +228,4 @@ enum class PrefName(val data: Pref) {
     Socks5ProxyPort(Pref(Location.Protected, String::class, "")),
     Socks5ProxyUsername(Pref(Location.Protected, String::class, "")),
     Socks5ProxyPassword(Pref(Location.Protected, String::class, "")),
-
-    // Torrent Settings
 }
