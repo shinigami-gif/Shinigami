@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.discord.Discord
 import ani.dantotsu.settings.AnilistSettingsActivity
 import ani.dantotsu.settings.FAQActivity
 import ani.dantotsu.settings.PlayerSettingsActivity
