@@ -25,9 +25,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import android.widget.NumberPicker
-import ani.dantotsu.currContext
-import ani.dantotsu.download.anime.AnimeDownloader
 
 fun handleProgress(cont: LinearLayout, bar: View, empty: View, mediaId: Int, ep: String) {
     val cleanNum = MediaNameAdapter.findChapterNumber(ep)?.let {
@@ -59,15 +56,11 @@ class EpisodeAdapter(
     private val media: Media,
     private val fragment: AnimeWatchFragment,
     var arr: List<Episode> = arrayListOf(),
-    var offlineMode: Boolean
+    var offlineMode: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     val context = fragment.requireContext()
 
     companion object {
-        /** Partial bind: update download status text only (no Glide / animation). */
-        private const val PAYLOAD_PROGRESS = "download_progress"
-        /** Partial bind: update download chrome (icon/state) without full card rebind. */
-        private const val PAYLOAD_DOWNLOAD_STATE = "download_state"
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -131,10 +124,7 @@ class EpisodeAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val ep = arr[position]
-        val isTorrent = ep.extra?.containsKey("torrentHash") == true || ep.link?.contains("127.0.0.1:8090") == true
-        val title = if (isTorrent) {
-            ep.title ?: ep.sEpisode?.name ?: ep.number
-        } else if (!ep.title.isNullOrEmpty() && ep.title != "null") {
+        val title = if (!ep.title.isNullOrEmpty() && ep.title != "null") {
             ep.title?.let { MediaNameAdapter.removeEpisodeNumber(it) }
         } else {
             ep.number
@@ -183,7 +173,7 @@ class EpisodeAdapter(
 
                 binding.itemEpisodeDesc.isVisible = !ep.desc.isNullOrBlank()
                 binding.itemEpisodeDesc.text = ep.desc ?: ""
-                holder.bind(ep.number, ep.downloadProgress, ep.desc)
+                holder.bind(ep.desc)
 
                 val epNum = MediaNameAdapter.findEpisodeNumber(ep.number) ?: ep.number.toFloatOrNull() ?: 9999f
                 if (media.userProgress != null) {
@@ -307,123 +297,6 @@ class EpisodeAdapter(
     }
 
     override fun getItemCount(): Int = arr.size
-    private val downloadedEpisodes = mutableSetOf<String>()
-
-    fun clearAllDownloaded() {
-        downloadedEpisodes.clear()
-    }
-
-    fun startDownload(episodeNumber: String) {
-        if (downloadedEpisodes.contains(episodeNumber) ||
-            AnimeDownloader.isDownloading(media.id, episodeNumber))
-                return
-        AnimeDownloader.startDownload(media.id, episodeNumber)
-        val position = arr.indexOfFirst { it.number == episodeNumber }
-        if (position != -1) {
-            arr[position].downloadProgress = ""
-            notifyItemChanged(position, PAYLOAD_DOWNLOAD_STATE)
-        }
-    }
-
-    @OptIn(UnstableApi::class)
-    fun addToDownloadedEpisodes(episodeNumber: String, size: Double) {
-        AnimeDownloader.stopDownload(media.id, episodeNumber)
-        downloadedEpisodes.add(episodeNumber)
-        val position = arr.indexOfFirst { it.number == episodeNumber }
-        if (position != -1) {
-            arr[position].downloadProgress = "Downloaded" + ": (${"%.1f".format(size)} MB)"
-            notifyItemChanged(position, PAYLOAD_DOWNLOAD_STATE)
-        }
-    }
-
-    fun deleteDownload(episodeNumber: String) {
-        downloadedEpisodes.remove(episodeNumber)
-        val position = arr.indexOfFirst { it.number == episodeNumber }
-        if (position != -1) {
-            arr[position].downloadProgress = null
-            notifyItemChanged(position, PAYLOAD_DOWNLOAD_STATE)
-        }
-    }
-
-    /** User cancel: back to idle (not "Failed"). */
-    fun clearDownloadState(episodeNumber: String) {
-        AnimeDownloader.stopDownload(media.id, episodeNumber)
-        downloadedEpisodes.remove(episodeNumber)
-        val position = arr.indexOfFirst { it.number == episodeNumber }
-        if (position != -1) {
-            arr[position].downloadProgress = null
-            notifyItemChanged(position, PAYLOAD_DOWNLOAD_STATE)
-        }
-    }
-
-    /** Real download failure from the service. */
-    fun purgeDownload(episodeNumber: String) {
-        AnimeDownloader.stopDownload(media.id, episodeNumber)
-        downloadedEpisodes.remove(episodeNumber)
-        val position = arr.indexOfFirst { it.number == episodeNumber }
-        if (position != -1) {
-            arr[position].downloadProgress = "Failed"
-            notifyItemChanged(position, PAYLOAD_DOWNLOAD_STATE)
-        }
-    }
-
-    fun updateDownloadProgress(episodeNumber: String, progress: Int) {
-        updateDownloadProgress(episodeNumber, progress, -1L, -1L)
-    }
-
-    fun updateDownloadProgress(
-        episodeNumber: String,
-        progress: Int,
-        downloadedBytes: Long,
-        estimatedTotalBytes: Long
-    ) {
-        // Ignore stale progress after cancel (engine may still emit briefly)
-        if (!AnimeDownloader.isDownloading(media.id, episodeNumber)) return
-        val position = arr.indexOfFirst { it.number == episodeNumber }
-        if (position == -1) return
-        val text = buildDownloadProgressText(progress, downloadedBytes, estimatedTotalBytes)
-        // Skip no-op updates (same label) to avoid any rebind work
-        if (arr[position].downloadProgress == text) return
-        arr[position].downloadProgress = text
-        notifyItemChanged(position, PAYLOAD_PROGRESS)
-    }
-
-    private fun buildDownloadProgressText(
-        progress: Int,
-        downloadedBytes: Long,
-        estimatedTotalBytes: Long
-    ): String {
-        val hasDownloaded = downloadedBytes > 0L
-        val hasEstimatedTotal = estimatedTotalBytes > 0L
-        return if (hasDownloaded && hasEstimatedTotal) {
-            "Downloading: $progress% (${SizeFormatter.formatBytes(downloadedBytes)} / ${SizeFormatter.formatBytes(estimatedTotalBytes)} est.)"
-        } else if (hasEstimatedTotal) {
-            "Downloading: $progress% (~${SizeFormatter.formatBytes(estimatedTotalBytes)} est.)"
-        } else {
-            "Downloading: $progress%"
-        }
-    }
-
-
-    inner class EpisodeCompactViewHolder(val binding: ItemEpisodeCompactBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        init {
-            itemView.setOnClickListener {
-                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0)
-                    fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
-            }
-        }
-    }
-
-    inner class EpisodeGridViewHolder(val binding: ItemEpisodeGridBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        init {
-            itemView.setOnClickListener {
-                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0)
-                    fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
-            }
-        }
-    }
 
     inner class EpisodeListViewHolder(val binding: ItemEpisodeListBinding) :
         RecyclerView.ViewHolder(binding.root) {
