@@ -70,7 +70,7 @@ class ShinigamiChatClient(
                 .header("Authorization", "Bearer $token")
                 .get()
                 .build()
-            executeJson(request).get("unreadCount")?.asInt
+            executeJson(request).get("count")?.asInt
                 ?: throw IllegalStateException("Backend returned an invalid unread count")
         }
 
