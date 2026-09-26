@@ -85,26 +85,25 @@ class ProfileStatsWidget : AppWidgetProvider() {
             val backgroundBitmap = gradientDrawable.toBitmap(720, 360)
 
             launchIO {
-                val userPref = PrefManager.getVal(PrefName.AnilistUserId, "")
-                if (userPref.isNotEmpty()) {
+                val token = ani.dantotsu.connections.shinigami.ShinigamiSessionStore(context).getToken()
+                if (!token.isNullOrBlank()) {
                     val lastUpdate = prefs.getLong("last_update", 0)
                     if (System.currentTimeMillis() - lastUpdate > 1000 * 60 * 60 * 4 || !prefs.contains("user_name")) {
-                        val respond = Anilist.query.getUserProfile(userPref.toInt())
-                        respond?.data?.user?.let { user ->
-                            prefs.edit()
-                                .putLong("last_update", System.currentTimeMillis())
-                                .putString("user_name", user.name)
-                                .putString("avatar_url", user.avatar?.medium ?: "")
-                                .putInt("anime_count", user.statistics.anime.count)
-                                .putInt("episodes_watched", user.statistics.anime.episodesWatched)
-                                .putInt("manga_count", user.statistics.manga.count)
-                                .putInt("chapters_read", user.statistics.manga.chaptersRead)
-                                .apply()
-                            
-                            renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, userPref, titleTextColor, statsTextColor,
-                                user.name, user.avatar?.medium, user.statistics.anime.count, user.statistics.anime.episodesWatched,
-                                user.statistics.manga.count, user.statistics.manga.chaptersRead)
-                        } ?: showLoginCascade(context, appWidgetManager, appWidgetId, backgroundBitmap)
+                        val profile = ani.dantotsu.connections.shinigami.ShinigamiBackendClient().getMe(token)
+                        val user = profile.user
+                        prefs.edit()
+                            .putLong("last_update", System.currentTimeMillis())
+                            .putString("user_name", user.displayName ?: user.username)
+                            .putString("avatar_url", user.avatarUrl ?: "")
+                            .putInt("anime_count", profile.stats.animeTotal)
+                            .putInt("episodes_watched", profile.stats.episodesWatched)
+                            .putInt("manga_count", 0)
+                            .putInt("chapters_read", 0)
+                            .apply()
+
+                        renderWidget(context, appWidgetManager, appWidgetId, backgroundBitmap, user.id, titleTextColor, statsTextColor,
+                            user.displayName ?: user.username, user.avatarUrl, profile.stats.animeTotal, profile.stats.episodesWatched,
+                            0, 0)
                     } else {
                         val userName = prefs.getString("user_name", "") ?: ""
                         val avatarUrl = prefs.getString("avatar_url", "")
