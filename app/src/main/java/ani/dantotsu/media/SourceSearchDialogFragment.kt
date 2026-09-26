@@ -79,7 +79,7 @@ class SourceSearchDialogFragment : BottomSheetDialogFragment() {
                     }
                 }
                 binding.searchSourceTitle.text = source?.name ?: "Search"
-                binding.searchBarText.setText(media!!.mangaName())
+                binding.searchBarText.setText(media!!.title?.userPreferred.orEmpty())
                 binding.searchBarText.setOnEditorActionListener { _, actionId, _ ->
                     return@setOnEditorActionListener when (actionId) {
                         EditorInfo.IME_ACTION_SEARCH -> {
