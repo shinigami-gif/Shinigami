@@ -121,7 +121,7 @@ class AnimeFragment : Fragment() {
         var loading = true
         if (model.notSet) {
             model.notSet = false
-            model.animeSearchResults = AniMangaSearchResults(
+            model.animeSearchResults = AnimeSearchResults(
                 "ANIME",
                 isAdult = false,
                 onList = false,
@@ -130,7 +130,7 @@ class AnimeFragment : Fragment() {
                 sort = Anilist.sortBy[1]
             )
         }
-        val popularAdaptor = MediaAdaptor(1, model.aniMangaSearchResults.results, requireActivity())
+        val popularAdaptor = MediaAdaptor(1, model.animeSearchResults.results, requireActivity())
         val progressAdaptor = ProgressAdapter(searched = model.searched)
         val adapter = ConcatAdapter(animePageAdapter, popularAdaptor, progressAdaptor)
         binding.animePageRecyclerView.adapter = adapter
