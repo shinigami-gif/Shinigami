@@ -48,6 +48,18 @@ class AnimeStateRepository(
         upsert(current.copy(isFavorite = favorite, updatedAt = now))
     }
 
+    suspend fun continueWatching(): List<AnimeStateRecord> = withContext(Dispatchers.IO) {
+        queries.selectContinueWatching().executeAsList().map { it.toRecord() }
+    }
+
+    suspend fun favorites(): List<AnimeStateRecord> = withContext(Dispatchers.IO) {
+        queries.selectFavorites().executeAsList().map { it.toRecord() }
+    }
+
+    suspend fun planned(): List<AnimeStateRecord> = withContext(Dispatchers.IO) {
+        queries.selectPlanned().executeAsList().map { it.toRecord() }
+    }
+
     suspend fun delete(animeId: Int) = withContext(Dispatchers.IO) {
         queries.deleteById(animeId.toLong())
     }
