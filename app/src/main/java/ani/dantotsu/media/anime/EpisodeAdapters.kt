@@ -282,8 +282,6 @@ class EpisodeAdapter(
         }
 
         fun bind(desc: String?) {
-            binding.itemDownload.visibility = View.GONE
-            binding.itemDownloadStatus.visibility = View.GONE
             binding.itemEpisodeDesc.visibility = if (!desc.isNullOrBlank()) View.VISIBLE else View.GONE
             binding.itemEpisodeDesc.text = desc ?: ""
         }
