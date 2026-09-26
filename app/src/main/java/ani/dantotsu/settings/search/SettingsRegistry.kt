@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import ani.dantotsu.R
 import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.settings.AnilistSettingsActivity
 import ani.dantotsu.settings.FAQActivity
 import ani.dantotsu.settings.PlayerSettingsActivity
@@ -541,7 +542,7 @@ object SettingsRegistry {
                 breadcrumbs = "${context.getString(R.string.settings)} > ${context.getString(R.string.accounts)}",
                 targetActivity = SettingsAccountActivity::class.java,
                 highlightKey = context.getString(R.string.comments_button),
-                isVisible = (Anilist.token != null)
+                isVisible = (ShinigamiSessionStore(context).getToken() != null)
             )
         )
 
