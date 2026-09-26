@@ -352,9 +352,10 @@ class OtherDetailsViewModel : ViewModel() {
             val libraryMap = mutableMapOf<String, MutableList<Media>>()
             val idMap = mutableMapOf<String, MutableList<Int>>()
 
-            val userId = Anilist.userid ?: 0
-            val userLibrary = Anilist.query.getMediaLists(true, userId)
-            val libraryMediaIds = userLibrary.flatMap { it.value }.map { it.id }
+            val token = ani.dantotsu.connections.shinigami.ShinigamiSessionStore(ani.dantotsu.App.instance!!).getToken()
+            val libraryMediaIds = if (!token.isNullOrBlank()) {
+                ani.dantotsu.connections.shinigami.ShinigamiLibraryClient().getLibrary(token).items.mapNotNull { it.mediaId.toIntOrNull() }
+            } else emptyList()
 
             res.forEach {
                 val v = it.relation?.split(",")?.map { i -> i.toLong() }!!
