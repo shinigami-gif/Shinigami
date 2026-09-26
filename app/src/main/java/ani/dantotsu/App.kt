@@ -109,14 +109,6 @@ class App : Application(), GraphProvider<AppGraph> {
             LogcatLogger.install(AndroidLogcatLogger(LogPriority.VERBOSE))
         }
 
-        if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 0) {
-            if (BuildConfig.FLAVOR.contains("fdroid")) {
-                PrefManager.setVal(PrefName.CommentsEnabled, 2)
-            } else {
-                PrefManager.setVal(PrefName.CommentsEnabled, 1)
-            }
-        }
-
         val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         applicationScope.launch(Dispatchers.IO) {
             runCatching {
@@ -180,7 +172,6 @@ class App : Application(), GraphProvider<AppGraph> {
 
         override fun onActivityResumed(p0: Activity) {
             currentActivity = p0
-            updateDiscordPresence(p0)
             applySystemFont(p0)
         }
 
