@@ -57,8 +57,8 @@ class ActivityFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         arguments?.let {
             type = it.getSerializableCompat<ActivityType>("type") as ActivityType
-            userId = if (it.containsKey("userId")) it.getString("userId").takeIf { id -> id.isNotBlank() } else null
-            activityId = if (it.containsKey("activityId")) it.getString("activityId").takeIf { id -> id.isNotBlank() } else null
+            userId = if (it.containsKey("userId")) it.getString("userId")?.takeIf { id -> id.isNotBlank() } else null
+            activityId = if (it.containsKey("activityId")) it.getString("activityId")?.takeIf { id -> id.isNotBlank() } else null
         }
         val isUserActivity = type == ActivityType.USER || type == ActivityType.GLOBAL || userId == null || userId == currentUserId()
         binding.titleBar.visibility =
