@@ -108,7 +108,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                     }
                 }
 
-                fun initializeVideoServerSelector(ep: Episode, onEpisodeDownloadHandler: EpisodeDownloadHandler? = null) {
+                fun initializeVideoServerSelector(ep: Episode) {
                     binding.selectorRecyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                         bottomMargin = navBarHeight
                     }
@@ -158,9 +158,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         if (ep.extractors?.size == 0) {
                             fail(R.string.stream_selection_empty)
                         }
-                        if (model.watchSources!!.isDownloadedSource(media?.selected!!.sourceIndex)) {
-                            adapter.performClick(0)
-                        }
                         binding.selectorProgressBar.visibility = View.GONE
                     }
                 }
@@ -177,13 +174,10 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         initializeVideoServerSelector(ep)
                     }
 
-                    val sourceName = model.watchSources?.get(media?.selected?.sourceIndex ?: 0)?.name
-                    val preferredResolutions = PrefManager.getPreferredDownloadResolutions(sourceName)
-
                     fun selectAndStart(chosenExtractor: VideoExtractor): Boolean {
-                        val bestVideo = findBestVideoForDownload(chosenExtractor.videos, preferredResolutions) ?: return false
+                        if (chosenExtractor.videos.isEmpty()) return false
                         ep.selectedExtractor = chosenExtractor.server.name
-                        ep.selectedVideo = chosenExtractor.videos.indexOf(bestVideo).takeIf { it >= 0 } ?: 0
+                        ep.selectedVideo = 0
                         val currentKey = media!!.anime!!.selectedEpisode ?: ep.number
                         media!!.anime!!.episodes?.getEpisode(currentKey)?.selectedExtractor = ep.selectedExtractor
                         media!!.anime!!.episodes?.getEpisode(currentKey)?.selectedVideo = ep.selectedVideo
@@ -501,7 +495,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                     putString("server", server)
                     putBoolean("launch", la)
                     putString("prev", prev)
-                    putBoolean("isDownload", isDownload)
                     putStringArrayList("episodes", episodes)
                 }
             }
