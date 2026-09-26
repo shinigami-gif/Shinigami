@@ -31,9 +31,6 @@
     <string name="home">Home</string>
     <string name="anime">Anime</string>
     <string name="browse_anime">Browse Anime</string>
-    <string name="manga">Manga</string>
-    <string name="browse_manga">Browse Manga</string>
-    <string name="novels">Novels</string>
     <string name="info">Info</string>
     <string name="watch">Watch</string>
     <string name="read">Read</string>
@@ -41,7 +38,6 @@
     <string name="language_code" translatable="false">LANG</string>
 
     <string name="anime_list">Anime List</string>
-    <string name="manga_list">Manga List</string>
 
     <string name="sad">X(</string>
     <string name="oh">:o</string>
@@ -58,9 +54,6 @@
     <string name="updated">Recently Updated</string>
     <string name="trending_anime">Trending Anime</string>
     <string name="popular_anime">Popular Anime</string>
-    <string name="trending_manga">Trending Manga</string>
-    <string name="trending_novel">Trending Novel</string>
-    <string name="popular_manga">Popular Manga</string>
 
     <string name="username">Username</string>
     <string name="chapters_read">Chapters Read</string>
@@ -270,7 +263,6 @@
 
     <string name="update_progress">Update Progress</string>
     <string name="ask_update_progress_anime">Ask for each Anime \"Individually\"</string>
-    <string name="ask_update_progress_manga">Ask for each Manga \"Individually\"</string>
     <string name="ask_update_progress_info_ep">Turning off will always automatically update progress when the episode is watched.</string>
     <string name="ask_update_progress_info_chap">Turning off will always automatically update progress when the chapter is read.</string>
     <string name="ask_update_progress_chapter_zero">Update Progress for Chapter 0</string>
@@ -326,7 +318,6 @@
     <string name="animation_speed">Overall Speed</string>
     <string name="empty_fav">Looks like you don\'t like anything,\nTry liking a show to keep it here.</string>
     <string name="fav_anime">Favourite Anime</string>
-    <string name="fav_manga">Favourite Manga</string>
     <string name="restart_app">Restart the app?</string>
     <string name="restart_app_extra">Restart the app to apply changes</string>
     <string name="next">Next</string>
@@ -338,7 +329,6 @@
     <string name="prefer_dub">Prefer Dubbed Anime</string>
     <string name="none">None</string>
     <string name="selected_dns">Selected DNS</string>
-    <string name="anime_manga">Anime and Manga</string>
     <string name="list_settings">List Settings</string>
     <string name="dns_info">Change if your ISP blocks any source</string>
     <string name="selected_title_language">Selected Title Language</string>
@@ -349,7 +339,6 @@
     <string name="selected_no_time_zone">No Timezone selected</string>
     <string name="selected_row_order">Default List Order</string>
     <string name="custom_anime_list">Custom Anime Lists</string>
-    <string name="custom_manga_list">Custom Manga Lists</string>
     <string name="delete_custom_list">Delete Custom List</string>
     <string name="delete_custom_list_confirm">Are you sure you want to delete %1$s ?</string>
     <string name="keep_screen_on">Keep Screen On</string>
@@ -397,11 +386,8 @@
     <string name="include_media_in_list">Include List</string>
     <string name="release_calendar">Calendar</string>
     <string name="planned_anime">Planned Anime</string>
-    <string name="planned_manga">Planned Manga</string>
     <string name="image_long_clicking">Open image by Long Clicking</string>
     <string name="always_continue_content">Always continue previous items</string>
-    <string name="open_animanga_directly">Open Anime/Manga search directly</string>
-    <string name="open_animanga_directly_info">Open Anime/Manga search on their respective pages directly</string>
     <string name="search_source_list">Search next available source</string>
     <string name="timestamp_proxy_desc">Useful if you are getting Handshake Fails</string>
     <string name="timestamp_proxy">Use Proxy for Timestamps</string>
@@ -410,7 +396,6 @@
     <string name="forks">Versions</string>
     <string name="faq">FAQ</string>
     <string name="accounts">Accounts</string>
-    <string name="addons">Add-ons</string>
     <string name="myanimelist">MyAnimeList</string>
     <string name="login_with_anilist">Login with Anilist!</string>
     <string name="anilist">Anilist</string>
@@ -475,7 +460,6 @@
     <string name="discord_anilist_mode">AniList Mode</string>
     <string name="discord_mal_mode">MAL Mode</string>
     <string name="discord_anime_presence">Anime Presence</string>
-    <string name="discord_manga_presence">Manga Presence</string>
     <string name="discord_disable_adult_media_rpc">Disable RPC on adult media</string>
     <string name="discord_no_tracker_link">No Tracker Link (Hidden)</string>
     <string name="view_profile_in_dantotsu">Dantotsu Profile</string>
@@ -705,7 +689,6 @@
     <string name="subscribed_notification">Subscribed! Receiving notifications, when new episodes are released on %1$s.</string>
     <string name="subscribe_prompt_title">Subscribe for updates?</string>
     <string name="subscribe_prompt_anime_message">You finished this episode. Subscribe to %1$s updates?</string>
-    <string name="subscribe_prompt_manga_message">You finished this chapter. Subscribe to %1$s updates?</string>
 
     <string name="unsubscribed_notification">Unsubscribed, you will not receive any notifications.</string>
     <string name="activity_subscription">Activity Subscription</string>
@@ -714,7 +697,6 @@
     <string name="activity_unsubscribe_failed">Failed to unsubscribe from activity</string>
     <string name="activity_unsubscribe_unavailable">Cannot unsubscribe right now</string>
     <string name="import_anilist_lists_to_subscriptions">Import AniList lists to subscriptions</string>
-    <string name="import_anilist_lists_to_subscriptions_desc">Add media from selected AniList anime/manga list sections to subscriptions</string>
     <string name="import_anilist_statuses_to_subscriptions">Import AniList list statuses to subscriptions</string>
     <string name="import_anilist_statuses_to_subscriptions_desc">Add media from selected AniList list statuses (watching/planning/paused/dropped) to subscriptions</string>
     <string name="select_lists_to_import">Select lists to import</string>
@@ -747,7 +729,6 @@
     <string name="discord_warning"><![CDATA[By logging in, your discord will now show what you are watching & reading on Dantotsu\n\nIf you are on invisible mode, logging in will make you online, when you open Dantotsu.\n\nThis does break the Discord TOS. \nAlthough Discord has never banned anyone for using Custom Rich Presence(what Dantotsu uses), You have still been warned.\n\nDantotsu is not responsible for anything that happens to your account.]]></string>
     <string name="warning">Warning</string>
     <string name="view_anime" translatable="false">View Anime</string>
-    <string name="view_manga" translatable="false">View Manga</string>
     <string name="force_legacy_installer">Force Legacy Installer</string>
     <string name="extensions_settings">Extensions</string>
     <string name="NSFWExtention">NSFW Extensions</string>
@@ -765,7 +746,6 @@
     <string name="use_system_font_desc">Use the system font instead of the app\'s default font</string>
     <string name="installed_anime">Installed Anime</string>
     <string name="available_anime">Available Anime</string>
-    <string name="installed_manga">Installed Manga</string>
     <string name="color_picker">Color Picker</string>
     <string name="random_selection">Random Selection</string>
     <string name="library">Library</string>
@@ -798,7 +778,6 @@
     <string name="menu">menu</string>
     <string name="view_followers">View Followers</string>
     <string name="no_fav_anime">User has no favorite Anime</string>
-    <string name="no_fav_manga">User has no favorite Manga</string>
     <string name="fav_character">Favourite Characters</string>
     <string name="fav_staff">Favorite Staff</string>
 
@@ -807,8 +786,6 @@
     <string name="total_anime">Total Anime</string>
     <string name="anime_mean_score">Anime Mean Score</string>
     <string name="volume_read">Volume read</string>
-    <string name="total_manga">Total Manga</string>
-    <string name="manga_mean_score">Manga Mean Score</string>
     <string name="about_me">About me</string>
     <string name="follow">Follow</string>
     <string name="following">Following</string>
@@ -825,14 +802,11 @@
     <string name="extension_version">version</string>
     <string name="enter_password_to_decrypt_file">Enter your password to decrypt the file</string>
     <string name="show_rotate_button">Show Rotate Button</string>
-    <string name="default_manga_settings">Default Manga Settings</string>
     <string name="use_dark_theme">Use Dark Theme</string>
     <string name="use_oled_theme">Use OLED Theme</string>
     <string name="scanlators">Scanlators</string>
     <string name="exporting_requires_encryption">Exporting credentials requires a password for encryption.</string>
-    <string name="manga_queue">Manga Queue (WIP)</string>
     <string name="anime_queue">Anime Queue (WIP)</string>
-    <string name="no_offline_manga_found">No offline manga found</string>
     <string name="sort">Sort</string>
     <string name="download">Download</string>
     <string name="scanlator">Scanlator</string>
@@ -914,7 +888,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
 
     <string name="profile_stats_widget">Track progress directly from your home screen</string>
     <string name="anime_watched">Anime\nWatched</string>
-    <string name="manga_read">Manga\nRead</string>
     <string name="loading">Loading…</string>
     <string name="user_stats">%1$s\'s Stats</string>
 
@@ -930,8 +903,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="placeholder">Placeholder</string>
 
     <string name="anime_add_repository">Add Anime Store</string>
-    <string name="manga_add_repository">Add Manga Store</string>
-    <string name="novel_add_repository">Add Novel Store</string>
     <string name="edit_repositories">Edit stores</string>
     <string name="rem_repository">Remove store?</string>
 
@@ -959,9 +930,7 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="theme_desc">Change the vibe of your app</string>
     <string name="common_desc">UI and other mischievous stuff</string>
     <string name="anime_desc">Choose how you watch</string>
-    <string name="manga_desc">Choose how you read</string>
     <string name="extensions_desc">Manage your reliable stores</string>
-    <string name="addons_desc">Get more features out of your app</string>
     <string name="alsettings_desc">Change your AniList settings</string>
     <string name="airing_notifications">Airing Anime notifications</string>
     <string name="airing_notifications_desc">Get notified whenever a new episode drops</string>
@@ -989,13 +958,10 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="recentlyListOnly_desc">Show only your list items in the recent tab</string>
     <string name="adult_only_content_desc">Show only adult content in the explore page</string>
     <string name="anime_add_repository_desc">Add Anime Extensions from various stores</string>
-    <string name="manga_add_repository_desc">Add Manga Extensions from various stores</string>
-    <string name="novel_add_repository_desc">Add Novel Extensions from various stores</string>
     <string name="user_agent_desc">Change your default user agent</string>
     <string name="force_legacy_installer_desc">Use the legacy installer to install extensions (For older android phones)</string>
     <string name="skip_loading_extension_icons_desc">Don\'t load icons of extensions on the extension page</string>
     <string name="NSFWExtention_desc">Enable 18+ extensions from search (May remove some useful extensions)</string>
-    <string name="include_list_desc">Include list items in Manga explore page</string>
     <string name="anilist_notification_filters_desc">Choose category to Ignore</string>
     <string name="anilist_notifications_checking_time_desc">Set the frequency you want the app to check for Anilist notifications</string>
     <string name="comment_notification_checking_time_desc">Set the frequency you want the app to check for Comment notifications</string>
@@ -1011,8 +977,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="hide_private_desc">Long click "Continue Watching" to access</string>
     <string name="loaded_successfully">Loaded Successfully</string>
     <string name="not_installed">Not Installed</string>
-    <string name="update_addon">Add-on update available</string>
-    <string name="install_addon">Install Add-on</string>
     <string name="image">Image</string>
     <string name="clear_history">Clear History</string>
     <string name="failed_ext_install_conflict">Failed to install extension due to conflict</string>
@@ -1056,7 +1020,6 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="forum_category">Category</string>
     <string name="review_body_min_length_error">Review body must be at least 2200 characters (current: %1$d)</string>
     <string name="recommend">Recommend</string>
-    <string name="recommend_media">Recommend Similar Anime / Manga</string>
     <string name="edit_bio">Edit Profile Bio</string>
     <string name="create">Create</string>
     <string name="preview">Preview</string>
@@ -1138,14 +1101,12 @@ Non quae tempore quo provident laudantium qui illo dolor vel quia dolor et exerc
     <string name="all">All</string>
     <string name="text">Text Posts</string>
     <string name="anime_progress">Anime Progress</string>
-    <string name="manga_progress">Manga Progress</string>
     <string name="all_progress">All Progress</string>
     <string name="messages">Messages</string>
     <string name="pinned">Pinned</string>
     <string name="subscribed_activities">Subscribed</string>
     <string name="apply_filters">Apply Filters</string>
     <string name="no_anime_progress">No anime progress activities</string>
-    <string name="no_manga_progress">No manga progress activities</string>
     <string name="no_all_progress">No list progress activities</string>
     <string name="no_status_activities">No status activities</string>
     <string name="no_messages">No messages</string>
