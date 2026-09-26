@@ -107,19 +107,10 @@ class DantotsuPlayerManager(
         mediaMetadata: MediaMetadata? = null,
         audioTracks: List<eu.kanade.tachiyomi.animesource.model.Track> = emptyList()
     ): Pair<MediaSource, MediaItem> {
-        val isLocalhost = runCatching {
-            val host = video.file.url.toUri().host
-            host == "127.0.0.1" || host == "localhost"
-        }.getOrDefault(false)
-
         val headers = mutableMapOf<String, String>()
         headers.putAll(defaultHeaders)
         video.file.headers?.let {
             headers.putAll(it)
-        }
-        if (isLocalhost) {
-            headers.remove("Accept-Encoding")
-            headers.remove("accept-encoding")
         }
 
         val httpClient = client.newBuilder().apply {
@@ -212,8 +203,7 @@ class DantotsuPlayerManager(
         val httpDataSourceFactory = MediaDataSourceFactory.resolveHttpFactory(
             context = activity,
             headers = headers,
-            okHttpClient = httpClient,
-            isLocalhost = isLocalhost,
+            okHttpClient = httpClient
         )
 
         val upstream = DefaultDataSource.Factory(activity, httpDataSourceFactory)
@@ -264,19 +254,9 @@ class DantotsuPlayerManager(
         // the extension handed us, so the scheme has to come from the media item.
         val isContentUri =
             (mediaItem.localConfiguration?.uri?.scheme ?: video.file.url.substringBefore(":")) == "content"
-        val isLocalhostTorrent = runCatching {
-            val host = video.file.url.toUri().host
-            host == "127.0.0.1" || host == "localhost"
-        }.getOrDefault(false)
-
         val activeFactory = if (isContentUri) {
             val localDataSourceFactory = DefaultDataSource.Factory(activity)
             DefaultMediaSourceFactory(localDataSourceFactory, extractorsFactory)
-                .setSubtitleParserFactory(assParserFactory)
-                .setDrmSessionManagerProvider(drmProvider)
-        } else if (isLocalhostTorrent) {
-            // Direct upstream for localhost torrent streams - avoids double writing to flash via VideoCache
-            DefaultMediaSourceFactory(upstream, extractorsFactory)
                 .setSubtitleParserFactory(assParserFactory)
                 .setDrmSessionManagerProvider(drmProvider)
         } else {
@@ -347,12 +327,8 @@ class DantotsuPlayerManager(
         releaseExoPlayer()
 
         val uri = currentMediaItem?.localConfiguration?.uri
-        val isTorrentStream = uri != null && (uri.host == "127.0.0.1" || uri.host == "localhost") &&
-            (uri.path?.contains("torrent", ignoreCase = true) == true ||
-             uri.query?.contains("torrent", ignoreCase = true) == true ||
-             uri.query?.contains("infohash", ignoreCase = true) == true)
-        val targetBufferBytes = if (isTorrentStream) 48 * 1024 * 1024 else androidx.media3.common.C.LENGTH_UNSET
-        val maxBufferMs = if (isTorrentStream) 60_000 else DEFAULT_MAX_BUFFER_MS
+        val targetBufferBytes = androidx.media3.common.C.LENGTH_UNSET
+        val maxBufferMs = DEFAULT_MAX_BUFFER_MS
         val loadControl = DefaultLoadControl.Builder()
             .setBackBuffer(BACK_BUFFER_DURATION_MS, false)
             .setBufferDurationsMs(
