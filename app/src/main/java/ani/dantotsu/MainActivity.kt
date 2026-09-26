@@ -45,7 +45,6 @@ import ani.dantotsu.media.CalendarFragment
 import ani.dantotsu.profile.activity.SocialFragment
 import ani.dantotsu.media.user.LibraryFragment
 import ani.dantotsu.account.AccountFragment
-import ani.dantotsu.home.NoInternet
 import ani.dantotsu.media.MediaDetailsActivity
 import ani.dantotsu.notifications.TaskScheduler
 import ani.dantotsu.others.CustomBottomDialog
@@ -382,16 +381,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        val offlineMode: Boolean = PrefManager.getVal(PrefName.OfflineMode)
         if (!isOnline(this)) {
             snackString(this@MainActivity.getString(R.string.no_internet_connection))
-            startActivity(Intent(this, NoInternet::class.java))
-        } else {
-            if (offlineMode) {
-                snackString(this@MainActivity.getString(R.string.no_internet_connection))
-                startActivity(Intent(this, NoInternet::class.java))
-            } else {
-                val model: AnilistHomeViewModel by viewModels()
+        }
+        val model: AnilistHomeViewModel by viewModels()
 
                 //Load Data
                 if (!load && !launched) {
