@@ -28,8 +28,7 @@ object AnimeSources : WatchSources() {
             pinnedAnimeSources
         ) + listOf(
             Lazier({ TorrentAnimeParser() }, "Torrent"),
-            Lazier({ LocalAnimeParser() }, "Local"),
-            Lazier({ OfflineAnimeParser() }, "Downloaded")
+            Lazier({ LocalAnimeParser() }, "Local")
         )
         isInitialized = true
 
@@ -39,18 +38,16 @@ object AnimeSources : WatchSources() {
                 pinnedAnimeSources
             ) + listOf(
                 Lazier({ TorrentAnimeParser() }, "Torrent"),
-                Lazier({ LocalAnimeParser() }, "Local"),
-                Lazier({ OfflineAnimeParser() }, "Downloaded")
+                Lazier({ LocalAnimeParser() }, "Local")
             )
         }
     }
 
     fun performReorderAnimeSources() {
-        list = list.filter { it.name != "Torrent" && it.name != "Local" && it.name != "Downloaded" }
+        list = list.filter { it.name != "Torrent" && it.name != "Local" }
         list = sortPinnedAnimeSources(list, pinnedAnimeSources) + listOf(
             Lazier({ TorrentAnimeParser() }, "Torrent"),
-            Lazier({ LocalAnimeParser() }, "Local"),
-            Lazier({ OfflineAnimeParser() }, "Downloaded")
+            Lazier({ LocalAnimeParser() }, "Local")
         )
     }
 
