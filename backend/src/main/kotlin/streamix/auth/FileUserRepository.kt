@@ -3,6 +3,7 @@ package streamix.auth
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import streamix.api.ShinigamiUser
+import streamix.api.UserRelationship
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
