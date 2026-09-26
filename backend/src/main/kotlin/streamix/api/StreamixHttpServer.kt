@@ -707,86 +707,6 @@ class StreamixHttpServer(
             runSuspend(exchange) { service.search(query, page) }
         }
 
-        http.createContext(ControlApiContract.PROVIDERS) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            if (!method(exchange, "GET")) return@createContext
-            respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
-        }
-
-        http.createContext(ControlApiContract.EXTRACTORS) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            if (!method(exchange, "GET")) return@createContext
-            respond(exchange, 200, controlApi?.extractors() ?: mapOf("total" to 0, "extractors" to emptyList<Any>()))
-        }
-
-        http.createContext(ControlApiContract.INCIDENTS) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            val relative = exchange.requestURI.path.removePrefix(ControlApiContract.INCIDENTS).trim('/')
-            if (relative.isBlank()) {
-                if (!method(exchange, "GET")) return@createContext
-                respond(exchange, 200, controlApi?.incidents() ?: emptyList<Any>())
-            } else if (relative.endsWith("/resolve")) {
-                if (!method(exchange, "POST")) return@createContext
-                val id = relative.removeSuffix("/resolve").trim('/')
-                val resolved = controlApi?.resolveIncident(id) ?: false
-                respond(exchange, if (resolved) 200 else 404, mapOf("resolved" to resolved))
-            } else {
-                respond(exchange, 404, mapOf("error" to "route not found"))
-            }
-        }
-
-        http.createContext(ControlApiContract.UPDATES) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            val relative = exchange.requestURI.path.removePrefix(ControlApiContract.UPDATES).trim('/')
-            val api = controlApi
-                ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
-            if (relative.isBlank()) {
-                if (!method(exchange, "GET")) return@createContext
-                respond(exchange, 200, api.updates())
-                return@createContext
-            }
-            val parts = relative.split("/")
-            val providerId = parts.firstOrNull()?.takeIf { it.isNotBlank() }
-                ?: return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
-            try {
-                when {
-                    parts.size == 1 && exchange.requestMethod.equals("GET", true) ->
-                        respond(exchange, 200, api.update(providerId) ?: return@createContext respond(exchange, 404, mapOf("error" to "update not found")))
-                    parts.size == 2 && parts[1] == "check" && exchange.requestMethod.equals("POST", true) ->
-                        respond(exchange, 200, runSuspendValue { api.checkUpdate(providerId) })
-                    parts.size == 2 && parts[1] == "queue" && exchange.requestMethod.equals("POST", true) ->
-                        respond(exchange, 200, api.queueUpdate(providerId))
-                    parts.size == 2 && parts[1] == "run" && exchange.requestMethod.equals("POST", true) ->
-                        respond(exchange, 200, runSuspendValue { api.runUpdate(providerId) })
-                    parts.size == 2 && parts[1] == "activate" && exchange.requestMethod.equals("POST", true) ->
-                        respond(exchange, 200, runSuspendValue { api.activateUpdate(providerId) })
-                    parts.size == 2 && parts[1] == "rollback" && exchange.requestMethod.equals("POST", true) -> {
-                        val body = readBody(exchange)
-                        val request = gson.fromJson(body, Map::class.java)
-                        val targetVersion = request["targetVersion"]?.toString()?.trim()
-                            ?: return@createContext respond(exchange, 400, mapOf("error" to "targetVersion is required"))
-                        respond(exchange, 200, runSuspendValue { api.rollback(providerId, targetVersion) })
-                    }
-                    else -> respond(exchange, 405, mapOf("error" to "method not allowed"))
-                }
-            } catch (error: IllegalArgumentException) {
-                respond(exchange, 400, mapOf("error" to (error.message ?: "invalid control request")))
-            } catch (error: IllegalStateException) {
-                respond(exchange, 409, mapOf("error" to (error.message ?: "control operation rejected")))
-            }
-        }
-
-        http.createContext(ControlApiContract.SNAPSHOT) { exchange ->
-            val auth = requireControlAccess(exchange) ?: return@createContext
-            if (!method(exchange, "GET")) return@createContext
-            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
-            respond(exchange, 200, mapOf(
-                "providers" to api.status(),
-                "extractors" to api.extractors(),
-                "incidents" to api.recentIncidents()
-            ))
-        }
-
         http.createContext(AdminApiContract.DASHBOARD) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val actor = authenticatedAdminActor(exchange, auth) ?: return@createContext
@@ -947,7 +867,111 @@ class StreamixHttpServer(
             respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
         }
 
-        http.createContext(NotificationApiContract.NOTIFICATIONS) { exchange ->
+        http.createContext(BackendApiContract.PROVIDERS) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_STATUS) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            respond(exchange, 200, controlApi?.status() ?: emptyList<Any>())
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_UPDATES) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            respond(exchange, 200, controlApi?.updates() ?: emptyList<Any>())
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_UPDATE_CHECK) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "POST")) return@createContext
+            val providerId = exchange.requestURI.path
+                .removePrefix("/api/v1/providers/")
+                .removeSuffix("/updates/check")
+                .trim('/')
+            if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            runSuspendValue { api.checkUpdate(providerId) }
+                .let { respond(exchange, 200, it) }
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_UPDATE_QUEUE) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "POST")) return@createContext
+            val providerId = query(exchange, "providerId")?.trim().orEmpty()
+            if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "providerId is required"))
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            respond(exchange, 200, api.queueUpdate(providerId))
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_UPDATE) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "POST")) return@createContext
+            val providerId = exchange.requestURI.path
+                .removePrefix("/api/v1/providers/")
+                .removeSuffix("/update")
+                .trim('/')
+            if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            runSuspendValue { api.runUpdate(providerId) }
+                .let { respond(exchange, 200, it) }
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_ACTIVATE) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "POST")) return@createContext
+            val providerId = exchange.requestURI.path
+                .removePrefix("/api/v1/providers/")
+                .removeSuffix("/update/activate")
+                .trim('/')
+            if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            runSuspendValue { api.activateUpdate(providerId) }
+                .let { respond(exchange, 200, it) }
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_ROLLBACK) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "POST")) return@createContext
+            val providerId = exchange.requestURI.path
+                .removePrefix("/api/v1/providers/")
+                .removeSuffix("/rollback")
+                .trim('/')
+            if (providerId.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "provider id is required"))
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            val request = runCatching { gson.fromJson(readBody(exchange), Map::class.java) }.getOrNull()
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid rollback request"))
+            val targetVersion = request["targetVersion"]?.toString()?.trim()
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "targetVersion is required"))
+            runSuspendValue { api.rollback(providerId, targetVersion) }
+                .let { respond(exchange, 200, it) }
+        }
+
+        http.createContext(BackendApiContract.PROVIDER_INCIDENTS) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            val relative = exchange.requestURI.path.removePrefix(BackendApiContract.PROVIDER_INCIDENTS).trim('/')
+            when {
+                relative.isBlank() && exchange.requestMethod.equals("GET", true) ->
+                    respond(exchange, 200, api.incidents())
+                relative.endsWith("/resolve") && exchange.requestMethod.equals("POST", true) -> {
+                    val id = relative.removeSuffix("/resolve").trim('/')
+                    if (id.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "incident id is required"))
+                    respond(exchange, if (api.resolveIncident(id)) 200 else 404, mapOf("resolved" to api.resolveIncident(id)))
+                }
+                else -> method(exchange, "GET")
+            }
+        }
+
+        http.createContext(BackendApiContract.EXTRACTORS) { exchange ->
+            requireControlAccess(exchange) ?: return@createContext
+            if (!method(exchange, "GET")) return@createContext
+            val api = controlApi ?: return@createContext respond(exchange, 503, mapOf("error" to "control api is not configured"))
+            respond(exchange, 200, api.extractors())
+        }\n\n        http.createContext(NotificationApiContract.NOTIFICATIONS) { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
