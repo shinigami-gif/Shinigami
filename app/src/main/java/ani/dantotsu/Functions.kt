@@ -661,10 +661,10 @@ class InputFilterMinMax(
     }
 
     private fun isInRange(a: Double, b: Double, c: Double): Boolean {
-        val statusStrings = currContext()!!.resources.getStringArray(R.array.status_manga)[2]
+        val statusString = currContext()!!.resources.getStringArray(R.array.status_anime)[2]
 
         if (c == b) {
-            status?.setText(statusStrings, false)
+            status?.setText(statusString, false)
             status?.parent?.requestLayout()
         }
         return if (b > a) c in a..b else c in b..a
