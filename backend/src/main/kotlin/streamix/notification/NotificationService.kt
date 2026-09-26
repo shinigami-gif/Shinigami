@@ -101,14 +101,4 @@ class NotificationService(
             targetId = targetId
         )
 
-    private fun <T> page(items: List<T>, page: Int, perPage: Int): NotificationPage {
-        val safePage = page.coerceAtLeast(1)
-        val safePerPage = perPage.coerceIn(1, 100)
-        return NotificationPage(
-            items = items,
-            page = safePage,
-            perPage = safePerPage,
-            hasNextPage = items.size == safePerPage
-        )
-    }
 }
