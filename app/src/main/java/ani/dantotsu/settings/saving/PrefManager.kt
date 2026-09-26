@@ -18,7 +18,6 @@ object PrefManager {
     private var generalPreferences: SharedPreferences? = null
     private var uiPreferences: SharedPreferences? = null
     private var playerPreferences: SharedPreferences? = null
-    private var readerPreferences: SharedPreferences? = null
     private var irrelevantPreferences: SharedPreferences? = null
     private var animeDownloadsPreferences: SharedPreferences? = null
     private var protectedPreferences: SharedPreferences? = null
@@ -31,8 +30,6 @@ object PrefManager {
             context.getSharedPreferences(Location.UI.location, Context.MODE_PRIVATE)
         playerPreferences =
             context.getSharedPreferences(Location.Player.location, Context.MODE_PRIVATE)
-        readerPreferences =
-            context.getSharedPreferences(Location.Reader.location, Context.MODE_PRIVATE)
         irrelevantPreferences =
             context.getSharedPreferences(Location.Irrelevant.location, Context.MODE_PRIVATE)
         animeDownloadsPreferences =
@@ -468,8 +465,6 @@ object PrefManager {
             Location.General -> generalPreferences
             Location.UI -> uiPreferences
             Location.Player -> playerPreferences
-            Location.Reader -> readerPreferences
-            Location.NovelReader -> readerPreferences
             Location.Irrelevant -> irrelevantPreferences
             Location.AnimeDownloads -> animeDownloadsPreferences
             Location.Protected -> protectedPreferences
