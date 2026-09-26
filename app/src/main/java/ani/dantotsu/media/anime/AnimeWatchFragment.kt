@@ -206,8 +206,7 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                         EpisodeAdapter(
                             style ?: PrefManager.getVal(PrefName.AnimeDefaultView),
                             media,
-                            this,
-                            offlineMode = offlineMode
+                            this
                         )
 
                     binding.mediaSourceRecycler.adapter =
