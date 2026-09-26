@@ -86,47 +86,8 @@ class MediaInfoFragment : Fragment() {
         _binding = null
     }
 
-    // Method to display anime adaptation
-    private fun displayAnimeAdaptation(adaptation: MangaAnimeUtil.AnimeAdaptation) {
-        if (adaptation.hasAdaptation) {
-            val adaptationText = buildString {
-                append("Start: ${adaptation.animeStart ?: "Unknown"}\n")
-                append("End: ${adaptation.animeEnd ?: "Ongoing"}")
-            }
 
-            binding.mediaAnimeAdaptation.text = adaptationText
 
-            binding.mediaAnimeAdaptationText.fadeIn()
-            binding.mediaAnimeAdaptation.fadeIn()
-        } else {
-            binding.mediaAnimeAdaptationText.fadeOut()
-            binding.mediaAnimeAdaptation.fadeOut()
-        }
-    }
-    private fun displayNextChapterPrediction(prediction: MangaAnimeUtil.NextRelease) {
-        if (prediction.error == null && prediction.nextReleaseDate != null) {
-            val dateFormat = java.text.SimpleDateFormat("d MMMM", java.util.Locale.US)
-
-            val predictionText = buildString {
-                append("Current: ${prediction.latestChapter ?: "Unknown"}\n")
-                append("${prediction.nextChapter ?: "Next chapter"} releases on ${
-                    dateFormat.format(prediction.nextReleaseDate)
-                }")
-            }
-
-            binding.mediaNextChapterPrediction.text = predictionText
-
-            binding.mediaNextChapterPredictionText.fadeIn()
-            binding.mediaNextChapterPrediction.fadeIn()
-        } else {
-            binding.mediaNextChapterPredictionText.fadeOut()
-            binding.mediaNextChapterPrediction.fadeOut()
-
-            if (prediction.error != null) {
-                Logger.log("Next chapter prediction error: ${prediction.error}")
-            }
-        }
-    }
     fun View.fadeIn(duration: Long = 250) {
         if (isVisible) return
         alpha = 0f
