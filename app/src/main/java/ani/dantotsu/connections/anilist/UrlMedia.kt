@@ -146,7 +146,6 @@ class UrlMedia : Activity() {
 
         val mediaType = when (firstSegment) {
             "anime", "watch" -> "ANIME"
-            "manga", "read" -> "MANGA"
             else -> firstSegment.uppercase()
         }
 
