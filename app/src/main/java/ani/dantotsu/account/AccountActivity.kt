@@ -106,8 +106,8 @@ class AccountActivity : AppCompatActivity() {
             val profile = session.user
             binding.accountUsername.text = profile.displayName ?: profile.username
             binding.accountBio.text = profile.bio.orEmpty()
-            profile.avatarUrl?.let { ani.dantotsu.loadImage(binding.accountAvatar, it) }
-            profile.bannerUrl?.let { ani.dantotsu.loadImage(binding.accountBanner, it) }
+            profile.avatarUrl?.let { binding.accountAvatar.loadImage(it) }
+            profile.bannerUrl?.let { binding.accountBanner.loadImage(it) }
         }
     }
 }
