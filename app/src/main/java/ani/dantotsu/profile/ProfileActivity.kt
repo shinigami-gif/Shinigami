@@ -103,13 +103,15 @@ class ProfileActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListene
                         val user = profile.user
                         val currentUserId =
                             ani.dantotsu.connections.shinigami.ShinigamiSessionStore(context).getUserId()
+                        var following = user.isFollowing
+                        var follower = user.isFollower
                         followButton.isGone = currentUserId == null || currentUserId == user.id
 
                         fun followText(): String = getString(
                             when {
-                                user.isFollowing && user.isFollower -> R.string.mutual
-                                user.isFollowing -> R.string.unfollow
-                                user.isFollower -> R.string.follows_you
+                                following && follower -> R.string.mutual
+                                following -> R.string.unfollow
+                                follower -> R.string.follows_you
                                 else -> R.string.follow
                             }
                         )
@@ -119,9 +121,9 @@ class ProfileActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListene
                             lifecycleScope.launch(Dispatchers.IO) {
                                 try {
                                     val updated = ani.dantotsu.connections.shinigami.ShinigamiBackendClient()
-                                        .setFollow(token, user.id, !user.isFollowing)
-                                    user.isFollowing = updated.isFollowing
-                                    user.isFollower = updated.isFollower
+                                        .setFollow(token, user.id, !following)
+                                    following = updated.isFollowing
+                                    follower = updated.isFollower
                                     withContext(Dispatchers.Main) {
                                         followButton.text = followText()
                                         snackString(R.string.success)
