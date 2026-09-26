@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.NumberPicker
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
@@ -154,7 +153,7 @@ class AnimeWatchAdapter(
                 null
             )
         }
-        val offline = !isOnline(binding.root.context) || PrefManager.getVal(PrefName.OfflineMode)
+        val offline = !isOnline(binding.root.context)
 
         binding.mediaSourceNameContainer.isGone = offline
         binding.mediaSourceSettings.isGone = offline
@@ -347,29 +346,6 @@ class AnimeWatchAdapter(
                     }
                 }
 
-                //implement Multi download
-                downloadNo.setText("0")
-                if (media.format == "LOCAL") {
-                    animeDownloadContainer.visibility = View.GONE
-                    mediaWebviewContainer.visibility = View.GONE
-                }
-                mediaDownloadTop.setOnClickListener {
-                    // Alert dialog asking for the number of Episodes to download
-                    fragment.requireContext().customAlertDialog().apply {
-                        setTitle("Multi Episode Downloader")
-                        setMessage("Enter the number of episodes to download")
-                        val input = NumberPicker(currContext())
-                        input.minValue = 1
-                        input.maxValue = 20
-                        input.value = 1
-                        setCustomView(input)
-                        setPosButton(R.string.ok) {
-                            downloadNo.setText("${input.value}")
-                        }
-                        setNegButton(R.string.cancel)
-                        show()
-                    }
-                }
 
                 resetProgress.setOnClickListener {
                     fragment.requireContext().customAlertDialog().apply {
@@ -398,9 +374,6 @@ class AnimeWatchAdapter(
                     setCustomView(dialogBinding.root)
                     setPosButton("OK") {
                         if (run) fragment.onIconPressed(style, reversed)
-                        if (downloadNo.text.toString() != "0") {
-                            fragment.multiDownload(n = downloadNo.text.toString().toInt())
-                        }
                         if (refresh) fragment.loadEpisodes(source, true)
                     }
                     setNegButton("Cancel") {
