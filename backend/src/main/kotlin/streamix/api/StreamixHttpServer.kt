@@ -256,21 +256,77 @@ class StreamixHttpServer(
             val auth = requireAuthRuntime(exchange) ?: return@createContext
             val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
             val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
-            when {
-                exchange.requestMethod.equals("GET", true) -> {
-                    val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
-                    val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
-                    respond(exchange, 200, auth.socialService.activities(viewer.id, page, perPage))
+            val suffix = exchange.requestURI.path.removePrefix(SocialApiContract.ACTIVITIES).trim('/')
+            if (suffix.isBlank()) {
+                when (exchange.requestMethod.uppercase()) {
+                    "GET" -> {
+                        val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
+                        respond(exchange, 200, auth.socialService.activities(viewer.id, page, perPage))
+                    }
+                    "POST" -> {
+                        val body = runCatching {
+                            gson.fromJson(
+                                exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                                CreateActivityRequest::class.java
+                            )
+                        }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid request"))
+                        if (body.type.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "type is required"))
+                        respond(exchange, 201, auth.socialService.createActivity(viewer.id, body.type.trim(), body.text, body.mediaId, body.mediaTitle))
+                    }
+                    else -> method(exchange, "GET")
                 }
-                exchange.requestMethod.equals("POST", true) -> {
-                    val body = gson.fromJson(exchange.requestBody.reader(), CreateActivityRequest::class.java)
-                        ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid request"))
-                    respond(exchange, 201, auth.social.createActivity(viewer.id, body.type, body.text, body.mediaId, body.mediaTitle))
+                return@createContext
+            }
+
+            val parts = suffix.split("/")
+            val activityId = parts.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid activity id"))
+            when (parts.drop(1).joinToString("/")) {
+                "" -> when (exchange.requestMethod.uppercase()) {
+                    "GET" -> {
+                        val activity = auth.socialService.activity(activityId, viewer.id)
+                            ?: return@createContext respond(exchange, 404, mapOf("error" to "activity not found"))
+                        respond(exchange, 200, activity)
+                    }
+                    "DELETE" -> {
+                        if (!auth.socialService.deleteActivity(activityId, viewer.id))
+                            return@createContext respond(exchange, 404, mapOf("error" to "activity not found"))
+                        respond(exchange, 200, mapOf("status" to "deleted"))
+                    }
+                    else -> method(exchange, "GET")
                 }
-                else -> method(exchange, "GET")
+                "replies" -> when (exchange.requestMethod.uppercase()) {
+                    "GET" -> {
+                        val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
+                        respond(exchange, 200, auth.socialService.replies(activityId, viewer.id, page, perPage))
+                    }
+                    "POST" -> {
+                        val body = runCatching {
+                            gson.fromJson(
+                                exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                                CreateReplyRequest::class.java
+                            )
+                        }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid reply request"))
+                        if (body.text.isBlank()) return@createContext respond(exchange, 400, mapOf("error" to "text is required"))
+                        respond(exchange, 201, auth.socialService.createReply(activityId, viewer.id, body.text.trim()))
+                    }
+                    else -> method(exchange, "GET")
+                }
+                "like" -> if (exchange.requestMethod.equals("POST", true)) {
+                    val result = auth.socialService.likeActivity(activityId, viewer.id)
+                        ?: return@createContext respond(exchange, 404, mapOf("error" to "activity not found"))
+                    respond(exchange, 200, result)
+                } else method(exchange, "POST")
+                "subscribe" -> if (exchange.requestMethod.equals("POST", true)) {
+                    val result = auth.socialService.subscribeActivity(activityId, viewer.id)
+                        ?: return@createContext respond(exchange, 404, mapOf("error" to "activity not found"))
+                    respond(exchange, 200, result)
+                } else method(exchange, "POST")
+                else -> respond(exchange, 404, mapOf("error" to "route not found"))
             }
         }
-
 
         http.createContext("/api/v1/social/") { exchange ->
             val auth = requireAuthRuntime(exchange) ?: return@createContext
