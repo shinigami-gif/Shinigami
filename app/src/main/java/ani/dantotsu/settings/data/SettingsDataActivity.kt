@@ -36,8 +36,6 @@ import ani.dantotsu.util.customAlertDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -282,33 +280,6 @@ class SettingsDataActivity : AppCompatActivity() {
                 }
             ),
 
-            // Change Download Directory
-
-
-            // Rebuild Download Index
-
-
-            // Purge Downloads
-            Settings(
-                type = 1,
-                name = getString(R.string.purge_downloads),
-                desc = getString(R.string.purge_downloads_desc),
-                icon = R.drawable.ic_round_delete_24,
-                onClick = {
-                    context.customAlertDialog().apply {
-                        setTitle(R.string.purge_downloads)
-                        setMessage(R.string.purge_confirm, "${getString(R.string.anime)} & ${getString(R.string.manga)}")
-                        setPosButton(R.string.yes) {
-                            val downloadsManager = Injekt.get<DownloadsManager>()
-                            downloadsManager.purgeDownloads(MediaType.ANIME)
-                            downloadsManager.purgeDownloads(MediaType.MANGA)
-                            updateStorageInfo()
-                        }
-                        setNegButton(R.string.no)
-                        show()
-                    }
-                }
-            )
         )
 
         binding.dataSettingsRecyclerView.apply {
