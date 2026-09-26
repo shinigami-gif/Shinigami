@@ -110,6 +110,7 @@ dependencies {
     implementation("org.mozilla:rhino:1.8.1")
     implementation("org.json:json:20260814")
     implementation("com.google.code.gson:gson:2.13.2")
+    implementation(libs.firebase.admin)
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
 }
