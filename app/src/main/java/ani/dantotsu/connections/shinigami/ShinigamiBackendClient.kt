@@ -54,6 +54,51 @@ class ShinigamiBackendClient(
         )
     }
 
+    suspend fun getProfile(token: String, userId: String): ShinigamiUser =
+        withContext(Dispatchers.IO) {
+            executeUser(
+                Request.Builder()
+                    .url("$baseUrl/api/v1/users/$userId")
+                    .header("Authorization", "Bearer $token")
+                    .get()
+                    .build()
+            )
+        }
+
+    suspend fun setFollow(token: String, userId: String, enabled: Boolean): ShinigamiUser =
+        withContext(Dispatchers.IO) {
+            executeUser(
+                Request.Builder()
+                    .url("$baseUrl/api/v1/users/$userId/follow?enabled=$enabled")
+                    .header("Authorization", "Bearer $token")
+                    .post("{}".toRequestBody("application/json; charset=utf-8"))
+                    .build()
+            )
+        }
+
+    suspend fun setBlock(token: String, userId: String, enabled: Boolean): ShinigamiUser =
+        withContext(Dispatchers.IO) {
+            executeUser(
+                Request.Builder()
+                    .url("$baseUrl/api/v1/users/$userId/block?enabled=$enabled")
+                    .header("Authorization", "Bearer $token")
+                    .post("{}".toRequestBody("application/json; charset=utf-8"))
+                    .build()
+            )
+        }
+
+    private fun executeUser(request: Request): ShinigamiUser {
+        val response = http.newCall(request).execute()
+        response.use {
+            val body = it.body?.string().orEmpty()
+            if (!it.isSuccessful) {
+                throw IllegalStateException("Backend user request failed: HTTP " + it.code)
+            }
+            return gson.fromJson(body, ShinigamiUser::class.java)
+                ?: throw IllegalStateException("Backend returned an empty user")
+        }
+    }
+
     suspend fun logout(token: String) = withContext(Dispatchers.IO) {
         val response = http.newCall(
             Request.Builder()
