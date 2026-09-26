@@ -217,20 +217,6 @@ class JikanQueries {
         }
     }
 
-    suspend fun searchUsers(query: String, page: Int = 1): JikanUserSearchResponse? {
-        val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        return tryWithSuspend {
-            fetchWithFallback<JikanUserSearchResponse>("/users?q=$encodedQuery&page=$page")
-        }
-    }
-
-    suspend fun getUserProfile(username: String): JikanUserRef? {
-        val encodedUsername = URLEncoder.encode(username, "UTF-8")
-        return tryWithSuspend {
-            fetchWithFallback<JikanUserProfileResponse>("/users/$encodedUsername")?.data
-        }
-    }
-
     suspend fun getCharacterFull(malId: Int): JikanCharacterFullData? {
         return tryWithSuspend {
             fetchWithFallback<JikanCharacterFullResponse>("/characters/$malId/full")?.data
@@ -252,13 +238,6 @@ class JikanQueries {
     suspend fun getProducerAnime(malId: Int, page: Int = 1): JikanSearchResponse? {
         return tryWithSuspend {
             fetchWithFallback<JikanSearchResponse>("/anime?producers=$malId&order_by=start_date&sort=desc&page=$page&limit=25")
-        }
-    }
-
-    suspend fun getUserFavorites(username: String): JikanUserFavoritesData? {
-        return tryWithSuspend {
-            val encodedUsername = URLEncoder.encode(username, "UTF-8")
-            fetchWithFallback<JikanUserFavoritesResponse>("/users/$encodedUsername/favorites")?.data
         }
     }
 
