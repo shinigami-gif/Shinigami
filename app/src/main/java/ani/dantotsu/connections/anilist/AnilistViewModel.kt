@@ -684,7 +684,6 @@ class AnilistSearch : ViewModel() {
                 when (it) {
                     "tv", "movie", "ova", "special", "ona", "music" -> it
                     "tv_short" -> "tv"
-                    "manga", "novel", "light_novel", "oneshot", "doujin", "manhwa", "manhua" -> it.replace("_", "")
                     else -> null
                 }
             }
