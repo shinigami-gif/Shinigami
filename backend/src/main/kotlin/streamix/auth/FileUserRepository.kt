@@ -48,6 +48,14 @@ class FileUserRepository(
         read().firstOrNull { it.username.equals(username, ignoreCase = true) }?.toPublic()
     }
 
+    override fun count(): Long = synchronized(lock) {
+        read().size.toLong()
+    }
+
+    override fun allIds(): List<String> = synchronized(lock) {
+        read().map { it.id }
+    }
+
     override fun search(query: String, page: Int, perPage: Int): List<ShinigamiUser> =
         synchronized(lock) {
             val normalized = query.trim().lowercase()
