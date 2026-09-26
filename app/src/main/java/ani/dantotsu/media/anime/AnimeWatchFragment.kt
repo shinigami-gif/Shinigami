@@ -298,7 +298,6 @@ class AnimeWatchFragment : Fragment(), AnimeWatchAdapter.ScanlatorSelectionListe
                             val jikanTitle = cleanTitle((media.anime?.fillerEpisodes?.get(epNum) ?: media.anime?.fillerEpisodes?.getEpisode(epNum))?.title)
                             episode.title = anifyTitle ?: kitsuTitle ?: jikanTitle ?: buildFallbackEpisodeTitle(i, episode)
                         } else {
-                            // For torrent/magnet streams, preserve real file names and file size descriptions
                             if (episode.title.isNullOrBlank()) {
                                 episode.title = episode.sEpisode?.name ?: buildFallbackEpisodeTitle(i, episode)
                             }
