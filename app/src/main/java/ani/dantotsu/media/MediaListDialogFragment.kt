@@ -16,7 +16,9 @@ import ani.dantotsu.InputFilterMinMax
 import ani.dantotsu.R
 import ani.dantotsu.Refresh
 import ani.dantotsu.connections.PendingProgressUpdate
-import ani.dantotsu.connections.anilist.Anilist
+import ani.dantotsu.connections.shinigami.ShinigamiLibraryClient
+import ani.dantotsu.connections.shinigami.ShinigamiLibraryWrite
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
 import ani.dantotsu.connections.anilist.api.FuzzyDate
 import ani.dantotsu.connections.mal.MAL
 import ani.dantotsu.databinding.BottomSheetMediaListBinding
@@ -309,19 +311,21 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                                     val updated = existing.filterNot { it.mediaId == media!!.id } + pending
                                     PrefManager.setVal(PrefName.PendingProgressUpdates, updated)
                                 } else {
-                                    Anilist.mutation.editList(
-                                        mediaID = media!!.id,
-                                        progress = progress,
-                                        progressVolumes = progressVolumes,
-                                        score = score,
-                                        repeat = rewatch,
-                                        notes = notes,
-                                        status = status,
-                                        private = media?.isListPrivate ?: false,
-                                        startedAt = startD,
-                                        completedAt = endD,
-                                        customList = media?.inCustomListsOf?.mapNotNull { if (it.value) it.key else null }
-                                    )
+                                    if (media!!.anime != null) {
+                                        val token = ShinigamiSessionStore(requireContext()).getToken()
+                                            ?: throw IllegalStateException("Shinigami session is missing")
+                                        ShinigamiLibraryClient().upsert(
+                                            token = token,
+                                            mediaId = media!!.id.toLong(),
+                                            state = ShinigamiLibraryWrite(
+                                                status = status.name,
+                                                progress = progress ?: 0,
+                                                score = score?.div(10.0),
+                                                isFavorite = media?.isFav ?: false,
+                                                notes = notes
+                                            )
+                                        )
+                                    }
                                 }
                                 MAL.query.editList(
                                     media!!.idMAL,
