@@ -62,7 +62,7 @@ abstract class Installer(private val service: Service) {
     open fun processEntry(entry: Entry) {
         if (entry.type is MediaType) {
             when (entry.type) {
-                MediaType.ANIME -> animeExtensionManager.setInstalling(entry.downloadId)MediaType.NOVEL -> novelExtensionManager.setInstalling(entry.downloadId)
+                MediaType.ANIME -> animeExtensionManager.setInstalling(entry.downloadId)
             }
         }
     }
@@ -90,9 +90,6 @@ abstract class Installer(private val service: Service) {
             if (completedEntry.type is MediaType) {
                 when (completedEntry.type) {
                     MediaType.ANIME -> animeExtensionManager.updateInstallStep(
-                        completedEntry.downloadId,
-                        resultStep
-                    )MediaType.NOVEL -> novelExtensionManager.updateInstallStep(
                         completedEntry.downloadId,
                         resultStep
                     )
@@ -136,9 +133,6 @@ abstract class Installer(private val service: Service) {
                     MediaType.ANIME -> animeExtensionManager.updateInstallStep(
                         it.downloadId,
                         InstallStep.Error
-                    )MediaType.NOVEL -> novelExtensionManager.updateInstallStep(
-                        it.downloadId,
-                        InstallStep.Error
                     )
                 }
             }
@@ -167,9 +161,6 @@ abstract class Installer(private val service: Service) {
             if (toCancel.type is MediaType) {
                 when (toCancel.type) {
                     MediaType.ANIME -> animeExtensionManager.updateInstallStep(
-                        downloadId,
-                        InstallStep.Idle
-                    )MediaType.NOVEL -> novelExtensionManager.updateInstallStep(
                         downloadId,
                         InstallStep.Idle
                     )
