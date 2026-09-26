@@ -937,39 +937,7 @@ class AnilistQueries {
         }
     }
 
-    private fun queryMangaList(onList: Boolean = true): String {
-        val includeList = if (!onList) "onList:false" else ""
-        val isAdult = if (getPreference(PrefName.AdultOnly)) "isAdult:true" else ""
-        return buildString {
-            append(
-                """{trendingManga:${
-                    buildQueryString(
-                        "POPULARITY_DESC",
-                        "MANGA",
-                        country = "JP"
-                    )
-                } trendingManhwa:${
-                    buildQueryString(
-                        "POPULARITY_DESC",
-                        "MANGA",
-                        country = "KR"
-                    )
-                } trendingNovel:${
-                    buildQueryString(
-                        "POPULARITY_DESC",
-                        "MANGA",
-                        format = "NOVEL",
-                        country = "JP"
-                    )
-                } topRated:${
-                    buildQueryString(
-                        "SCORE_DESC",
-                        "MANGA"
-                    )
-                } mostFav:${buildQueryString("FAVOURITES_DESC", "MANGA")} trending: Page(page:1, perPage:10) { $standardPageInformation media(sort:TRENDING_DESC, type:MANGA, $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } } popular: Page(page:1, perPage:50) { $standardPageInformation media(sort:POPULARITY_DESC, type:MANGA, $includeList $isAdult) { id idMal status chapters episodes nextAiringEpisode{episode} isAdult type meanScore  format bannerImage countryOfOrigin coverImage{large} title{english romaji userPreferred} description genres tags { name isMediaSpoiler }  } }}"""
-            )
-        }
-    }
+
 
     suspend fun loadAnimeMetadataList(): Map<String, ArrayList<Media>> = coroutineScope {
         val list = mutableMapOf<String, ArrayList<Media>>()
@@ -1006,23 +974,7 @@ class AnilistQueries {
         list
     }
 
-    suspend fun loadMangaList(onList: Boolean = true): Map<String, ArrayList<Media>> = coroutineScope {
-        val list = mutableMapOf<String, ArrayList<Media>>()
 
-        val mangaList = async { executeQuery<Query.MangaList>(queryMangaList(onList), force = true) }
-
-        mangaList.await()?.data?.apply {
-            list["trendingManga"] = mediaList(trendingManga)
-            list["trendingManhwa"] = mediaList(trendingManhwa)
-            list["trendingNovel"] = mediaList(trendingNovel)
-            list["topRated"] = mediaList(topRated)
-            list["mostFav"] = mediaList(mostFav)
-            list["trending"] = mediaList(trending)
-            list["popular"] = mediaList(popular)
-        }
-
-        list
-    }
 
     suspend fun recentlyUpdated(
         greater: Long = 0,
