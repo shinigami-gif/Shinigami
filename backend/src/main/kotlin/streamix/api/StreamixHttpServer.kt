@@ -426,15 +426,7 @@ class StreamixHttpServer(
                         "replies" -> if (exchange.requestMethod.equals("GET", true)) {
                             val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
                             val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 20
-                            val comment = auth.socialService.comments(
-                                mediaId = query(exchange, "mediaId")?.toLongOrNull()
-                                    ?: return@createContext respond(exchange, 400, mapOf("error" to "mediaId is required")),
-                                viewerId = viewer.id,
-                                parentCommentId = commentId,
-                                page = page,
-                                perPage = perPage
-                            )
-                            respond(exchange, 200, comment)
+                            respond(exchange, 200, auth.socialService.commentReplies(commentId, viewer.id, page, perPage))
                         } else method(exchange, "GET")
                         else -> respond(exchange, 404, mapOf("error" to "route not found"))
                     }
