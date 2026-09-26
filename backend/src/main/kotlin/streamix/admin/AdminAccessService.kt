@@ -29,7 +29,7 @@ class AdminAccessService(
 
     private fun permissions(role: AdminRole): Set<AdminPermission> =
         when (role) {
-            AdminRole.FOUNDER -> AdminPermission.entries.toSet()
+            AdminRole.FOUNDER -> AdminPermission.values().toSet()
             AdminRole.BACKEND_ADMIN -> setOf(
                 AdminPermission.VIEW_DASHBOARD,
                 AdminPermission.VIEW_USERS,
