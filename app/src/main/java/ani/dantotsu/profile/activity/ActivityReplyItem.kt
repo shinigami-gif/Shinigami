@@ -49,18 +49,7 @@ class ActivityReplyItem(
         binding.activityLike.setColorFilter(if (reply.isLiked) likeColor else normalColor)
         buildMarkwon(context).setMarkdown(binding.activityContent, getBasicAniHTML(reply.text))
         binding.activityLikeContainer.setOnClickListener {
-            scope.launch {
-                try {
-                    val token = ShinigamiSessionStore(context).getToken() ?: return@launch
-                    val updated = ShinigamiSocialClient().likeActivity(token, reply.id)
-                    reply.likeCount = updated.likeCount
-                    reply.isLiked = updated.isLiked
-                    binding.activityLikeCount.text = updated.likeCount.toString()
-                    binding.activityLike.setColorFilter(if (updated.isLiked) likeColor else normalColor)
-                } catch (_: Exception) {
-                    snackString("Failed to like activity reply")
-                }
-            }
+            snackString("Reply likes are not enabled yet")
         }
         binding.activityReply.setOnClickListener {
             ContextCompat.startActivity(
