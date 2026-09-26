@@ -20,15 +20,15 @@ import ani.dantotsu.R
 import ani.dantotsu.blurImage
 import ani.dantotsu.buildMarkwon
 import ani.dantotsu.connections.anilist.Anilist
-import ani.dantotsu.connections.anilist.api.Activity
+import ani.dantotsu.connections.shinigami.ShinigamiActivity
+import ani.dantotsu.connections.shinigami.ShinigamiSessionStore
+import ani.dantotsu.connections.shinigami.ShinigamiSocialClient
 import ani.dantotsu.databinding.FragmentStatusBinding
 import ani.dantotsu.getThemeColor
 import ani.dantotsu.home.status.listener.StoriesCallback
 import ani.dantotsu.loadImage
 import ani.dantotsu.media.MediaDetailsActivity
 import ani.dantotsu.profile.ProfileActivity
-import ani.dantotsu.profile.User
-import ani.dantotsu.profile.UsersDialogFragment
 import ani.dantotsu.profile.activity.ActivityItemBuilder
 import ani.dantotsu.profile.activity.RepliesBottomDialog
 import ani.dantotsu.settings.saving.PrefManager
@@ -52,7 +52,7 @@ class Stories @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), View.OnTouchListener {
     private lateinit var binding: FragmentStatusBinding
-    private lateinit var activityList: List<Activity>
+    private lateinit var activityList: List<ShinigamiActivity>
     private lateinit var storiesListener: StoriesCallback
     private var userClicked: Boolean = false
     private var storyIndex: Int = 1
@@ -81,14 +81,14 @@ class Stories @JvmOverloads constructor(
 
 
     fun setStoriesList(
-        activityList: List<Activity>, startIndex: Int = 1
+        activityList: List<ShinigamiActivity>, startIndex: Int = 1
     ) {
         this.activityList = activityList
         this.storyIndex = startIndex
         addLoadingViews(activityList)
     }
 
-    private fun addLoadingViews(storiesList: List<Activity>) {
+    private fun addLoadingViews(storiesList: List<ShinigamiActivity>) {
         var idCounter = 1
         storiesList.forEach { _ ->
             binding.progressBarContainer.removeView(findViewWithTag<ProgressBar>("story${idCounter}"))
@@ -316,218 +316,94 @@ class Stories @JvmOverloads constructor(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun loadStory(story: Activity) {
+    private fun loadStory(story: ShinigamiActivity) {
         binding.linkPreviewContainer.removeAllViews()
         binding.linkPreviewContainer.visibility = GONE
-        
-        val key = "activities"
-        val set = PrefManager.getCustomVal<Set<String>>(key, emptySet())
-            .mapNotNull { it.toIntOrNull() }.toSet().plus(story.id)
-        val newList = set.sorted().takeLast(200).map { it.toString() }.toSet()
-        PrefManager.setCustomVal(key, newList)
-        binding.statusUserAvatar.loadImage(
-            story.user?.avatar?.large ?: story.user?.avatar?.medium
-        )
-        binding.statusUserName.text = story.user?.name
+
+        val watched = PrefManager.getCustomVal<Set<String>>("activities", emptySet()).toMutableSet()
+        watched.add(story.id)
+        PrefManager.setCustomVal("activities", watched.takeLast(200).toSet())
+
+        binding.statusUserAvatar.loadImage(story.author.avatarUrl)
+        binding.statusUserName.text = story.author.displayName ?: story.author.username
         binding.statusUserTime.text = ActivityItemBuilder.getDateTime(story.createdAt)
         binding.statusUserContainer.setOnClickListener {
-            context.startActivity(
-                Intent(context, ProfileActivity::class.java).apply {
-                    putExtra("userId",story.userId)
-                }
-            )
+            context.startActivity(Intent(context, ProfileActivity::class.java).putExtra("userId", story.author.id))
         }
 
-        binding.textActivity.setOnTouchListener { v, event ->
-            onTouchView(v, event, true)
-            v.onTouchEvent(event)
-        }
-        binding.textActivityContainer.setOnTouchListener { v, event ->
-            onTouchView(v, event, true)
-            v.onTouchEvent(event)
-        }
-        fun visible(isList: Boolean) {
-            binding.textActivity.isVisible = !isList
-            binding.textActivityContainer.isVisible = !isList
-            binding.infoText.isVisible = isList
-            binding.coverImage.isVisible = isList
-            binding.infoText.visibility = if (isList) VISIBLE else INVISIBLE
-            binding.infoText.text = ""
-            binding.contentImageViewKen.isVisible = isList
-            binding.contentImageView.isVisible = isList
-        }
+        binding.textActivity.setOnTouchListener { v, event -> onTouchView(v, event, true); v.onTouchEvent(event) }
+        binding.textActivityContainer.setOnTouchListener { v, event -> onTouchView(v, event, true); v.onTouchEvent(event) }
 
-        when (story.typename) {
-            "ListActivity" -> {
-                visible(true)
-                val text = "${
-                    story.status?.replaceFirstChar {
-                        if (it.isLowerCase()) {
-                            it.titlecase(Locale.ROOT)
-                        } else {
-                            it.toString()
-                        }
-                    }
-                } ${story.progress ?: story.media?.title?.userPreferred} " +
-                        if (
-                            story.status?.contains("completed") == false &&
-                            !story.status.contains("plans") &&
-                            !story.status.contains("repeating") &&
-                            !story.status.contains("paused") &&
-                            !story.status.contains("dropped")
-                        ) {
-                            "of ${story.media?.title?.userPreferred}"
-                        } else {
-                            ""
-                        }
-                binding.infoText.text = text
-                val bannerAnimations: Boolean = PrefManager.getVal(PrefName.BannerAnimations)
-                val cover =
-                    story.media?.coverImage?.extraLarge ?: story.media?.coverImage?.large
-                blurImage(
-                    if (bannerAnimations) binding.contentImageViewKen else binding.contentImageView,
-                    story.media?.bannerImage ?: cover
-                )
-                binding.coverImage.loadImage(cover)
+        val isMediaActivity = story.type == "ANIME_LIST" || story.type == "MANGA_LIST"
+        binding.textActivity.isVisible = !isMediaActivity
+        binding.textActivityContainer.isVisible = !isMediaActivity
+        binding.infoText.isVisible = isMediaActivity
+        binding.coverImage.isVisible = isMediaActivity
+        binding.contentImageViewKen.isVisible = isMediaActivity
+        binding.contentImageView.isVisible = isMediaActivity
+
+        if (isMediaActivity) {
+            binding.infoText.text = story.mediaTitle ?: story.text.orEmpty()
+            story.mediaId?.toInt()?.let { mediaId ->
                 binding.coverImage.setOnClickListener {
-                    context.startActivity(
-                        Intent(context, MediaDetailsActivity::class.java).putExtra(
-                            "mediaId",
-                            story.media?.id
-                        ),
-                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            it.context as FragmentActivity,
-                            binding.coverImage,
-                            ViewCompat.getTransitionName(binding.coverImage)!!
-                        ).toBundle()
-                    )
+                    context.startActivity(Intent(context, MediaDetailsActivity::class.java).putExtra("mediaId", mediaId))
+                }
+                val host = context as? FragmentActivity
+                host?.lifecycleScope?.launch {
+                    val media = withContext(Dispatchers.IO) { Anilist.query.getMediaList(listOf(mediaId))?.firstOrNull() }
+                    if (media != null && !host.isDestroyed) {
+                        val cover = media.cover?.extraLarge ?: media.cover?.large
+                        binding.coverImage.loadImage(cover)
+                        blurImage(if (PrefManager.getVal(PrefName.BannerAnimations)) binding.contentImageViewKen else binding.contentImageView, media.banner ?: cover)
+                    }
                 }
             }
-
-            "TextActivity" -> {
-                visible(false)
-                if (!(context as android.app.Activity).isDestroyed) {
-                    val originalText = story.text ?: ""
-                    val anilistLinks = AnilistLinkParser.extractAnilistLinks(originalText)
-                    val htmlText = AniMarkdown.getBasicAniHTML(originalText)
-                    val cleanedHtml = AnilistLinkParser.removeAnilistUrlsFromHtml(htmlText)
-                    val markwon = buildMarkwon(context, false)
-                    markwon.setMarkdown(binding.textActivity, cleanedHtml)
-                    addLinkPreviews(anilistLinks, originalText)
-                }
-            }
-
-            "MessageActivity" -> {
-                visible(false)
-                if (!(context as android.app.Activity).isDestroyed) {
-                    val originalMessage = story.message ?: ""
-                    val anilistLinks = AnilistLinkParser.extractAnilistLinks(originalMessage)
-                    val htmlMessage = AniMarkdown.getBasicAniHTML(originalMessage)
-                    val cleanedHtml = AnilistLinkParser.removeAnilistUrlsFromHtml(htmlMessage)
-                    val markwon = buildMarkwon(context, false)
-                    markwon.setMarkdown(binding.textActivity, cleanedHtml)
-                    addLinkPreviews(anilistLinks, originalMessage)
-                }
+        } else {
+            val originalText = story.text.orEmpty()
+            if (!(context as android.app.Activity).isDestroyed) {
+                val links = AnilistLinkParser.extractAnilistLinks(originalText)
+                val html = AnilistLinkParser.removeAnilistUrlsFromHtml(AniMarkdown.getBasicAniHTML(originalText))
+                buildMarkwon(context, false).setMarkdown(binding.textActivity, html)
+                addLinkPreviews(links, originalText)
             }
         }
-        val userList = arrayListOf<User>()
-        story.likes?.forEach { i ->
-            userList.add(User(i.id, i.name.toString(), i.avatar?.medium, i.bannerImage, isFollowing = i.isFollowing, isFollower = i.isFollower))
-        }
+
         val likeColor = ContextCompat.getColor(context, R.color.yt_red)
         val notLikeColor = ContextCompat.getColor(context, R.color.bg_opp)
         binding.replyCount.text = story.replyCount.toString()
-        binding.activityReplies.setColorFilter(ContextCompat.getColor(context, R.color.bg_opp))
+        binding.activityReplies.setColorFilter(notLikeColor)
         binding.activityRepliesContainer.setOnClickListener {
             val hostActivity = it.context as? FragmentActivity ?: return@setOnClickListener
             pause()
             RepliesBottomDialog.newInstance(story.id).apply {
-                onDialogClosed = {
-                    hostActivity.window?.decorView?.post {
-                        if (!hostActivity.isFinishing &&
-                            !hostActivity.isDestroyed &&
-                            hostActivity.hasWindowFocus()
-                        ) {
-                            resume()
-                        }
-                    }
-                }
+                onDialogClosed = { hostActivity.window?.decorView?.post { if (!hostActivity.isFinishing && !hostActivity.isDestroyed && hostActivity.hasWindowFocus()) resume() } }
             }.show(hostActivity.supportFragmentManager, "replies")
         }
-        binding.activityLike.setColorFilter(if (story.isLiked == true) likeColor else notLikeColor)
+        binding.activityLike.setColorFilter(if (story.isLiked) likeColor else notLikeColor)
         binding.activityLikeCount.text = story.likeCount.toString()
-        binding.activityLikeContainer.setOnClickListener {
-            like()
-        }
-        binding.activityLikeContainer.setOnLongClickListener {
-            val hostActivity = it.context as? FragmentActivity ?: return@setOnLongClickListener true
-            if (userList.isNotEmpty()) {
-                UsersDialogFragment().apply {
-                    userList(userList)
-                    show(hostActivity.supportFragmentManager, "dialog")
-                }
-            } else if ((story.likeCount ?: 0) > 0) {
-                pause()
-                val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-                scope.launch {
-                    val feed = Anilist.query.getFeed(userId = null, page = 1, activityId = story.id)
-                    val fetchedStory = feed?.data?.page?.activities?.firstOrNull()
-                    val fetchedLikes = fetchedStory?.likes
-                    withContext(Dispatchers.Main) {
-                        if (!hostActivity.isFinishing && !hostActivity.isDestroyed) {
-                            val fetchedUserList = arrayListOf<User>()
-                            fetchedLikes?.forEach { i ->
-                                fetchedUserList.add(User(i.id, i.name.toString(), i.avatar?.medium, i.bannerImage, isFollowing = i.isFollowing, isFollower = i.isFollower))
-                            }
-                            if (fetchedUserList.isNotEmpty()) {
-                                story.likes = fetchedLikes
-                                userList.clear()
-                                userList.addAll(fetchedUserList)
-                            }
-                            UsersDialogFragment().apply {
-                                userList(if (fetchedUserList.isNotEmpty()) fetchedUserList else userList)
-                                show(hostActivity.supportFragmentManager, "dialog")
-                            }
-                        }
-                    }
-                }
-            } else {
-                UsersDialogFragment().apply {
-                    userList(userList)
-                    show(hostActivity.supportFragmentManager, "dialog")
-                }
-            }
-            true
-        }
+        binding.activityLikeContainer.setOnClickListener { like() }
         binding.androidStoriesLoadingView.visibility = GONE
         timer.start()
     }
 
     fun like() {
         val story = activityList[storyIndex - 1]
+        val token = ShinigamiSessionStore(context).getToken()
+        if (token.isNullOrBlank()) { snackString("Login required"); return }
         val likeColor = ContextCompat.getColor(context, R.color.yt_red)
         val notLikeColor = ContextCompat.getColor(context, R.color.bg_opp)
-        val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-        scope.launch {
-            val res = Anilist.mutation.toggleLike(story.id, "ACTIVITY")
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            val res = ShinigamiSocialClient().likeActivity(token, story.id)
             withContext(Dispatchers.Main) {
-                if (res != null) {
-                    if (story.isLiked == true) {
-                        story.likeCount = story.likeCount?.minus(1)
-                    } else {
-                        story.likeCount = story.likeCount?.plus(1)
-                    }
-                    binding.activityLikeCount.text = (story.likeCount ?: 0).toString()
-                    story.isLiked = !story.isLiked!!
-                    binding.activityLike.setColorFilter(if (story.isLiked == true) likeColor else notLikeColor)
-
-                } else {
-                    snackString("Failed to like activity")
-                }
+                if (res) {
+                    story.isLiked = !story.isLiked
+                    story.likeCount += if (story.isLiked) 1 else -1
+                    binding.activityLikeCount.text = story.likeCount.toString()
+                    binding.activityLike.setColorFilter(if (story.isLiked) likeColor else notLikeColor)
+                } else snackString("Failed to like activity")
             }
         }
     }
-
     private fun addLinkPreviews(links: List<AnilistLinkParser.AnilistLink>, originalText: String) {
         binding.linkPreviewContainer.removeAllViews()
         if (links.isEmpty()) {
