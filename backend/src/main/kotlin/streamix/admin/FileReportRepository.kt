@@ -42,6 +42,10 @@ class FileReportRepository(
         read().count { status == null || it.status == status }.toLong()
     }
 
+    override fun countForUser(userId: String): Long = synchronized(lock) {
+        read().count { it.targetUserId == userId }.toLong()
+    }
+
     private fun read(): List<AdminReport> {
         if (!Files.exists(file)) return emptyList()
         val json = Files.readString(file)
