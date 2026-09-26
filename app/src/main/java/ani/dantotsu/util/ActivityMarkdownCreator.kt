@@ -111,7 +111,7 @@ class ActivityMarkdownCreator : AppCompatActivity() {
         }
 
         when (type) {
-            "replyActivity" -> if (parentId == -1) {
+            "replyActivity" -> if (parentId.isBlank()) {
                 toast("Error: No parent ID")
                 finish()
                 return
