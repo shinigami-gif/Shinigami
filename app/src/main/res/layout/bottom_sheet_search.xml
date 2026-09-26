@@ -34,24 +34,6 @@
         app:cornerRadius="0dp" />
 
     <Button
-        android:id="@+id/mangaSearch"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="16dp"
-        android:fontFamily="@font/poppins_bold"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:paddingStart="32dp"
-        android:paddingEnd="32dp"
-        android:text="@string/manga"
-        android:textSize="17sp"
-        android:textAlignment="viewStart"
-        android:textAllCaps="false"
-        android:textColor="?attr/colorOnBackground"
-        app:cornerRadius="0dp" />
-
-    <Button
         android:id="@+id/userSearch"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="match_parent"
