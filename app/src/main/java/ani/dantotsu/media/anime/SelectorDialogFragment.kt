@@ -447,10 +447,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
             RecyclerView.ViewHolder(binding.root) {
             init {
                 itemView.setSafeOnClickListener {
-                    if (isDownloadMenu == true) {
-                        binding.urlDownload.performClick()
-                        return@setSafeOnClickListener
-                    }
                     tryWith(true) {
                         val currentEp = media?.anime?.episodes?.getEpisode(media?.anime?.selectedEpisode) ?: episode
                         val epKey = media?.anime?.episodes?.getEpisodeKey(media?.anime?.selectedEpisode) ?: media?.anime?.selectedEpisode
