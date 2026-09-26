@@ -69,7 +69,6 @@ class UpcomingRemoteViewsFactory(private val context: Context) :
 
     private fun fillWidgetItems() {
         refreshing = true
-        val userId = PrefManager.getVal<String>(PrefName.AnilistUserId)
         val prefs = context.getSharedPreferences(UpcomingWidget.PREFS_NAME, Context.MODE_PRIVATE)
         val lastUpdated = prefs.getLong(UpcomingWidget.LAST_UPDATE, 0)
         val serializedMedia = prefs.getString(UpcomingWidget.PREF_SERIALIZED_MEDIA, "")
