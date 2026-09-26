@@ -35,8 +35,8 @@ class EditProfileActivity : AppCompatActivity() {
             }.getOrNull() ?: return@launch
             binding.usernameInput.setText(session.user.username)
             binding.bioInput.setText(session.user.bio.orEmpty())
-            session.user.avatarUrl?.let { ani.dantotsu.loadImage(binding.avatarPreview, it) }
-            session.user.bannerUrl?.let { ani.dantotsu.loadImage(binding.bannerPreview, it) }
+            session.user.avatarUrl?.let { binding.avatarPreview.loadImage(it) }
+            session.user.bannerUrl?.let { binding.bannerPreview.loadImage(it) }
         }
     }
 
