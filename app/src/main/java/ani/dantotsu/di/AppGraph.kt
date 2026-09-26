@@ -9,7 +9,6 @@ import ani.dantotsu.App
 import ani.dantotsu.MainActivity
 import ani.dantotsu.addons.download.DownloadAddonManager
 import ani.dantotsu.di.injekt.MetroInteropModule
-import ani.dantotsu.download.DownloadsManager
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
@@ -36,8 +35,6 @@ interface AppGraph {
     val preferenceStore: PreferenceStore
     val sourcePreferences: SourcePreferences
     val basePreferences: BasePreferences
-
-    val downloadsManager: DownloadsManager
     val networkHelper: NetworkHelper
     val javaScriptEngine: JavaScriptEngine
     val animeExtensionManager: AnimeExtensionManager
