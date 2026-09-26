@@ -630,18 +630,8 @@ class AnimeWatchAdapter(
                 binding.sourceProgressBar.visibility = View.GONE
 
                 val sourceFound = media.anime.episodes!!.isNotEmpty()
-                val isDownloadedSource =
-
-                if (isDownloadedSource) {
-                    binding.sourceNotFound.text = if (sourceFound) {
-                        binding.root.context.getString(R.string.source_not_found)
-                    } else {
-                        binding.root.context.getString(R.string.download_not_found)
-                    }
-                } else {
-                    binding.sourceNotFound.text =
-                        binding.root.context.getString(R.string.source_not_found)
-                }
+                binding.sourceNotFound.text =
+                    binding.root.context.getString(R.string.source_not_found)
 
                 binding.sourceNotFound.isGone = sourceFound
                 binding.faqbutton.isGone = sourceFound
