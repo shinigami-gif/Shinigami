@@ -516,6 +516,111 @@ class StreamixHttpServer(
             }
         }
 
+
+        http.createContext(ChatApiContract.GLOBAL_MESSAGES) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            when (exchange.requestMethod.uppercase()) {
+                "GET" -> {
+                    val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+                    respond(exchange, 200, auth.chatService.global(page, perPage))
+                }
+                "POST" -> {
+                    val request = runCatching {
+                        gson.fromJson(
+                            exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                            SendChatMessageRequest::class.java
+                        )
+                    }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid chat request"))
+                    respond(exchange, 201, auth.chatService.sendGlobal(viewer.id, request.content))
+                }
+                else -> method(exchange, "GET")
+            }
+        }
+
+        http.createContext("/api/v1/chat/anime/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            val parts = exchange.requestURI.path.removePrefix("/api/v1/chat/anime/").trim('/').split("/")
+            val mediaId = parts.firstOrNull()?.toLongOrNull()
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid mediaId"))
+            if (parts.size != 2 || parts[1] != "messages") {
+                return@createContext respond(exchange, 404, mapOf("error" to "route not found"))
+            }
+            when (exchange.requestMethod.uppercase()) {
+                "GET" -> {
+                    val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+                    respond(exchange, 200, auth.chatService.anime(mediaId, page, perPage))
+                }
+                "POST" -> {
+                    val request = runCatching {
+                        gson.fromJson(
+                            exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                            SendChatMessageRequest::class.java
+                        )
+                    }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid chat request"))
+                    respond(exchange, 201, auth.chatService.sendAnime(viewer.id, mediaId, request.content))
+                }
+                else -> method(exchange, "GET")
+            }
+        }
+
+        http.createContext(ChatApiContract.MESSAGES) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            if (!method(exchange, "GET")) return@createContext
+            val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+            val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+            respond(exchange, 200, auth.chatService.conversations(viewer.id, page, perPage))
+        }
+
+        http.createContext(ChatApiContract.MESSAGE_UNREAD_COUNT) { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            if (!method(exchange, "GET")) return@createContext
+            respond(exchange, 200, mapOf("count" to auth.chatService.unreadCount(viewer.id)))
+        }
+
+        http.createContext("/api/v1/messages/") { exchange ->
+            val auth = requireAuthRuntime(exchange) ?: return@createContext
+            val token = bearerToken(exchange) ?: return@createContext unauthorized(exchange)
+            val viewer = auth.auth.currentUser(token) ?: return@createContext unauthorized(exchange)
+            val suffix = exchange.requestURI.path.removePrefix("/api/v1/messages/").trim('/')
+            val parts = suffix.split("/")
+            val otherUserId = parts.firstOrNull()?.takeIf { it.isNotBlank() }
+                ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid user id"))
+            if (parts.size == 1) {
+                when (exchange.requestMethod.uppercase()) {
+                    "GET" -> {
+                        val page = query(exchange, "page")?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        val perPage = query(exchange, "perPage")?.toIntOrNull()?.coerceIn(1, 100) ?: 30
+                        respond(exchange, 200, auth.chatService.messages(viewer.id, otherUserId, page, perPage))
+                    }
+                    "POST" -> {
+                        val request = runCatching {
+                            gson.fromJson(
+                                exchange.requestBody.bufferedReader(StandardCharsets.UTF_8).use { it.readText() },
+                                SendMessageRequest::class.java
+                            )
+                        }.getOrNull() ?: return@createContext respond(exchange, 400, mapOf("error" to "invalid message request"))
+                        respond(exchange, 201, auth.chatService.sendMessage(viewer.id, otherUserId, request.content))
+                    }
+                    else -> method(exchange, "GET")
+                }
+            } else if (parts.size == 2 && parts[1] == "read") {
+                if (!method(exchange, "POST")) return@createContext
+                respond(exchange, 200, mapOf("marked" to auth.chatService.markRead(viewer.id, otherUserId)))
+            } else {
+                respond(exchange, 404, mapOf("error" to "route not found"))
+            }
+        }
+
         http.createContext(BackendApiContract.SEARCH) { exchange ->
             if (!method(exchange, "GET")) return@createContext
             val query = query(exchange, "q")?.trim().orEmpty()
