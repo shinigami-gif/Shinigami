@@ -104,8 +104,8 @@ class HomeFragment : Fragment() {
                 val profile = if (!rescueMode && !token.isNullOrBlank()) runCatching { ShinigamiBackendClient().getMe(token) }.getOrNull() else null
                 val notificationCount = if (!rescueMode && !token.isNullOrBlank()) runCatching { ShinigamiNotificationClient().unreadCount(token) }.getOrDefault(0) else 0
                 if (rescueMode && MAL.token != null) {
-                    currentBinding.homeUserName.text = MAL.username ?: Anilist.username
-                    currentBinding.homeUserAvatar.loadImage(MAL.avatar ?: Anilist.avatar)
+                    currentBinding.homeUserName.text = MAL.username ?: "MAL User"
+                    currentBinding.homeUserAvatar.loadImage(MAL.avatar)
                 } else {
                     currentBinding.homeUserName.text = profile?.user?.username ?: "Shinigami"
                     currentBinding.homeUserAvatar.loadImage(profile?.user?.avatarUrl)
@@ -557,27 +557,8 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
                 scope.launch {
                     withContext(Dispatchers.IO) {
                         val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-                        if (rescueMode) {
-                            withContext(Dispatchers.Main) {
-                                getUserId(context) { load() }
-                            }
-                        } else {
-                            Anilist.userid =
-                                PrefManager.getNullableVal<String>(PrefName.AnilistUserId, null)
-                                    ?.toIntOrNull()
-                            if (Anilist.userid == null) {
-                                withContext(Dispatchers.Main) {
-                                    getUserId(context) {
-                                        load()
-                                    }
-                                }
-                            } else {
-                                launch(Dispatchers.Main) {
-                                    getUserId(context) {
-                                        load()
-                                    }
-                                }
-                            }
+                        withContext(Dispatchers.Main) {
+                            getUserId(context) { load() }
                         }
                         model.loaded = true
                     }
@@ -660,10 +641,21 @@ binding.homeRecommendedRecyclerView.addOnScrollListener(object :
         if (!model.loaded) Refresh.activity[1]!!.postValue(true)
         if (_binding != null) {
             val rescueMode: Boolean = PrefManager.getVal(PrefName.RescueMode)
-            binding.homeNotificationCount.isVisible = !rescueMode
-                    && Anilist.unreadNotificationCount > 0
-                    && PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
-            binding.homeNotificationCount.text = Anilist.unreadNotificationCount.toString()
+            if (!rescueMode) {
+                val token = ShinigamiSessionStore(requireContext()).getToken()
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    val count = if (!token.isNullOrBlank()) runCatching {
+                        ShinigamiNotificationClient().unreadCount(token)
+                    }.getOrDefault(0) else 0
+                    withContext(Dispatchers.Main) {
+                        if (_binding != null) {
+                            binding.homeNotificationCount.isVisible = count > 0 &&
+                                PrefManager.getVal<Boolean>(PrefName.ShowNotificationRedDot) == true
+                            binding.homeNotificationCount.text = count.toString()
+                        }
+                    }
+                }
+            }
         }
         super.onResume()
     }
