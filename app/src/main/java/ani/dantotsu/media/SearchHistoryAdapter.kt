@@ -29,7 +29,6 @@ class SearchHistoryAdapter(type: SearchType, private val searchClicked: (String)
     private var searchHistory: MutableList<SearchHistory>? = null
     private var historyType: PrefName = when (type) {
         SearchType.ANIME -> PrefName.SortedAnimeSH
-        SearchType.MANGA -> PrefName.SortedMangaSH
         SearchType.CHARACTER -> PrefName.SortedCharacterSH
         SearchType.STAFF -> PrefName.SortedStaffSH
         SearchType.STUDIO -> PrefName.SortedStudioSH
