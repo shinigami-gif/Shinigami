@@ -87,7 +87,7 @@ object MediaDataSourceFactory {
     }
 
     // -------------------------------------------------------------------------
-    // Tier 2 (also used directly by DrmDownloader for license requests)
+    // Tier 2 for player/license requests
     // -------------------------------------------------------------------------
 
     /**
