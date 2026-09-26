@@ -122,8 +122,7 @@ class FileChatRepository(
     private fun <T> paginate(items: List<T>, page: Int, perPage: Int): List<T> {
         val safePage = page.coerceAtLeast(1)
         val safePerPage = perPage.coerceIn(1, 100)
-        return items.sortedBy { (it as? StoredMessage)?.createdAt ?: "" }
-            .drop((safePage - 1) * safePerPage)
+        return items.drop((safePage - 1) * safePerPage)
             .take(safePerPage)
     }
 
