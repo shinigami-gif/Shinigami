@@ -1,9 +1,7 @@
 package ani.dantotsu.notifications.comment
 
 import ani.dantotsu.client
-import ani.dantotsu.connections.anilist.Anilist
 import ani.dantotsu.settings.saving.PrefManager
-import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.util.Logger
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
@@ -76,16 +74,12 @@ class MediaNameFetch {
             if (idsToFetch.isNotEmpty()) {
                 try {
                     val url = "https://graphql.anilist.co/"
-                    val token = Anilist.token ?: PrefManager.getVal(PrefName.AnilistToken, null as String?)
                     val headers = mutableMapOf(
                         "Content-Type" to "application/json; charset=utf-8",
                         "Accept" to "application/json",
                         "Referer" to "https://anilist.co/",
                         "Origin" to "https://anilist.co"
                     )
-                    if (!token.isNullOrEmpty()) {
-                        headers["Authorization"] = "Bearer $token"
-                    }
 
                     withContext(Dispatchers.IO) {
                         for (chunk in idsToFetch.chunked(50)) {
